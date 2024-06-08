@@ -27,8 +27,8 @@ extern char* puerto_cpu_interrupt;
 extern char* puerto_escucha;
 extern char* algoritmo_planificacion;
 extern int quantum;
-extern char** recursos[];
-extern char** instancias_recursos[];
+extern char** recursos;
+extern char** instancias_recursos;
 extern int grado_multiprogramacion;
 
 

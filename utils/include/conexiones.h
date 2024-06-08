@@ -21,23 +21,15 @@ typedef enum{
 	SIG_INS,
 	FETCH,
 	TAM_PAG,
-    CARGAR_PROCESO,
+    CREAR_PROCESO,
     ELIMINAR_PROCESO,
     PAGE_FAULT,
+    OUT_OF_MEMORY,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
     } op_code;
 
-/*
-typedef enum CODIGOS_DE_OPERACIONES
-{
-    MENSAJE,
-    PAQUETE,
-    CONTEXTO,
-    FETCH
 
-} op_code;
-*/
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
     INT_NO,

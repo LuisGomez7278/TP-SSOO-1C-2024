@@ -27,7 +27,7 @@
 typedef  enum {
     FIFO,
     RR,
-    ERROR
+    //ERROR
 } t_algoritmo_planificacion;
 
 sem_t proceso_new;
