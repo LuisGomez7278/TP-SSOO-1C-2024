@@ -1,10 +1,6 @@
 #include "../include/inicioMemoria.h"
 
 void iniciar_memoria(){
-
-
-
-
     //INICIALIZO LOGGER
     logger = start_logger("log_memoria.log", "LOG MEMORIA", LOG_LEVEL_INFO);
 
@@ -26,3 +22,4 @@ void iniciar_memoria(){
 
     retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
     log_info(logger, "RETARDO RESPUESTA: %d", retardo);
+}

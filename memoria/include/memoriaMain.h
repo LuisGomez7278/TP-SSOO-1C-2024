@@ -10,23 +10,6 @@
 #include "inicioMemoria.h"
 #include "Memoria-Kernel.h"
 
-
-t_log* logger;
-char* path_base;
-int tam_pagina;
-int tam_memoria;
-int retardo;
-t_config* config;
-
-
-char* puerto_escucha;
-int socket_cpu_memoria;
-int socket_kernel_memoria;
-int socket_entradasalida_memoria;
-int socket_escucha;
-
-
-
 t_log* logger;
 char* path_base;
 int tam_pagina;

@@ -26,19 +26,11 @@ typedef enum{
     PAGE_FAULT,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
-    FETCH
+    FETCH,
+    HANDSHAKE,
+    PAQUETE
 } op_code;
 
-/*
-typedef enum CODIGOS_DE_OPERACIONES
-{
-    MENSAJE,
-    PAQUETE,
-    CONTEXTO,
-    FETCH
-
-} op_code;
-*/
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
     INT_NO,
