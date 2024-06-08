@@ -56,7 +56,7 @@ void iniciar_colas_de_estado(){
     cola_new = queue_create();
 	cola_ready = queue_create();
 	cola_exit = queue_create();
-
+	cola_bloqueado= queue_create;
 
 
 

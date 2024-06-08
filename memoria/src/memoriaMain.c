@@ -2,19 +2,71 @@
 
 
 int main(int argc, char* argv[]) {
-    ///////////////////////////////////LAS CONFIGURACIONES LOS INICIOS DE LOGGER LOS PASE A LA CARPETA INICIO KERNEL
-    ///////////////////////////////////LAS DECLARACIONES DE LAS VARIABLES LAS PASE A LAS CARPETAS.H
-    ///////////////////////////////////LA CARPETA EXTERN_GLOBALS.C ES PARA COMPARTIR LAS VARIABLES QUE NECESITAS QUE SE VEAN DE TODAS LAS DEMAS CARPETAS DEL MODULO (AGREGAR EXTERN ANTES)
-    ///////////////////////////////////AGREGAR EXTERN ANTES ES PARA QUE EL COMPILADOR NO TOME COMO QUE ESTAR DECLARANDO LA VARIABLE DOS VECES   
+    
 
-    //iniciar Server
-    socket_escucha = iniciar_servidor(puerto_escucha, logger);
+    iniciar_memoria();
 
-    //esperar conexiones
 
-    socket_cpu_memoria = esperar_cliente(socket_escucha, logger);
-    // socket_kernel_memoria = esperar_cliente(socket_escucha, logger);    
-    // socket_entradasalida_memoria = esperar_cliente(socket_escucha, logger);
+    //                  LAS CONFIGURACIONES LOS INICIOS DE LOGGER LOS PASE A LA CARPETA INICIO KERNEL
+    //                  LAS DECLARACIONES DE LAS VARIABLES LAS PASE A LAS CARPETAS.H
+    ///                 LA CARPETA EXTERN_GLOBALS.C ES PARA COMPARTIR LAS VARIABLES QUE NECESITAS QUE SE VEAN DE TODAS LAS DEMAS CARPETAS DEL MODULO (AGREGAR EXTERN ANTES)
+    //                  AGREGAR EXTERN ANTES ES PARA QUE EL COMPILADOR NO TOME COMO QUE ESTAR DECLARANDO LA VARIABLE DOS VECES   
+
+
+// INICIALIZO  SERVIDOR DE MEMORIA
+    socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
+
+
+// ESPERO QUE SE CONECTE CPU
+    log_trace(logger_debug,"Esperando que se conecte CPU");
+    socket_cpu_memoria_dispatch=esperar_cliente(socket_escucha,logger_debug);
+    socket_cpu_memoria_interrupt=esperar_cliente(socket_escucha,logger_debug);
+
+// ESPERO QUE SE CONECTE EL KERNEL
+    log_trace(logger_debug,"Esperando que se concte KERNEL");
+    socket_kernel_memoria=esperar_cliente(socket_escucha,logger_debug);
+
+// CREO HILO ENTRADA-SALIDA Y ADENTRO DEL HILO SOPORTO MULTIPLES CONEXIONES
+        pthread_t hilo_entradaSalida_memoria;
+        pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)atender_conexion_ENTRADASALIDA_MEMORIA,NULL);
+        pthread_detach(hilo_entradaSalida_memoria);
+
+// CREO HILO KERNEL 
+        pthread_t hilo_kernel_memoria;
+        pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
+        pthread_detach(hilo_kernel_memoria);
+ 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+     //Pruebas con CPU
+    //enviar mensaje a cpu
+    // enviar_mensaje("MEMORIA manda mensaje a cpu", socket_cpu_memoria);
+    // log_info(logger, "Se envio el primer mensaje a cpu");
+
+    //recibir respuesta de cpu
+    // op_code codop1 = recibir_operacion(socket_cpu_memoria);
+    
+    //if (codop1 == MENSAJE) {log_info(logger, "LLego un mensaje");}
+    //else {log_info(logger, "LLego otra cosa");}
+    //recibir_mensaje(socket_cpu_memoria, logger);
+
+    // uint32_t PID = 1;
+    // t_contexto_ejecucion CE;
+    // CE.PC = 2;
+    // CE.AX = 1;
+    // CE.BX = 0;
+    // CE.CX = 0;
+    // CE.DX = 0;
+    // CE.EAX = 32;
+    // CE.EBX = 0;
+    // CE.ECX = 0;
+    // CE.EDX = 0;
+    // CE.SI = 0;
+    // CE.DI = 0;
+    // log_info(logger, "CE listo para enviar, datos: PID=%d, PC=%d, AX=%d, EAX=%d, SI=%d", PID, CE.PC, CE.AX, CE.EAX, CE.SI);
+    
+    // enviar_CE(socket_cpu_memoria, PID, CE);
+    // log_info(logger, "CE enviado con exito");
     
     // Test local obtencion de instrucciones
     char* path_parcial = "test_ins.txt"; //viene de kernel
@@ -26,7 +78,8 @@ int main(int argc, char* argv[]) {
     conexion_con_cpu(socket_cpu_memoria, lista_instrucciones);
     
 
-    if (socket_cpu_memoria) {liberar_conexion(socket_cpu_memoria);}
+    if (socket_cpu_memoria_dispatch) {liberar_conexion(socket_cpu_memoria_dispatch);}
+    if (socket_cpu_memoria_interrupt) {liberar_conexion(socket_cpu_memoria_interrupt);}
     if (socket_kernel_memoria) {liberar_conexion(socket_kernel_memoria);}
     if (socket_entradasalida_memoria) {liberar_conexion(socket_entradasalida_memoria);}
     if (socket_escucha) {liberar_conexion(socket_escucha);}

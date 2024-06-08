@@ -51,6 +51,7 @@ extern t_config *config;
 extern t_queue *cola_new;
 extern t_queue *cola_ready;
 extern t_queue *cola_exit;
+extern t_queue *cola_bloqueado;
 
 
 

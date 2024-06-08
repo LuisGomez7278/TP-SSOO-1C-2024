@@ -1,8 +1,9 @@
 #include "../include/Kernel-CPU-dispatch.h"
     
     void atender_conexion_CPU_DISPATCH_KERNEL (){
-    
-        //Recibir un mensaje de CPU
+
+
+    //Recibir un mensaje de CPU
 
 
         op_code codop1 = recibir_operacion(socket_kernel_cpu_dispatch);

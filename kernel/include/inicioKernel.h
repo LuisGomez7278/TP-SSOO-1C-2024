@@ -33,7 +33,7 @@ void iniciar_colas_de_estado();
 t_queue *cola_new;
 t_queue *cola_ready;
 t_queue *cola_exit;
-
+t_queue *cola_bloqueado;
 
 
 

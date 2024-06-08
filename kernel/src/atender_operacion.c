@@ -50,8 +50,9 @@ void iniciar_proceso(char*leido){
     new_pcb->CE.SI=0;
     new_pcb->CE.DI=0;
 
-
+    queue_push(cola_new, new_pcb);
     
+    solicitud_de_creacion_proceso_a_memoria(new_pcb->PID,leido);
 
 
 

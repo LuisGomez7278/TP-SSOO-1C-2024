@@ -24,15 +24,19 @@ int main(int argc, char* argv[]) {
     socket_kernel_cpu_interrupt = crear_conexion(ip_cpu, puerto_cpu_interrupt);
     log_info(logger_debug,"Kernel conectado a CPU interrupt");
 
-//ESPERO QUE SE CONECTE I/O
-    socket_entradasalida_kernel = esperar_cliente(socket_escucha, logger);
-    log_info(logger_debug,"Kernel conectado a I/O");
+// ENTRADAS SALIDAS LAS CONECTO DENTRO DEL HILO, YA QUE PODRIA ACEPTAR UNA O MULTIPLES CONEXIONES
+
 
 
   
 
       /////////////////////////////////////                AHORA ATENDEMOS LAS CONEXIONES                        //////////////////////////////////////////////////////
-
+    // CREO HILO ENTRADA-SALIDA
+        pthread_t hilo_entradaSalida;
+        pthread_create(&hilo_entradaSalida,NULL,(void*)atender_conexion_ENTRADASALIDA_KERNEL,NULL);
+        pthread_detach(hilo_entradaSalida);
+    
+    
     // CREO HILO DE CPU DISPARCH
         pthread_t hilo_CPU_dispatch;
         pthread_create(&hilo_CPU_dispatch,NULL,(void*)atender_conexion_CPU_DISPATCH_KERNEL,NULL);
@@ -48,10 +52,7 @@ int main(int argc, char* argv[]) {
         pthread_create(&hilo_MEMORIA,NULL,(void*)atender_conexion_MEMORIA_KERNELL,NULL);
         pthread_detach(hilo_CPU_interrupt); 
                    
-    // CREO HILO ENTRADA-SALIDA
-        pthread_t hilo_entradaSalida;
-        pthread_create(&hilo_entradaSalida,NULL,(void*)atender_conexion_ENTRADASALIDA_KERNEL,NULL);
-        pthread_detach(hilo_entradaSalida);
+
 
         
     //  INICIO CONSOLA INTERACTIVA  

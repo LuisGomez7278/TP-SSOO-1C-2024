@@ -1,5 +1,5 @@
-#ifndef INICIO_MEMORIA_H_
-#define  INICIO_MEMORIA_H_
+#ifndef ENTRADAS_Y_SALIDAS_H_
+#define ENTRADAS_Y_SALIDAS_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,10 +16,7 @@
 #include "../../utils/include/conexiones.h"
 #include "extern_globales.h"
 
-
-
-void iniciar_memoria();
-
+void atender_conexion_ENTRADASALIDA_MEMORIA();
 
 
 
@@ -28,4 +25,7 @@ void iniciar_memoria();
 
 
 
-#endif /*  INICIO_MEMORIA_H_*/
+
+
+
+#endif /*   ENTRADAS_Y_SALIDAS_H_*/

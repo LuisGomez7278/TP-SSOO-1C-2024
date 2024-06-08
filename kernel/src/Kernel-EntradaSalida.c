@@ -2,6 +2,10 @@
 
 void atender_conexion_ENTRADASALIDA_KERNEL(){
 
+//ESPERO QUE SE CONECTE ENTRADA-SALIDA
+    socket_entradasalida_kernel = esperar_cliente(socket_escucha, logger);
+    log_info(logger_debug,"Kernel conectado a I/O");
+
 //ENVIAR MENSAJE ENTRADA SALIDA
     enviar_mensaje("kernel manda mensaje a entradasalida", socket_entradasalida_kernel);
     log_info(logger, "Se envio el primer mensaje a entradasalida");

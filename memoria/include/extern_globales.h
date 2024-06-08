@@ -22,13 +22,16 @@
 
 
 extern t_log* logger;
+extern t_log* logger_debug;
 extern char* path_base;
 extern int tam_pagina;
 extern int tam_memoria;
 extern int retardo;
-
 extern char* puerto_escucha;
-extern int socket_cpu_memoria;
+t_config* config;
+
+extern int socket_cpu_memoria_dispatch;
+extern int socket_cpu_memoria_interrupt;
 extern int socket_kernel_memoria;
 extern int socket_entradasalida_memoria;
 extern int socket_escucha;
@@ -36,21 +39,6 @@ extern int socket_escucha;
 
 ///////////////////////////////////
 
-extern char* PUERTO_ESCUCHA;
-//extern int TAM_MEMORIA;
-//extern int TAM_PAGINA;
-//extern char* PATH_INSTRUCCIONES;
-//extern int RETARDO_RESPUESTA;
-
-
-//extern t_log* logger_memoria;
-//extern t_log* logger_memoria_db;
-//extern t_config* memoriaConfig;
-
-extern int fd_memoria;
-extern int fd_CPU;
-extern int fd_kernel;
-extern int fd_entradaSalida;
 
 
 

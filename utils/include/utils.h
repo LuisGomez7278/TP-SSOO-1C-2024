@@ -57,7 +57,8 @@ typedef enum
     LISTO,
     EJECUCION,
     BLOQUEO,
-    FINALIZADO
+    EXITT,
+    ERROR
 } t_estado;
 
 typedef struct contexto_de_ejecucion_de_proceso
