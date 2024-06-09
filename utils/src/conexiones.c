@@ -228,6 +228,11 @@ void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string
 	paquete->buffer->size += tamanio + sizeof(uint32_t);
 }
 
+
+//-------------------------------------------------------------------------------------------
+
+
+
 uint8_t leer_de_buffer_uint8(void* buffer, int* desplazamiento)
 {
     uint8_t valor;

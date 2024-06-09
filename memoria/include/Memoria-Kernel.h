@@ -19,7 +19,8 @@
 #include "extern_globales.h"
 
 void atender_conexion_KERNEL_MEMORIA();
-
+void escuchando_KERNEL_memoria();
+void crear_proceso_solicitado_por_kernel();
 
 
 

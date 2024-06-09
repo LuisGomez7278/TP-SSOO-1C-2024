@@ -94,6 +94,7 @@ uint32_t leer_de_buffer_uint32(void* buffer, int* desplazamiento);
 char* leer_de_buffer_string(void* buffer, int* desplazamiento);
 cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento);
 
+
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
 /*----------Fin Serializacion----------*/

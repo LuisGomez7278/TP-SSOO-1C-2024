@@ -70,11 +70,11 @@ int main(int argc, char* argv[]) {
     
     // Test local obtencion de instrucciones
 
-    char* path_parcial = "test_ins.txt"; //viene de kernel
-    char* path = path_completo(path_base, path_parcial);
+    //char* path_parcial = "test_ins.txt"; //viene de kernel
+    //char* path = path_completo(path_base, path_parcial);
     // log_info(logger, "path de archivo: %s", path);
     
-    t_list* lista_instrucciones = leer_pseudocodigo(path);
+    //t_list* lista_instrucciones = leer_pseudocodigo(path);
 
     
     // // Pruebas creacion de lista de instrucciones
@@ -87,17 +87,9 @@ int main(int argc, char* argv[]) {
     // log_info(logger, "codigo instruccion 4: %d", ins4->ins);
     // log_info(logger, "codigo instruccion 5: %d", ins5->ins);
 
-    // //Pruebas con kernel
-    // //enviar mensaje a kernel
-    // enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
-    // log_info(logger, "Se envio el primer mensaje a kernel");
 
-    // //recibir respuesta de kernel
-    // op_code codop2 = recibir_operacion(socket_kernel_memoria);
-    
-    // if (codop2 == MENSAJE) {log_info(logger, "LLego un mensaje");}
-    // else {log_info(logger, "LLego otra cosa");}
-    // recibir_mensaje(socket_kernel_memoria, logger);
+    //LAS PRUEBAS DE ENVIO DE MENSAJE Y RECEPCION LA PASE A "Memoria-Kernel.c"
+
 
     // //Pruebas con entradasalida
     // //enviar mensaje a entradasalida
@@ -389,7 +381,7 @@ void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
     agregar_a_paquete_string(paquete, strlen(instruccion->arg4) + 1, instruccion->arg4);
     agregar_a_paquete_string(paquete, strlen(instruccion->arg5) + 1, instruccion->arg5);
 
-    enviar_paquete(paquete, socket);
+    enviar_paquete(paquete, socket_cpu_memoria);
     //log_info(logger, "Paquete enviado");
     eliminar_paquete(paquete);
 }
