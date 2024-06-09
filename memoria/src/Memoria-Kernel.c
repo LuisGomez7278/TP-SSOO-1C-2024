@@ -22,7 +22,7 @@ void atender_conexion_KERNEL_MEMORIA(){
 
 void escuchando_KERNEL_memoria(){
 
-//RECIVO PRIMER MENSAJE DE KERNEL
+//RECIBO PRIMER MENSAJE DE KERNEL
 
     op_code codop2 = recibir_operacion(socket_kernel_memoria);
     if (codop2 == MENSAJE) {log_info(logger, "LLego un mensaje");}

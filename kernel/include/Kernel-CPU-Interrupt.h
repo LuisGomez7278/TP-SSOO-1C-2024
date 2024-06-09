@@ -22,6 +22,9 @@
 #include "extern_globales.h"
 
 
+
+
+
 void atender_conexion_CPU_INTERRUPT_KERNEL();
 
 

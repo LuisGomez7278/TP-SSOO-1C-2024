@@ -1,7 +1,6 @@
 #ifndef SERVICIOS_KERNEL_H_
 #define SERVICIOS_KERNEL_H_
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include<commons/log.h>
@@ -23,8 +22,9 @@
 #include "extern_globales.h"
 
 
-uint32_t identificador_PID =1;
-pthread_mutex_t mutex_pid;
+
+
+
 
 uint32_t asignar_pid();
 

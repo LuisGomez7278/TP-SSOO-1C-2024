@@ -2,7 +2,7 @@
 // SOLAMENTE FIFO Y RR PARA PRIMER CHECK
 //
 #include "../include/planificacion.h"
-
+/*
 void* pcp_planificar(void* args)
 {
 
@@ -120,3 +120,4 @@ void* cronometrar(void* args)
     usleep((*ptr) * 1000);
     return NULL;
 }
+*/

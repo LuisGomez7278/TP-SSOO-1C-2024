@@ -21,7 +21,11 @@
 
 #include "extern_globales.h"
 
-pthread_t hilo_sts;
+
+
+
+
+//pthread_t hilo_sts;
 
     char* ip_memoria;
     char* puerto_memoria;
@@ -45,9 +49,22 @@ pthread_t hilo_sts;
     int socket_entradasalida_kernel;
     int socket_escucha;
 
+
+
     t_log* logger;
     t_log* logger_debug;
     t_config* config;
+
+    t_queue *cola_new;
+    t_queue *cola_ready;
+    t_queue *cola_exit;
+    t_queue *cola_bloqueado;
+
+/*
+uint32_t identificador_PID =1;
+pthread_mutex_t mutex_pid;
+
+*/
 
 
 #endif //TP_KERNEL_MAIN_H_

@@ -19,6 +19,10 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
+
+
+
+
 extern char* ip_memoria;
 extern char* puerto_memoria;
 extern char* ip_cpu;
@@ -52,9 +56,10 @@ extern t_queue *cola_new;
 extern t_queue *cola_ready;
 extern t_queue *cola_exit;
 extern t_queue *cola_bloqueado;
-
-
-
+/*
+extern uint32_t identificador_PID;
+extern pthread_mutex_t mutex_pid;
+*/
 
 
 

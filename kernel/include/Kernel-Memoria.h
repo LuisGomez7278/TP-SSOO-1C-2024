@@ -1,7 +1,6 @@
 #ifndef KERNEL_MEMORIA_H_
 #define KERNEL_MEMORIA_H_
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include<commons/log.h>
@@ -20,6 +19,11 @@
 #include "../../utils/include/conexiones.h"
 
 #include "extern_globales.h"
+
+
+
+
+
 
 
  void atender_conexion_MEMORIA_KERNELL();

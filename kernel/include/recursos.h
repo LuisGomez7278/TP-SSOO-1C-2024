@@ -1,9 +1,7 @@
-//
-// Created by mathi on 5/21/24.
-//
 
 #ifndef TPANUAL_RECURSOS_H
 #define TPANUAL_RECURSOS_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include<commons/log.h>
@@ -23,7 +21,7 @@
 #include "planificacion.h"
 #include <commons/collections/dictionary.h>
 #include "extern_globales.h"
-
+/*
 typedef struct
 {
     int instancias;
@@ -43,5 +41,5 @@ void cargar_recursos(char** recursos, char** instancias_recursos, int cant_recur
 void liberar_recursos(t_pcb* pcb, char** lista_recursos);
 
 
-
+*/
 #endif //TPANUAL_RECURSOS_H
