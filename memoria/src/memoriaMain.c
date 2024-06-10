@@ -1,28 +1,14 @@
 #include "../include/memoriaMain.h"
 
-t_log* logger;
-char* puerto_escucha;
-char* path_base;
-int tam_pagina;
-int tam_memoria;
-int retardo;
-int cant_frames;
-void* memoria_usuario; 
-t_config* config;
-
 int main(int argc, char* argv[]) {
-
-    //SERVER
-    int socket_cpu_memoria;
-    int socket_kernel_memoria;
-    int socket_entradasalida_memoria;
-    int socket_escucha;
-
     //INICIALIZO LOGGER
     logger = start_logger("log_memoria.log", "LOG MEMORIA", LOG_LEVEL_INFO);
 
     //INICIALIZO CONFIG Y OBTENGO DATOS
     cargarConfig();
+    //SERVER
+    // INICIALIZO  SERVIDOR DE MEMORIA
+    
 
     // uint32_t PID = 1;
     // t_contexto_ejecucion CE;
@@ -51,47 +37,42 @@ int main(int argc, char* argv[]) {
 
     //conexion_con_cpu(socket_cpu_memoria);
     
-    // // pruebas memoria
+    // // PRUEBAS MEMORIA crear proceso, asignar tamaño, escribir y leer.
     inicializarMem();
+
+    procesoM* p = crear_proceso(path_base, 1);
+
+    resize(1, 50);
     
-    escribir_memoria(100, "Hola Mundo");
+    //resize(1, -40);
 
-    char* leido = leer_memoria(100);
+    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(2);
 
-    if (socket_cpu_memoria) {liberar_conexion(socket_cpu_memoria);}
+    /*if(tpg == NULL){
+        perror("AAA");    
+    }*/
+
+    char* buffer = "AAAAAAAAAAAAAAAAAAAAA";
+
+    bool escribir_bien = escribir_memoria(24, strlen(buffer), buffer, 1);
+    if(escribir_bien){log_info(logger, "Perfecto");}
+
+    char* leido = leer_memoria(24, 20, 1);
+    
+    if(leido==NULL){perror("Rompio");}
+    log_info(logger,"Dato leido: %s", leido);
+
+    free(leido);
+    log_info(logger, "a");
+
+
+    if (socket_cpu_memoria_dispatch) {liberar_conexion(socket_cpu_memoria_dispatch);}
+    if (socket_cpu_memoria_interrupt) {liberar_conexion(socket_cpu_memoria_interrupt);}
     if (socket_kernel_memoria) {liberar_conexion(socket_kernel_memoria);}
     if (socket_entradasalida_memoria) {liberar_conexion(socket_entradasalida_memoria);}
     if (socket_escucha) {liberar_conexion(socket_escucha);}
 
     return 0;
-}
-
-void cargarConfig(){
-    //INICIALIZO config
-    config = start_config("./memoria.config");
-
-    if(config==NULL){
-        perror("Fallo al crear el archivo config");
-        exit(EXIT_FAILURE);
-    }
-
-    //OBTENER VALORES CONFIG
-    puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");
-    log_info(logger, "PUERTO leido: %s", puerto_escucha);
-
-    path_base = config_get_string_value(config, "PATH_INSTRUCCIONES");
-    log_info(logger, "PATH: %s", path_base);
-
-    tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
-    log_info(logger, "TAMANIO MEMORIA: %d", tam_memoria);
-
-    tam_pagina = config_get_int_value(config, "TAM_PAGINA");
-    log_info(logger, "TAMANIO PAGINA: %d", tam_pagina);
-
-    retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
-    log_info(logger, "RETARDO RESPUESTA: %d", retardo);
-
-    cant_frames = tam_memoria/tam_pagina;
 }
 
 t_list* leer_pseudocodigo(char* path){
@@ -319,56 +300,3 @@ t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     return instruccion;
 }
 
-void conexion_con_cpu(int socket_cpu_memoria){
-    op_code codigo;
-
-    while(true){
-        codigo = recibir_operacion(socket_cpu_memoria);
-        switch (codigo)
-        {
-        case FETCH:
-            fetch(socket_cpu_memoria);
-            break;
-        
-        default:
-            break;
-        }
-    }
-}
-
-void fetch(int socket_cpu_memoria){
-    uint32_t PID; //por ahora no hace nada, sera relevante cuando lleguen varios procesos por kernel 
-    uint32_t PC;
-    recibir_fetch(socket_cpu_memoria, PID, PC);
-    log_info(logger, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
-
-    t_list* lista_instrucciones = leer_pseudocodigo(path_base);
-    t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
-    usleep(retardo);
-    enviar_instruccion(socket_cpu_memoria, sig_ins);
-    log_info(logger, "instruccion enviada");
-}
-
-void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC){
-    uint32_t size;
-    int desplazamiento = 0;
-    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
-
-    *PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-    *PC = leer_de_buffer_uint32(buffer, &desplazamiento);
-}
-
-void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
-    t_paquete* paquete = crear_paquete(FETCH);
-    //log_info(logger, "Paquete creado");
-    agregar_a_paquete_cod_ins(paquete, instruccion->ins);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg1) + 1, instruccion->arg1);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg2) + 1, instruccion->arg2);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg3) + 1, instruccion->arg3);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg4) + 1, instruccion->arg4);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg5) + 1, instruccion->arg5);
-
-    enviar_paquete(paquete, socket);
-    //log_info(logger, "Paquete enviado");
-    eliminar_paquete(paquete);
-}
