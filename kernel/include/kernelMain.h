@@ -10,6 +10,7 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
+
 #include "planificacion.h"
 #include "Kernel-CPU-dispatch.h"
 #include "Kernel-CPU-Interrupt.h"
@@ -25,7 +26,7 @@
 
 
 
-//pthread_t hilo_sts;
+
 
     char* ip_memoria;
     char* puerto_memoria;
@@ -60,11 +61,10 @@
     t_queue *cola_exit;
     t_queue *cola_bloqueado;
 
-/*
-uint32_t identificador_PID =1;
-pthread_mutex_t mutex_pid;
 
-*/
+    
+
+
 
 
 #endif //TP_KERNEL_MAIN_H_

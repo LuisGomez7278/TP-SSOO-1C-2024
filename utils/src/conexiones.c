@@ -129,13 +129,93 @@ void crear_buffer(t_paquete* paquete)
 
 void enviar_paquete(t_paquete* paquete, int socket_cliente)
 {
-	int bytes = paquete->buffer->size + 2*sizeof(uint32_t);
-	void* a_enviar = serializar_paquete(paquete, bytes);
-
+	int bytes = paquete->buffer->size + sizeof(uint32_t)+sizeof(op_code);
+    //imprimir_paquete(paquete);
+    void* a_enviar = serializar_paquete(paquete, bytes);
+    //verificar_paquete(a_enviar);
 	send(socket_cliente, a_enviar, bytes, 0);
 
 	free(a_enviar);
 }
+
+void imprimir_paquete(t_paquete* paquete) {
+    if (paquete == NULL || paquete->buffer == NULL || paquete->buffer->stream == NULL) {
+        printf("El paquete o su buffer es NULL.\n");
+        return;
+    }
+
+    printf("VERIFICACION PAQUETE ANTES DE SERIALIZAR\n");
+    printf("Código de operación: %d\n", paquete->codigo_operacion);
+
+    void* stream = paquete->buffer->stream;
+    int desplazamiento = 0;
+
+    // Leer el primer uint32_t (valor1)
+    uint32_t valor1;
+    memcpy(&valor1, stream + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    // Leer el segundo uint32_t (valor2)
+    uint32_t valor2;
+    memcpy(&valor2, stream + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    // Leer el string
+    char* string = strdup((char*)(stream + desplazamiento));
+
+    // Imprimir los valores leídos
+    printf("Tamaño total 1: %u\n", valor1);
+    printf("Tamaño buffer: %u\n", valor2);
+    printf("String: %s\n", string);
+
+    // Liberar la memoria asignada para el string
+    free(string);
+}
+
+void verificar_paquete(void* buffer) {
+    op_code codigo_operacion;
+    uint32_t size;
+    uint32_t valor1;
+    uint32_t valor2;
+    char* str;
+
+    // Desplazamiento para recorrer el buffer
+    int desplazamiento = 0;
+
+    // Leer el código de operación
+  //  memcpy(&codigo_operacion, buffer + desplazamiento, sizeof(op_code));
+  //  desplazamiento += sizeof(op_code);
+
+    // Leer el tamaño del buffer
+    memcpy(&size, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    // Leer el primer uint32_t
+    memcpy(&valor1, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    // Leer el segundo uint32_t
+    memcpy(&valor2, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    // Leer el string (asumimos que el string está al final y es null-terminated)
+    str = strdup((char*)(buffer + desplazamiento));
+
+    // Imprimir los valores leídos
+    printf("VERIFICACION PAQUETE A ENVIAR SERIALIZADO\n");
+    printf("Código de Operación: %d\n", codigo_operacion);
+    printf("Tamaño del Buffer: %u\n", size);
+    printf("Tamaño total 1: %u\n", valor1);
+    printf("Tamaño buffer: %u\n", valor2);
+    printf("String: %s\n", str);
+
+    // Liberar la memoria asignada para el string
+    free(str);
+}
+
+
+
+
 
 void* serializar_paquete(t_paquete* paquete, int bytes)
 {
@@ -143,9 +223,9 @@ void* serializar_paquete(t_paquete* paquete, int bytes)
 	int desplazamiento = 0;
 
 	memcpy(magic + desplazamiento, &(paquete->codigo_operacion), sizeof(op_code));
-	desplazamiento+= sizeof(int);
+	desplazamiento+= sizeof(op_code);
 	memcpy(magic + desplazamiento, &(paquete->buffer->size), sizeof(uint32_t));
-	desplazamiento+= sizeof(int);
+	desplazamiento+= sizeof(uint32_t);
 	memcpy(magic + desplazamiento, paquete->buffer->stream, paquete->buffer->size);
 	desplazamiento+= paquete->buffer->size;
 
@@ -194,6 +274,51 @@ void* recibir_buffer(uint32_t* size, int socket_cliente)
     return buffer;
 }
 
+
+
+/*
+void* recibir_buffer(uint32_t* size, int socket_cliente) {
+    void* buffer = NULL;
+
+    // Recibir el tamaño del buffer
+    ssize_t bytes_received = recv(socket_cliente, size, sizeof(uint32_t), MSG_WAITALL);
+    if (bytes_received <= 0) {
+        if (bytes_received == 0) {
+            fprintf(stderr, "El socket se cerró de manera inesperada\n");
+        } else {
+            fprintf(stderr, "Error al recibir el tamaño del buffer: %s\n", strerror(errno));
+        }
+        return NULL;
+    }
+
+    // Validar el tamaño recibido
+    if (*size == 0 || *size > 1000000) { // 1000000 es un valor arbitrario para evitar tamaños muy grandes
+        fprintf(stderr, "Tamaño del buffer inválido: %u\n", *size);
+        return NULL;
+    }
+
+    // Asignar memoria para el buffer
+    buffer = malloc(*size);
+    if (buffer == NULL) {
+        fprintf(stderr, "Error al asignar memoria para el buffer\n");
+        return NULL;
+    }
+
+    // Recibir el buffer real
+    bytes_received = recv(socket_cliente, buffer, *size, MSG_WAITALL);
+    if (bytes_received <= 0) {
+        if (bytes_received == 0) {
+            fprintf(stderr, "El socket se cerró de manera inesperada\n");
+        } else {
+            fprintf(stderr, "Error al recibir el buffer: %s\n", strerror(errno));
+        }
+        free(buffer);
+        return NULL;
+    }
+
+    return buffer;
+}
+*/
 /*----------Fin Mensajeria----------*/
 
 
@@ -258,7 +383,7 @@ uint32_t leer_de_buffer_uint32(void* buffer, int* desplazamiento)
 char* leer_de_buffer_string(void* buffer, int* desplazamiento)
 {
     uint32_t tamanio = leer_de_buffer_uint32(buffer, desplazamiento);
-    char* valor = malloc(tamanio);
+    char* valor = malloc(tamanio+1);
 
     memcpy(valor, buffer + (*desplazamiento), tamanio);
     (*desplazamiento) += tamanio;

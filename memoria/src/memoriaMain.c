@@ -15,13 +15,13 @@ int main(int argc, char* argv[]) {
 
 // INICIALIZO  SERVIDOR DE MEMORIA
     socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
-
+/*
 
 // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug,"Esperando que se conecte CPU");
     socket_cpu_memoria_dispatch=esperar_cliente(socket_escucha,logger_debug);
     socket_cpu_memoria_interrupt=esperar_cliente(socket_escucha,logger_debug);
-
+*/
 // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug,"Esperando que se concte KERNEL");
     socket_kernel_memoria=esperar_cliente(socket_escucha,logger_debug);
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 // CREO HILO KERNEL 
         pthread_t hilo_kernel_memoria;
         pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
-        pthread_detach(hilo_kernel_memoria);
+        pthread_join(hilo_kernel_memoria,NULL);
  
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

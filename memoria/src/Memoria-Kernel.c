@@ -11,7 +11,7 @@ void atender_conexion_KERNEL_MEMORIA(){
     // CREO HILO ESCUCHA KERNEL
             pthread_t hilo_escucha_kenel_memoria;
             pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)escuchando_KERNEL_memoria,NULL);
-            pthread_detach(hilo_escucha_kenel_memoria);
+            pthread_join(hilo_escucha_kenel_memoria,NULL);
         
 
 }
@@ -42,7 +42,7 @@ void escuchando_KERNEL_memoria(){
                 break;
             case CREAR_PROCESO:
                 crear_proceso_solicitado_por_kernel();
-
+                break;
             case -1:
                 log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
                 continuarIterando=0;
@@ -57,18 +57,33 @@ void escuchando_KERNEL_memoria(){
 
 
 
-void crear_proceso_solicitado_por_kernel(){
+void crear_proceso_solicitado_por_kernel(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA CARGAR EL PROCESO
 
-    int32_t *sizeTotal;
-    int *desplazamiento=0;
+    uint32_t *sizeTotal=malloc(sizeof(uint32_t));
+    int *desplazamiento=malloc(sizeof(int));
+    *desplazamiento=0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
-    int32_t size_string= leer_de_buffer_uint32(buffer,desplazamiento);
-    char* path_parcial= leer_de_buffer_string(buffer,desplazamiento);
-    free(sizeTotal);
-    free(desplazamiento);
-    free(buffer);
+    
+   // verificar_paquete(buffer);
 
+    if (buffer != NULL) {
+        uint32_t PID= leer_de_buffer_uint32(buffer,desplazamiento);
+        char* path_parcial= leer_de_buffer_string(buffer,desplazamiento);
+
+
+        log_info(logger_debug,"LLEGO UN PROCESO PARA CARGAR: PID= %u  direccion= %s  ",PID,path_parcial);
+        
+        free(sizeTotal);
+        free(desplazamiento);
+        free(buffer);
+    
+    } else {
+        // Manejo de error en caso de que recibir_buffer devuelva NULL
+        log_error(logger_debug,"Error al recibir el buffer");
+    }
 }
+
+
 
 
 

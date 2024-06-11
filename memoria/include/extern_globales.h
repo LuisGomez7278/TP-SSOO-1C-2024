@@ -28,7 +28,7 @@ extern int tam_pagina;
 extern int tam_memoria;
 extern int retardo;
 extern char* puerto_escucha;
-t_config* config;
+extern t_config* config;
 
 extern int socket_cpu_memoria_dispatch;
 extern int socket_cpu_memoria_interrupt;

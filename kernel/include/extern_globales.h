@@ -56,10 +56,6 @@ extern t_queue *cola_new;
 extern t_queue *cola_ready;
 extern t_queue *cola_exit;
 extern t_queue *cola_bloqueado;
-/*
-extern uint32_t identificador_PID;
-extern pthread_mutex_t mutex_pid;
-*/
 
 
 
@@ -67,4 +63,7 @@ extern pthread_mutex_t mutex_pid;
 
 
 
-#endif /*  VARIABLES_GLOBALES */
+
+
+
+#endif /*  VARIABLES_GLOBALES_H_ */

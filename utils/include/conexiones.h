@@ -98,6 +98,6 @@ cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento);
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
 /*----------Fin Serializacion----------*/
-
-
+void verificar_paquete(void* );
+void imprimir_paquete(t_paquete* paquete);
 #endif //CONEXIONES_TP_H_

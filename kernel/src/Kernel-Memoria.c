@@ -20,9 +20,11 @@
 
 void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
 
-//LE DOY VALOR A LAS VARIABLES A ENVIAR
 
     char** leido_array = string_split(leido, " ");  //SEPARO EL STRING LEIDO EN UN VECTOR DE STRING: 
+    
+//LE DOY VALOR A LAS VARIABLES A ENVIAR    
+
     //estructura: codigo operacion, pid, path_para_memoria
     op_code codigo_de_operacion=CREAR_PROCESO;
     char* path_para_memoria=leido_array[1];

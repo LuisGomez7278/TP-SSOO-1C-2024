@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/types.h>
+
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
@@ -22,7 +23,8 @@
 #include "extern_globales.h"
 
 
-
+extern uint32_t identificador_PID;
+extern pthread_mutex_t mutex_pid;
 
 
 
