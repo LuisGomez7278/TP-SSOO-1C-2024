@@ -28,7 +28,7 @@
 
  void atender_conexion_MEMORIA_KERNELL();
 void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
-
+void carga_exitosa_en_memoria();
 
 
 

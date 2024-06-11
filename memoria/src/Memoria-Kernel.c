@@ -18,8 +18,6 @@ void atender_conexion_KERNEL_MEMORIA(){
 
 
 
-
-
 void escuchando_KERNEL_memoria(){
 
 //RECIBO PRIMER MENSAJE DE KERNEL
@@ -73,6 +71,8 @@ void crear_proceso_solicitado_por_kernel(){  ///PID Y PATH PARCIAL SON LOS QUE S
 
         log_info(logger_debug,"LLEGO UN PROCESO PARA CARGAR: PID= %u  direccion= %s  ",PID,path_parcial);
         
+        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);
+
         free(sizeTotal);
         free(desplazamiento);
         free(buffer);
@@ -84,7 +84,16 @@ void crear_proceso_solicitado_por_kernel(){  ///PID Y PATH PARCIAL SON LOS QUE S
 }
 
 
+void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){
 
+    t_paquete *paquete= crear_paquete (codigo_operacion);
+    agregar_a_paquete_uint32(paquete,PID);
+    enviar_paquete(paquete,socket_kernel_memoria);              //--------------ESTA FUNCION SERIALIZA EL PAQUETE ANTES DE ENVIARLO --quedaria un void*= cod_op||SIZE TOTAL||PID(uint_32)
+    eliminar_paquete(paquete);
+
+
+
+}
 
 
 

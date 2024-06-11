@@ -12,6 +12,29 @@
 //ENVIAR MENSAJE A MEMORIA
     enviar_mensaje("Kernel manda mensaje a memoria", socket_memoria_kernel);
     log_info(logger, "Se envio el primer mensaje a memoria");
+        
+        bool continuarIterando=1;
+       
+
+        while (continuarIterando) {
+            int cod_op = recibir_operacion(socket_memoria_kernel);   ////se queda esperando en recv por ser bloqueante
+            switch (cod_op) {
+            case MENSAJE:
+                recibir_mensaje(socket_memoria_kernel,logger_debug);
+                break;
+            case CARGA_EXITOSA_PROCESO:
+                carga_exitosa_en_memoria();
+                break;
+            case -1:
+                log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
+                continuarIterando=0;
+                break;
+            default:
+                log_warning(logger_debug,"Operacion desconocida de KERNEL. No quieras meter la pata");
+                break;
+            }
+        }
+
 
     
      
@@ -41,7 +64,32 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
 
 }
 
+void carga_exitosa_en_memoria(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA CARGAR EL PROCESO
 
+    uint32_t *sizeTotal=malloc(sizeof(uint32_t));
+    int *desplazamiento=malloc(sizeof(int));
+    *desplazamiento=0;
+    void* buffer= recibir_buffer(sizeTotal,socket_memoria_kernel);
+    
+   // verificar_paquete(buffer);
+
+    if (buffer != NULL) {
+        uint32_t tam_buffer=leer_de_buffer_uint32(buffer,desplazamiento);
+        uint32_t PID= leer_de_buffer_uint32(buffer,desplazamiento);
+        
+
+
+        log_info(logger_debug,"CARGA EXITOSA DEL PROCESO: PID= %u  tam_buffer= %u  ",PID,tam_buffer);
+        
+        free(sizeTotal);
+        free(desplazamiento);
+        free(buffer);
+    
+    } else {
+        // Manejo de error en caso de que recibir_buffer devuelva NULL
+        log_error(logger_debug,"Error al recibir el buffer");
+    }
+}
 
 
 

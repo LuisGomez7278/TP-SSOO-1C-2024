@@ -21,7 +21,7 @@
 void atender_conexion_KERNEL_MEMORIA();
 void escuchando_KERNEL_memoria();
 void crear_proceso_solicitado_por_kernel();
-
+void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID);
 
 
 
