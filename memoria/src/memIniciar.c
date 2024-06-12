@@ -1,6 +1,9 @@
 #include "../include/memIniciar.h"
 
 void cargarConfig(){
+    //INICIALIZO LOGGER
+    logger = start_logger("log_memoria.log", "LOG MEMORIA", LOG_LEVEL_INFO);
+    logger_debug = start_logger("log_memoria_debug.log", "LOG MEMORIA DEBUG", LOG_LEVEL_TRACE);
     //INICIALIZO config
     config = start_config("./memoria.config");
 
@@ -50,5 +53,7 @@ void inicializarMem(){
     bitmap = bitarray_create_with_mode(bitarray_mem, tam_bitarray, MSB_FIRST);
 
     tablaDePaginas = list_create();
+    procesos = list_create();
+    
     log_info(logger, "BITMAP inicializado correctamente");
 }

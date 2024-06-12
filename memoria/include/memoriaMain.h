@@ -28,11 +28,5 @@ int socket_kernel_memoria;
 int socket_entradasalida_memoria;
 int socket_escucha;
 
-// memoria de instrucciones
-t_instruccion* parsear_instruccion(char* linea);
-t_list* leer_pseudocodigo(char* path);
-cod_ins hash_ins(char* ins);
-char* path_completo(char* path_base, char* path_parcial);
-t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC);
 
 #endif //TP_MEMORIA_MAIN_H_

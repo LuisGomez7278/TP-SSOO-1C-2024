@@ -2,23 +2,78 @@
 
 t_bitarray* bitmap;
 t_list* tablaDePaginas;
+t_list* procesos;
 
-procesoM* crear_proceso(char* path_instrucciones, uint32_t PID){ 
+bool crear_procesoM(char* path_instrucciones, uint32_t PID){ 
     procesoM* proceso = malloc(sizeof(procesoM));
     proceso->pid = PID;
     t_list* lista_inst = leer_pseudocodigo(path_instrucciones);
     if(lista_inst==NULL){
         perror("Error al crear la lista de instrucciones");
-        exit(EXIT_FAILURE);
+        return false;
     }else{proceso->instrs = lista_inst;}
 
     t_list* tabla_paginas = list_create(); //empieza con tabla de paginas vacia
     proceso->paginas = tabla_paginas;
 
     añadirTablaALista(tabla_paginas, PID);
-
-    return proceso;
+    list_add(procesos, proceso);
+    log_info(logger_debug, "Proceso con PID %d creado", PID);
+    return true;
 } 
+
+void eliminar_procesoM(uint32_t PID){
+    // Buscar el proceso en la lista de procesos
+    procesoM* proceso = buscar_proceso_por_pid(PID);
+    if (proceso == NULL) {
+        log_error(logger_debug, "Proceso con PID %d no encontrado para finalizar", PID);
+        return;
+    }
+
+    // Liberar los frames del proceso
+    liberar_frames(proceso->paginas);
+
+    // Eliminar el proceso de la lista de procesos
+    for (int i = 0; i < list_size(procesos); i++) {
+        procesoM* p = list_get(procesos, i);
+        if (p->pid == PID) {
+            list_remove_and_destroy_element(procesos, i, free);
+            break;
+        }
+    }
+
+    // Liberar la memoria asociada al proceso
+    list_destroy_and_destroy_elements(proceso->instrs, free);
+    list_destroy_and_destroy_elements(proceso->paginas, free);
+    free(proceso);
+
+    // Buscar y eliminar la tabla de páginas del proceso
+    tabla_pag_proceso* tabla_pag_p = obtener_tabla_pag_proceso(PID);
+    if (tabla_pag_p != NULL) {
+        for (int i = 0; i < list_size(tablaDePaginas); i++) {
+            tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
+            if (tabla->pid == PID) {
+                list_remove_and_destroy_element(tablaDePaginas, i, free);
+                break;
+            }
+        }
+
+        // Liberar la memoria asociada a la tabla de páginas del proceso
+        list_destroy_and_destroy_elements(tabla_pag_p->paginas, free);
+        free(tabla_pag_p);
+    }
+
+    log_info(logger_debug, "Proceso con PID %d finalizado y eliminado", PID);
+}
+
+void liberar_frames(t_list* paginas){
+    for (int i = 0; i < list_size(paginas); i++) {
+        tabla_pag* pagina = list_get(paginas, i);
+        if (pagina->presencia) {
+            bitarray_clean_bit(bitmap, pagina->marco);
+        }
+    }
+}
 
 void resize(uint32_t PID, int size) {
     tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
@@ -28,13 +83,15 @@ void resize(uint32_t PID, int size) {
     }
 
     int num_paginas_actuales = list_size(tabla_proceso->paginas);
-    int num_paginas_requeridas = (abs(size) + tam_pagina - 1) / tam_pagina;  // Redondea hacia arriba
+    int num_paginas_requeridas;
 
     if (size > 0) {
         // Añadir páginas
+        num_paginas_requeridas = (abs(size) + tam_pagina - 1) / tam_pagina;  // Redondea hacia arriba
         añadir_pagina_a_proceso(tabla_proceso, num_paginas_requeridas, PID);
     } else if (size < 0) {
         // Eliminar páginas
+        num_paginas_requeridas = abs(size)/tam_pagina; // Redondea hacia abajo
         eliminar_pagina_de_proceso(tabla_proceso, num_paginas_requeridas);
     }
 }
@@ -131,6 +188,26 @@ tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int marco_a
     return NULL;
 }
 
+procesoM* buscar_proceso_por_pid(uint32_t pid){
+    for (int i = 0; i < list_size(procesos); i++) {
+        procesoM* proceso = list_get(procesos, i);
+        if (proceso->pid == pid) {
+            return proceso;
+        }
+    }
+    log_error(logger, "Proceso con PID %d no encontrado", pid);
+    return NULL;
+}
+
+t_list* obtener_instrs(uint32_t pid){
+    procesoM* proceso = buscar_proceso_por_pid(pid);
+    if (proceso != NULL) {
+        return proceso->instrs;
+    }
+    log_error(logger, "No se pudo obtener la lista de instrucciones del proceso con PID %d", pid);
+    return NULL;
+}
+
 int asignar_marco(uint32_t PID, int numero_pagina) {
     tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
     if (tabla_proceso == NULL) {
@@ -219,7 +296,7 @@ bool escribir_memoria(int direccion_fisica, int bytes, char* valor, uint32_t PID
 }
 
 char* leer_memoria(int direccion_fisica, int size, uint32_t PID){
-    char* buffer = (char*)malloc(size);
+    char* buffer = malloc(size);
     int bytes_leidos = 0;
     int direccion_actual = direccion_fisica;
     int bytes_restantes = size;
@@ -233,7 +310,6 @@ char* leer_memoria(int direccion_fisica, int size, uint32_t PID){
         memcpy(buffer + bytes_leidos, (char*)memoria_usuario + (marco * tam_pagina) + offset, bytes_a_leer);
 
         log_info(logger, "Acceso a Espacio de Usuario: PID: %d - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_leer);
-
         bytes_leidos += bytes_a_leer;
         bytes_restantes -= bytes_a_leer;
 
@@ -253,6 +329,6 @@ char* leer_memoria(int direccion_fisica, int size, uint32_t PID){
             direccion_actual = siguiente_pagina->marco * tam_pagina;
         }
     }
-    log_info(logger, "%s", buffer);
+    log_info(logger, "%.*s", size, buffer);  
     return buffer;
 }

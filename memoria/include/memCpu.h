@@ -15,6 +15,7 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 #include "extGlobales.h"
+#include "memPaginacion.h"
 
 void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion);
 void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC);

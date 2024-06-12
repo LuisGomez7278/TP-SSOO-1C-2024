@@ -19,11 +19,12 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
-#include "extGlobales.h"
+
 
 extern t_bitarray* bitmap;
 extern void* memoria_usuario; 
 extern t_list* tablaDePaginas;
+extern t_list* procesos;
 
 //LOGGER
 extern t_log* logger;
@@ -44,5 +45,13 @@ extern int socket_cpu_memoria_interrupt;
 extern int socket_kernel_memoria;
 extern int socket_entradasalida_memoria;
 extern int socket_escucha;
+
+t_list* leer_pseudocodigo(char* path);
+// memoria de instrucciones
+t_instruccion* parsear_instruccion(char* linea);
+
+cod_ins hash_ins(char* ins);
+char* path_completo(char* path_base, char* path_parcial);
+t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC);
 
 #endif //TP_MEMORIA_EXT_H_

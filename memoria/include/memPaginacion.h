@@ -25,7 +25,11 @@ typedef struct {
 
 void inicializarMem();
 
-procesoM* crear_proceso(char* path_instrucciones, uint32_t PID);
+bool crear_procesoM(char* path_instrucciones, uint32_t PID);
+void eliminar_procesoM(uint32_t PID);
+
+procesoM* buscar_proceso_por_pid(uint32_t pid);
+t_list* obtener_instrs(uint32_t pid);
 
 // tablas
 void añadirTablaALista(t_list* paginas, uint32_t PID);
@@ -36,6 +40,7 @@ tabla_pag* obtener_pagina_proceso(tabla_pag_proceso* tabla_proceso, int numero_p
 tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int marco_actual);
 
 int asignar_marco(uint32_t PID, int numero_pagina);
+void liberar_frames(t_list* paginas);
 int obtener_marco(int direccion_fisica);
 int obtener_desplazamiento(int direccion_fisica);
 

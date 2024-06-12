@@ -1,14 +1,32 @@
 #include "../include/memoriaMain.h"
 
 int main(int argc, char* argv[]) {
-    //INICIALIZO LOGGER
-    logger = start_logger("log_memoria.log", "LOG MEMORIA", LOG_LEVEL_INFO);
-
-    //INICIALIZO CONFIG Y OBTENGO DATOS
+    
     cargarConfig();
     //SERVER
-    // INICIALIZO  SERVIDOR DE MEMORIA
-    
+    // INICIALIZO  SERVIDOR DE MEMORIA 
+    /*
+    socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
+
+
+    // ESPERO QUE SE CONECTE CPU
+    log_trace(logger_debug,"Esperando que se conecte CPU");
+    socket_cpu_memoria_dispatch = esperar_cliente(socket_escucha,logger_debug);
+    socket_cpu_memoria_interrupt = esperar_cliente(socket_escucha,logger_debug);
+
+    // ESPERO QUE SE CONECTE EL KERNEL
+    log_trace(logger_debug,"Esperando que se concte KERNEL");
+    socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
+
+    // CREO HILO ENTRADA-SALIDA Y ADENTRO DEL HILO SOPORTO MULTIPLES CONEXIONES
+    pthread_t hilo_entradaSalida_memoria;
+    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)atender_conexion_ENTRADASALIDA_MEMORIA,NULL);
+    pthread_detach(hilo_entradaSalida_memoria);
+
+    // CREO HILO KERNEL 
+    pthread_t hilo_kernel_memoria;
+    pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
+    pthread_detach(hilo_kernel_memoria); */
 
     // uint32_t PID = 1;
     // t_contexto_ejecucion CE;
@@ -40,31 +58,28 @@ int main(int argc, char* argv[]) {
     // // PRUEBAS MEMORIA crear proceso, asignar tamaño, escribir y leer.
     inicializarMem();
 
-    procesoM* p = crear_proceso(path_base, 1);
+    bool a = crear_procesoM(path_base, 1);
 
     resize(1, 50);
     
     //resize(1, -40);
 
-    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(2);
+    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
 
     /*if(tpg == NULL){
         perror("AAA");    
     }*/
 
-    char* buffer = "AAAAAAAAAAAAAAAAAAAAA";
+    char* buffer = "Hola mundo, todo bien. LoL";
 
-    bool escribir_bien = escribir_memoria(24, strlen(buffer), buffer, 1);
+    bool escribir_bien = escribir_memoria(30, 27, buffer, 1);
     if(escribir_bien){log_info(logger, "Perfecto");}
 
-    char* leido = leer_memoria(24, 20, 1);
+    char* leido = leer_memoria(30, 22, 1);
     
     if(leido==NULL){perror("Rompio");}
-    log_info(logger,"Dato leido: %s", leido);
 
     free(leido);
-    log_info(logger, "a");
-
 
     if (socket_cpu_memoria_dispatch) {liberar_conexion(socket_cpu_memoria_dispatch);}
     if (socket_cpu_memoria_interrupt) {liberar_conexion(socket_cpu_memoria_interrupt);}

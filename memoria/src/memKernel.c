@@ -28,11 +28,14 @@ void escuchando_KERNEL_memoria(){
                 recibir_mensaje(socket_kernel_memoria,logger_debug);
                 break;
             case CREAR_PROCESO:
-                crear_proceso_solicitado_por_kernel();
-
+                crear_proceso();
+                break;
+            case ELIMINAR_PROCESO:
+                eliminar_proceso();
+                break;
             case -1:
                 log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
-                continuarIterando=0;
+                continuarIterando = 0;
                 break;
             default:
                 log_warning(logger_debug,"Operacion desconocida de KERNEL. No quieras meter la pata");
@@ -41,6 +44,56 @@ void escuchando_KERNEL_memoria(){
         }
 }
 
-void crear_proceso_solicitado_por_kernel()
-{
+void crear_proceso(){ // llega el pid y el path de instrucciones
+    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
+    int *desplazamiento = malloc(sizeof(int));
+    *desplazamiento = 0;
+    void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
+
+    if (buffer != NULL) {
+        uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
+        char* path_parcial = leer_de_buffer_string(buffer,desplazamiento);
+
+        log_info(logger_debug,"LLEGO UN PROCESO PARA CARGAR: PID = %u  direccion= %s  ",PID,path_parcial);
+        
+        bool creado = crear_procesoM(path_parcial, PID);
+
+        if(creado){
+        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);
+        }    
+    } else {
+        // Manejo de error en caso de que recibir_buffer devuelva NULL
+        log_error(logger_debug,"Error al recibir el buffer");
+    }
+    free(sizeTotal);
+    free(desplazamiento);
+    free(buffer);
+}
+
+void eliminar_proceso(){ // llega un pid
+    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
+    int *desplazamiento = malloc(sizeof(int));
+    *desplazamiento = 0;
+    void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
+
+    if(buffer!=NULL){
+        uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
+
+        log_info(logger_debug,"LLEGO UN PROCESO PARA ELIMINAR: PID = %u",PID);
+
+        eliminar_procesoM(PID);
+    } else {
+        // Manejo de error en caso de que recibir_buffer devuelva NULL
+        log_error(logger_debug,"Error al recibir el buffer");
+    }
+    free(sizeTotal);
+    free(desplazamiento);
+    free(buffer);
+}
+
+void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){
+    t_paquete *paquete = crear_paquete (codigo_operacion);
+    agregar_a_paquete_uint32(paquete,PID);
+    enviar_paquete(paquete,socket_kernel_memoria);          
+    eliminar_paquete(paquete);
 }
