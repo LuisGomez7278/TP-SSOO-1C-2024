@@ -20,6 +20,24 @@
 #include "recursos.h"
 
 #include "extern_globales.h"
+
+
+
+
+
+
+
+
+
+
+
+
+void ingresar_en_lista(t_pcb* pcb, t_list* lista, char* modulo, pthread_mutex_t* semaforo_mutex, sem_t* semaforo, estado_code estado);
+void cambiar_grado_multiprogramacion(int nuevo_valor);
+
+
+
+
 /*
 typedef  enum {
     FIFO,

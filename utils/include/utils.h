@@ -53,7 +53,7 @@ typedef struct instruccion
 typedef enum 
 {
     NUEVO,
-    LISTO,
+    READY,
     EJECUCION,
     BLOQUEO,
     EXITT,
@@ -79,8 +79,9 @@ typedef struct pcb_de_proceso
 {
    	uint32_t PID;
     t_estado estado;
-    uint32_t quantum;
+    uint32_t quantum_restante;
     t_contexto_ejecucion CE;
+    
 } t_pcb;
 
 //Funciones de Utils.

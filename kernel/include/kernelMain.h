@@ -56,11 +56,11 @@
     t_log* logger_debug;
     t_config* config;
 
-    t_queue *cola_new;
-    t_queue *cola_ready;
-    t_queue *cola_exit;
-    t_queue *cola_bloqueado;
-
+    t_list *lista_new;
+    t_list *lista_ready;
+    t_list *lista_exit;
+    t_list *lista_bloqueado;
+    
 
     
 

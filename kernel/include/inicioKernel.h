@@ -27,10 +27,21 @@
 
 
 
+sem_t control_multiprogramacion;
+sem_t cantidad_procesos_new;
+sem_t cantidad_procesos_ready;
+
+pthread_mutex_t semaforo_new;
+pthread_mutex_t semaforo_ready;
+pthread_mutex_t semaforo_bloqueado;
+
+
+
+
 void iniciar_Kernel(void);
 void iniciar_logs(void);
 void iniciar_configs(void);
-void iniciar_colas_de_estado();
+void iniciar_estructuras_planificacion();
 
 
 

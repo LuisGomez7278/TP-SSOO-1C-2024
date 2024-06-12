@@ -52,13 +52,19 @@ extern t_log* logger;
 extern t_config *config;
 
 
-extern t_queue *cola_new;
-extern t_queue *cola_ready;
-extern t_queue *cola_exit;
-extern t_queue *cola_bloqueado;
+extern t_list *lista_new;
+extern t_list *lista_ready;
+extern t_list *lista_exit;
+extern t_list *lista_bloqueado;
 
 
+extern sem_t control_multiprogramacion;
+extern sem_t cantidad_procesos_new;
+extern sem_t cantidad_procesos_ready;
 
+extern pthread_mutex_t semaforo_new;
+extern pthread_mutex_t semaforo_ready;
+extern pthread_mutex_t semaforo_bloqueado;
 
 
 

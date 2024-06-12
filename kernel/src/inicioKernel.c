@@ -51,15 +51,30 @@ void iniciar_configs(){
 
 }
 
-void iniciar_colas_de_estado(){
+void iniciar_estructuras_planificacion(){
 
-    cola_new = queue_create();
-	cola_ready = queue_create();
-	cola_exit = queue_create();
-	cola_bloqueado= queue_create();
+    lista_new = list_create();
+	lista_ready = list_create();
+	lista_exit = list_create();
+	lista_bloqueado= list_create();
 
 
+//SEMAFORO MULTIPROGRAMACION
+
+    sem_init(&semaforo_multiprogramacion, 0, grado_multiprogramacion);     
+
+// SEMAFOROS AUXILIARES 
+
+    sem_init(&cantidad_procesos_new, 0, 0);
+    sem_init(&cantidad_procesos_ready, 0, 0);
+
+//MUTEX PARA MANIPULACION SEGURA DE LISTAS 
+
+    pthread_mutex_init(&semaforo_new, NULL);
+    pthread_mutex_init(&semaforo_ready, NULL);
+	pthread_mutex_init(&semaforo_bloqueado, NULL);
 
 
 
 }
+

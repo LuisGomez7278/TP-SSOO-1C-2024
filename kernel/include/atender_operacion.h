@@ -16,6 +16,7 @@
 #include "extern_globales.h"
 #include "Kernel-Memoria.h"
 #include "servicios_kernel.h"
+#include "planificacion.h"
 
 #ifndef  ATENDER_OPERACION_H
 #define ATENDER_OPERACION_H

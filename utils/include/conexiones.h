@@ -30,13 +30,22 @@ typedef enum{
 	MENSAJE,
     } op_code;
 
-
+/*
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
     INT_NO,
     INT_QUANTUM,
     INT_CONSOLA
 } int_code;
+*/
+typedef enum MOTIVO_DE_DESALOJO
+{
+    FIN_PROCESO,
+    ENTRADA_SALIDA,
+    FIN_QUANTUM,
+    PEDIDO_CONSOLA,
+    OUT_OF_MEMORY_A_KERNEL
+} desalojo_code;
 
 typedef struct
 {
@@ -99,6 +108,8 @@ cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento);
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
 /*----------Fin Serializacion----------*/
+
+/*----------Pruebas funcionamiento----------*/
 void verificar_paquete(void* );
 void imprimir_paquete(t_paquete* paquete);
 #endif //CONEXIONES_TP_H_

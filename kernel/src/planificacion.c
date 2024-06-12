@@ -1,7 +1,96 @@
-//
-// SOLAMENTE FIFO Y RR PARA PRIMER CHECK
-//
+
 #include "../include/planificacion.h"
+
+//////////////////   PLANIFICADOR LARGO PLAZO  /////////////////
+
+
+void ingresar_en_lista(t_pcb* pcb, t_list* lista, char* modulo, pthread_mutex_t* semaforo_mutex, sem_t* semaforo, t_estado estado) {
+	pthread_mutex_lock(semaforo_mutex);
+
+	if (pcb->estado == estado){
+		log_cambiar_estado(pcb->pid, pcb->estado, estado);
+	}
+
+	pcb->estado = estado;
+	list_add(lista, pcb);
+	sem_post(semaforo);
+
+	//log_info(kernel_logger, "Proceso PID:%i ingreso en %s", pcb->pid, modulo);
+
+	if(strcmp(modulo, "READY")==0){
+		char* log_cola_ready = string_new();
+		string_append(&log_cola_ready, "[");
+		for(int i=0; i<list_size(lista); i++){
+			t_pcb* pcb_logueado = list_get(lista, i);
+			char* string_pid = string_itoa(pcb_logueado->pid);
+			string_append(&log_cola_ready, string_pid);
+			free(string_pid);
+			if(i!= (list_size(lista)-1)){
+				string_append(&log_cola_ready, ", ");
+			}
+		}
+		string_append(&log_cola_ready, "]");
+		log_info(logger,"Cola Ready %s : %s",algoritmo_planificacion, log_cola_ready);
+		free(log_cola_ready);
+	}
+    
+    if(strcmp(modulo, "READY_PRIORITARIO")==0){
+		char* log_cola_ready_prioritario = string_new();
+		string_append(&log_cola_ready_prioritario, "[");
+		for(int i=0; i<list_size(lista); i++){
+			t_pcb* pcb_logueado = list_get(lista, i);
+			char* string_pid = string_itoa(pcb_logueado->pid);
+			string_append(&log_cola_ready_prioritario, string_pid);
+			free(string_pid);
+			if(i!= (list_size(lista)-1)){
+				string_append(&log_cola_ready, ", ");
+			}
+		}
+		string_append(&log_cola_ready, "]");
+		log_info(logger,"Cola Ready Prioritario %s : %s",algoritmo_planificacion, log_cola_ready);
+		free(log_cola_ready);
+	}
+pthread_mutex_unlock(semaforo_mutex);
+}
+
+void log_cambiar_estado(int pid, estado_code viejo, estado_code nuevo){
+	log_info(kernel_logger, "PID: %d - Cambio de estado %s -> %s", pid, codigo_estado_string(viejo), codigo_estado_string(nuevo));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void cambiar_grado_multiprogramacion(int nuevo_valor) {                     ////// CON ESTA FUNCION AGREGO O DISMINUYO INSTANCIAS DEL SEMAFORO QUE GESTIONA LA MULTIPROGRAMCION
+    int actual_valor;
+    sem_getvalue(&control_multiprogramacion, &actual_valor);
+    
+    if (nuevo_valor > actual_valor) {
+        // Incrementar el semáforo
+        for (int i = 0; i < nuevo_valor - actual_valor; i++) {
+            sem_post(&control_multiprogramacion);
+        }
+    } else if (nuevo_valor < actual_valor) {
+        // Decrementar el semáforo
+        for (int i = 0; i < actual_valor - nuevo_valor; i++) {
+            sem_wait(&control_multiprogramacion);
+        }
+    }
+}
+
+
+
+
+
+
+
 /*
 void* pcp_planificar(void* args)
 {
