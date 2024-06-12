@@ -1,54 +1,32 @@
 #include "../include/memoriaMain.h"
 
-
 int main(int argc, char* argv[]) {
     
-
-    iniciar_memoria();
-
-
-    //                  LAS CONFIGURACIONES LOS INICIOS DE LOGGER LOS PASE A LA CARPETA INICIO KERNEL
-    //                  LAS DECLARACIONES DE LAS VARIABLES LAS PASE A LAS CARPETAS.H
-    ///                 LA CARPETA EXTERN_GLOBALS.C ES PARA COMPARTIR LAS VARIABLES QUE NECESITAS QUE SE VEAN DE TODAS LAS DEMAS CARPETAS DEL MODULO (AGREGAR EXTERN ANTES)
-    //                  AGREGAR EXTERN ANTES ES PARA QUE EL COMPILADOR NO TOME COMO QUE ESTAR DECLARANDO LA VARIABLE DOS VECES   
-
-
-// INICIALIZO  SERVIDOR DE MEMORIA
+    cargarConfig();
+    //SERVER
+    // INICIALIZO  SERVIDOR DE MEMORIA 
+    /*
     socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
-/*
 
-// ESPERO QUE SE CONECTE CPU
+
+    // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug,"Esperando que se conecte CPU");
-    socket_cpu_memoria_dispatch=esperar_cliente(socket_escucha,logger_debug);
-    socket_cpu_memoria_interrupt=esperar_cliente(socket_escucha,logger_debug);
-*/
-// ESPERO QUE SE CONECTE EL KERNEL
+    socket_cpu_memoria_dispatch = esperar_cliente(socket_escucha,logger_debug);
+    socket_cpu_memoria_interrupt = esperar_cliente(socket_escucha,logger_debug);
+
+    // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug,"Esperando que se concte KERNEL");
-    socket_kernel_memoria=esperar_cliente(socket_escucha,logger_debug);
+    socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
-// CREO HILO ENTRADA-SALIDA Y ADENTRO DEL HILO SOPORTO MULTIPLES CONEXIONES
-        pthread_t hilo_entradaSalida_memoria;
-        pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)atender_conexion_ENTRADASALIDA_MEMORIA,NULL);
-        pthread_detach(hilo_entradaSalida_memoria);
+    // CREO HILO ENTRADA-SALIDA Y ADENTRO DEL HILO SOPORTO MULTIPLES CONEXIONES
+    pthread_t hilo_entradaSalida_memoria;
+    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)atender_conexion_ENTRADASALIDA_MEMORIA,NULL);
+    pthread_detach(hilo_entradaSalida_memoria);
 
-// CREO HILO KERNEL 
-        pthread_t hilo_kernel_memoria;
-        pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
-        pthread_join(hilo_kernel_memoria,NULL);
- 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-     //Pruebas con CPU
-    //enviar mensaje a cpu
-    // enviar_mensaje("MEMORIA manda mensaje a cpu", socket_cpu_memoria);
-    // log_info(logger, "Se envio el primer mensaje a cpu");
-
-    //recibir respuesta de cpu
-    // op_code codop1 = recibir_operacion(socket_cpu_memoria);
-    
-    //if (codop1 == MENSAJE) {log_info(logger, "LLego un mensaje");}
-    //else {log_info(logger, "LLego otra cosa");}
-    //recibir_mensaje(socket_cpu_memoria, logger);
+    // CREO HILO KERNEL 
+    pthread_t hilo_kernel_memoria;
+    pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
+    pthread_detach(hilo_kernel_memoria); */
 
     // uint32_t PID = 1;
     // t_contexto_ejecucion CE;
@@ -68,40 +46,40 @@ int main(int argc, char* argv[]) {
     // enviar_CE(socket_cpu_memoria, PID, CE);
     // log_info(logger, "CE enviado con exito");
     
-    // Test local obtencion de instrucciones
-
-    //char* path_parcial = "test_ins.txt"; //viene de kernel
-    //char* path = path_completo(path_base, path_parcial);
     // log_info(logger, "path de archivo: %s", path);
     
-    //t_list* lista_instrucciones = leer_pseudocodigo(path);
+    //iniciar Server de CPU
+    //socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
+    //socket_cpu_memoria = esperar_cliente(socket_escucha, logger);
+
+    //conexion_con_cpu(socket_cpu_memoria);
     
-    // // Pruebas creacion de lista de instrucciones
-    // t_instruccion* ins0 = get_ins(lista_instrucciones, 0);
-    // t_instruccion* ins2 = get_ins(lista_instrucciones, 2);
-    // t_instruccion* ins4 = get_ins(lista_instrucciones, 4);
-    // t_instruccion* ins5 = get_ins(lista_instrucciones, 5);
-    // log_info(logger, "codigo instruccion 0: %d", ins0->ins);
-    // log_info(logger, "codigo instruccion 2: %d", ins2->ins);
-    // log_info(logger, "codigo instruccion 4: %d", ins4->ins);
-    // log_info(logger, "codigo instruccion 5: %d", ins5->ins);
+    // // PRUEBAS MEMORIA crear proceso, asignar tamaño, escribir y leer.
+    inicializarMem();
 
+    bool a = crear_procesoM(path_base, 1);
 
-    //LAS PRUEBAS DE ENVIO DE MENSAJE Y RECEPCION LA PASE A "Memoria-Kernel.c"
-
-
-    // //Pruebas con entradasalida
-    // //enviar mensaje a entradasalida
-    // enviar_mensaje("MEMORIA manda mensaje a entradasalida", socket_entradasalida_memoria);
-    // log_info(logger, "Se envio el primer mensaje a entradasalida");
-
-    // //recibir respuesta de entradasalida
-    // op_code codop3 = recibir_operacion(socket_entradasalida_memoria);
+    resize(1, 50);
     
-    // if (codop3 == MENSAJE) {log_info(logger, "LLego un mensaje");}
-    // else {log_info(logger, "LLego otra cosa");}
-    // recibir_mensaje(socket_entradasalida_memoria, logger);
+    //resize(1, -40);
+
+    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
+
+    /*if(tpg == NULL){
+        perror("AAA");    
+    }*/
+
+    char* buffer = "Hola mundo, todo bien. LoL";
+
+    bool escribir_bien = escribir_memoria(30, 27, buffer, 1);
+    if(escribir_bien){log_info(logger_debug, "Perfecto");}
+
+    char* leido = leer_memoria(30, 22, 1);
+    
+    if(leido==NULL){perror("Rompio");}
+
+    free(leido);
 
     if (socket_cpu_memoria_dispatch) {liberar_conexion(socket_cpu_memoria_dispatch);}
     if (socket_cpu_memoria_interrupt) {liberar_conexion(socket_cpu_memoria_interrupt);}
@@ -118,7 +96,7 @@ t_list* leer_pseudocodigo(char* path){
     t_instruccion* instr;
 
     if (archivo == NULL) {
-        log_error(logger, "No se pudo abrir archivo de pseudocodigo");
+        log_error(logger_debug, "No se pudo abrir archivo de pseudocodigo");
         return (t_list*) NULL;    
     }
 
@@ -130,7 +108,7 @@ t_list* leer_pseudocodigo(char* path){
         // log_info(logger, "Ins: %d", instr->ins);
         if (!instr) 
         {
-            log_error(logger, "El archivo de pseudocodigo tiene errores/instrucciones invalidas");
+            log_error(logger_debug, "El archivo de pseudocodigo tiene errores/instrucciones invalidas");
             return (t_list* ) NULL;
             break;
         }
@@ -138,7 +116,7 @@ t_list* leer_pseudocodigo(char* path){
     }
 
     fclose(archivo);
-    // log_info(logger, "Archivo pseudocodigo leido, cantidad lineas leidas: [%d]", list_size(lista_instrucciones));
+    log_info(logger_debug, "Archivo pseudocodigo leido, cantidad lineas leidas: [%d]", list_size(lista_instrucciones));
 
     return lista_instrucciones;
 }
@@ -162,7 +140,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case IO_FS_READ:
         if (string_array_size(tokens)!=6)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }
@@ -192,7 +170,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case IO_FS_TRUNCATE:
         if (string_array_size(tokens)!=4)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }
@@ -323,13 +301,13 @@ cod_ins hash_ins(char* ins){
     else return -1;
 }
 
-char* path_completo(char* path_base, char* path_parcial){
-    char* path = string_new();
-    string_append(&path, path_base);
-    string_append(&path, path_parcial);
+// char* path_completo(char* path_base, char* path_parcial){
+    //char* path = string_new();
+    //string_append(&path, path_base);
+    //string_append(&path, path_parcial);
 
-    return path;
-}
+    //return path;
+//}
 
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     t_instruccion* instruccion = malloc(sizeof(t_instruccion*));
@@ -337,51 +315,3 @@ t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     return instruccion;
 }
 
-void conexion_con_cpu(int socket_cpu_memoria, t_list* lista_instrucciones){
-    op_code codigo;
-
-    while(true){
-        codigo = recibir_operacion(socket_cpu_memoria);
-        switch (codigo)
-        {
-        case FETCH:
-            uint32_t PID; //por ahora no hace nada, sera relevante cuando lleguen varios procesos por kernel 
-            uint32_t PC;
-            recibir_fetch(socket_cpu_memoria, &PID, &PC);
-            log_info(logger, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
-
-            t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
-            usleep(retardo);
-            enviar_instruccion(socket_cpu_memoria, sig_ins);
-            log_info(logger, "instruccion enviada");
-            break;
-        
-        default:
-            break;
-        }
-    }
-}
-
-void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC){
-    uint32_t size;
-    int desplazamiento = 0;
-    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
-
-    *PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-    *PC = leer_de_buffer_uint32(buffer, &desplazamiento);
-}
-
-void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
-    t_paquete* paquete = crear_paquete(FETCH);
-    //log_info(logger, "Paquete creado");
-    agregar_a_paquete_cod_ins(paquete, instruccion->ins);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg1) + 1, instruccion->arg1);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg2) + 1, instruccion->arg2);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg3) + 1, instruccion->arg3);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg4) + 1, instruccion->arg4);
-    agregar_a_paquete_string(paquete, strlen(instruccion->arg5) + 1, instruccion->arg5);
-
-    enviar_paquete(paquete, socket_cpu_memoria);
-    //log_info(logger, "Paquete enviado");
-    eliminar_paquete(paquete);
-}

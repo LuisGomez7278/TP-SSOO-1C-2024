@@ -20,6 +20,7 @@ typedef enum{
     CONTEXTO,
 	SIG_INS,
 	FETCH,
+    PROCESO_NO_CARGADO,
 	TAM_PAG,
     CREAR_PROCESO,
     ELIMINAR_PROCESO,
@@ -28,7 +29,7 @@ typedef enum{
     OUT_OF_MEMORY,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
-    } op_code;
+} op_code;
 
 
 typedef enum CODIGOS_DE_INTERRUPCIONES
