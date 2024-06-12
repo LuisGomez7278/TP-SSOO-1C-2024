@@ -439,22 +439,33 @@ void recibir_CE(int socket, uint32_t* PID_contenedor, t_contexto_ejecucion* cont
     free(buffer);
 };
 
-void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo){    
+void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo)
+{    
     paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(cod_ins));
-
 	memcpy(paquete->buffer->stream + paquete->buffer->size, &codigo, sizeof(cod_ins));
-
 	paquete->buffer->size += sizeof(cod_ins);    
-}
+};
 
 cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento)
 {
     cod_ins codigo;
-
     memcpy(&codigo,  buffer + (*desplazamiento), sizeof(cod_ins));
+    (*desplazamiento) += sizeof(cod_ins);    
+    return codigo;
+};
 
-    (*desplazamiento) += sizeof(cod_ins);
-    
+void agregar_a_paquete_int_code(t_paquete* paquete, int_code codigo)
+{    
+    paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(int_code));
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &codigo, sizeof(int_code));
+	paquete->buffer->size += sizeof(int_code);    
+};
+
+int_code leer_de_buffer_int_code(void* buffer, int* desplazamiento)
+{
+    int_code codigo;
+    memcpy(&codigo,  buffer + (*desplazamiento), sizeof(int_code));
+    (*desplazamiento) += sizeof(int_code);    
     return codigo;
 };
 

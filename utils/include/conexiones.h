@@ -29,7 +29,6 @@ typedef enum{
     OUT_OF_MEMORY,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
-    FETCH,
     HANDSHAKE,
     PAQUETE
 } op_code;
@@ -38,7 +37,9 @@ typedef enum{
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
     INT_NO,
+    INT_EXIT,
     INT_QUANTUM,
+    INT_DESALOJO,
     INT_CONSOLA
 } int_code;
 
@@ -98,6 +99,8 @@ uint8_t leer_de_buffer_uint8(void* buffer, int* desplazamiento);
 uint32_t leer_de_buffer_uint32(void* buffer, int* desplazamiento);
 char* leer_de_buffer_string(void* buffer, int* desplazamiento);
 cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento);
+void agregar_a_paquete_int_code(t_paquete* paquete, int_code codigo);
+int_code leer_de_buffer_int_code(void* buffer, int* desplazamiento);
 
 
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);

@@ -1,0 +1,31 @@
+#ifndef CPU_INICIO_H_
+#define CPU_INICIO_H_
+
+#include <commons/log.h>
+#include <commons/config.h>
+#include "../../utils/include/conexiones.h"
+
+extern t_log* logger;
+extern t_config* config;
+
+extern char* ip_memoria;
+extern char* puerto_memoria;
+extern char* puerto_escucha_dispatch;
+extern char* puerto_escucha_interrupt;
+extern int socket_cpu_kernel_dispatch;
+extern int socket_cpu_kernel_interrupt;
+extern int socket_cpu_memoria;
+extern int socket_escucha;
+
+extern int cant_entradas_TLB;
+extern char* algoritmo_TLB;
+
+extern uint32_t PID;
+extern int_code interrupcion;
+extern t_contexto_ejecucion contexto_interno;
+
+void iniciar_CPU(void);
+void iniciar_logs(void);
+void iniciar_config(void);
+
+#endif /*  CPU_INICIO_H_ */
