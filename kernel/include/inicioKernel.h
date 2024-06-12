@@ -1,5 +1,7 @@
+
 #ifndef INICIO_KERNEL_H_
 #define INICIO_KERNEL_H_
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,16 +26,12 @@
 #include "extern_globales.h"
 
 
+
 void iniciar_Kernel(void);
 void iniciar_logs(void);
 void iniciar_configs(void);
 void iniciar_colas_de_estado();
 
-
-t_queue *cola_new;
-t_queue *cola_ready;
-t_queue *cola_exit;
-t_queue *cola_bloqueado;
 
 
 

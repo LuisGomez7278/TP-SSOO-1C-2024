@@ -22,6 +22,10 @@
 #include "extern_globales.h"
 
 
+
+
+
+
 void atender_conexion_ENTRADASALIDA_KERNEL();
 void escuchar_a_ENTRADASALIDA();
 void enviar_a_ENTRADASALIDA();

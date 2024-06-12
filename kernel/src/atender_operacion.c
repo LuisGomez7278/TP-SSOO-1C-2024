@@ -32,7 +32,6 @@ void atender_instruccion_validada(char* leido)
 
 
 void iniciar_proceso(char*leido){
-    char** array_de_comando= string_split (leido, " ");
 
     t_pcb *new_pcb= malloc(sizeof(t_pcb));
     new_pcb->PID=asignar_pid();

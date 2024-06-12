@@ -10,6 +10,7 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
+
 #include "planificacion.h"
 #include "Kernel-CPU-dispatch.h"
 #include "Kernel-CPU-Interrupt.h"
@@ -21,7 +22,11 @@
 
 #include "extern_globales.h"
 
-pthread_t hilo_sts;
+
+
+
+
+
 
     char* ip_memoria;
     char* puerto_memoria;
@@ -31,8 +36,8 @@ pthread_t hilo_sts;
     char* puerto_escucha;
     char* algoritmo_planificacion;
 	int quantum;
-	char** recursos[];
-	char** instancias_recursos[];
+	char** recursos;
+	char** instancias_recursos;
 	int grado_multiprogramacion;
 
 
@@ -45,9 +50,21 @@ pthread_t hilo_sts;
     int socket_entradasalida_kernel;
     int socket_escucha;
 
+
+
     t_log* logger;
     t_log* logger_debug;
     t_config* config;
+
+    t_queue *cola_new;
+    t_queue *cola_ready;
+    t_queue *cola_exit;
+    t_queue *cola_bloqueado;
+
+
+    
+
+
 
 
 #endif //TP_KERNEL_MAIN_H_

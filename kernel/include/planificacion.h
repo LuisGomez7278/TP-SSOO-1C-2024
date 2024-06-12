@@ -1,9 +1,6 @@
-//
-// Created by mathi on 5/20/24.
-//
-
 #ifndef PLANIFICACION_H
 #define PLANIFICACION_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include<commons/log.h>
@@ -23,11 +20,11 @@
 #include "recursos.h"
 
 #include "extern_globales.h"
-
+/*
 typedef  enum {
     FIFO,
     RR,
-    ERROR
+    //ERROR
 } t_algoritmo_planificacion;
 
 sem_t proceso_new;
@@ -55,5 +52,5 @@ t_algoritmo_planificacion determinar_algoritmo();
 t_pcb* modificar_pcb(t_pcb* proceso);
 
 void* cronometrar(void* args);
-
+*/
 #endif //PLANIFICACION_H

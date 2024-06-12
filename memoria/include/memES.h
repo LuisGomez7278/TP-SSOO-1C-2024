@@ -1,5 +1,5 @@
-#ifndef ENTRADAS_Y_SALIDAS_H_
-#define ENTRADAS_Y_SALIDAS_H_
+#ifndef TP_MEMORIA_ES_H_
+#define TP_MEMORIA_ES_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,18 +14,8 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
-#include "extern_globales.h"
+#include "../include/extGlobales.h"
 
 void atender_conexion_ENTRADASALIDA_MEMORIA();
 
-
-
-
-
-
-
-
-
-
-
-#endif /*   ENTRADAS_Y_SALIDAS_H_*/
+#endif //TP_MEMORIA_ES_H_

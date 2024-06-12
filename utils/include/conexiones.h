@@ -20,16 +20,20 @@ typedef enum{
     CONTEXTO,
 	SIG_INS,
 	FETCH,
+    PROCESO_NO_CARGADO,
 	TAM_PAG,
-    CARGAR_PROCESO,
+    CREAR_PROCESO,
     ELIMINAR_PROCESO,
+    CARGA_EXITOSA_PROCESO,
     PAGE_FAULT,
+    OUT_OF_MEMORY,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
     FETCH,
     HANDSHAKE,
     PAQUETE
 } op_code;
+
 
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
@@ -95,9 +99,10 @@ uint32_t leer_de_buffer_uint32(void* buffer, int* desplazamiento);
 char* leer_de_buffer_string(void* buffer, int* desplazamiento);
 cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento);
 
+
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
 /*----------Fin Serializacion----------*/
-
-
+void verificar_paquete(void* );
+void imprimir_paquete(t_paquete* paquete);
 #endif //CONEXIONES_TP_H_

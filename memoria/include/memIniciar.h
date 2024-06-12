@@ -1,6 +1,5 @@
-#ifndef MEMORIA_KERNEL_H_
-#define MEMORIA_KERNEL_H_
-
+#ifndef TP_MEMORIA_INICIAR_H_
+#define TP_MEMORIA_INICIAR_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,25 +11,12 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include <string.h>
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
-#include "extern_globales.h"
+#include "extGlobales.h"
 
-void atender_conexion_KERNEL_MEMORIA();
+void cargarConfig();
+void inicializarMem();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif /*  MEMORIA_KERNEL_H_ */
+#endif //TP_MEMORIA_INICIAR_H_

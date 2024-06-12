@@ -1,7 +1,6 @@
 #ifndef KERNEL_MEMORIA_H_
 #define KERNEL_MEMORIA_H_
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include<commons/log.h>
@@ -22,9 +21,14 @@
 #include "extern_globales.h"
 
 
+
+
+
+
+
  void atender_conexion_MEMORIA_KERNELL();
-
-
+void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
+void carga_exitosa_en_memoria();
 
 
 

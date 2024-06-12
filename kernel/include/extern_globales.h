@@ -19,6 +19,10 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
+
+
+
+
 extern char* ip_memoria;
 extern char* puerto_memoria;
 extern char* ip_cpu;
@@ -27,8 +31,8 @@ extern char* puerto_cpu_interrupt;
 extern char* puerto_escucha;
 extern char* algoritmo_planificacion;
 extern int quantum;
-extern char** recursos[];
-extern char** instancias_recursos[];
+extern char** recursos;
+extern char** instancias_recursos;
 extern int grado_multiprogramacion;
 
 
@@ -62,4 +66,4 @@ extern t_queue *cola_bloqueado;
 
 
 
-#endif /*  VARIABLES_GLOBALES */
+#endif /*  VARIABLES_GLOBALES_H_ */
