@@ -71,7 +71,8 @@ void crear_proceso_solicitado_por_kernel(){  ///PID Y PATH PARCIAL SON LOS QUE S
 
         log_info(logger_debug,"LLEGO UN PROCESO PARA CARGAR: PID= %u  direccion= %s  ",PID,path_parcial);
         
-        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);
+        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);                      /////// FUERZO LA RESPUESTA CARGA EXITOSA, LUEGO ESTA LINEA HAY QUE SACARLA
+                                                                                                //  Y LLAMAR A LA FUNCION "contestar_a_kernel_carga_proceso"DONDE CORRESPONDA
 
         free(sizeTotal);
         free(desplazamiento);

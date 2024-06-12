@@ -25,8 +25,12 @@
             case CARGA_EXITOSA_PROCESO:
                 carga_exitosa_en_memoria();
                 break;
+            case PAGE_FAULT:
+            case OUT_OF_MEMORY:
+                 log_error(logger_debug,"Page fault || out of memory falta implementar");
+                 break;
             case -1:
-                log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
+                log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO. Terminando servidor");
                 continuarIterando=0;
                 break;
             default:
@@ -74,7 +78,7 @@ void carga_exitosa_en_memoria(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA 
    // verificar_paquete(buffer);
 
     if (buffer != NULL) {
-        uint32_t tam_buffer=leer_de_buffer_uint32(buffer,desplazamiento);
+        uint32_t tam_buffer=*sizeTotal;
         uint32_t PID= leer_de_buffer_uint32(buffer,desplazamiento);
         
 
