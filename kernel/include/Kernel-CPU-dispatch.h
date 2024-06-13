@@ -21,7 +21,7 @@
 
 #include "extern_globales.h"
 
-void atender_conexion_CPU_DISPATCH_KERNEL ();
+//void atender_conexion_CPU_DISPATCH_KERNEL ();
 
 
 

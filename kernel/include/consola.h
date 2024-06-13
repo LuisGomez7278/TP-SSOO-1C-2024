@@ -16,7 +16,7 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-#include "atender_operacion.h"
+
 #include "extern_globales.h"
 
 
@@ -25,8 +25,8 @@
 #define TPANUAL_CONSOLA_H
 
 
-bool validacion_de_ingreso_por_consola (char* leido);
-void iniciar_consola_interactiva();
+//bool validacion_de_ingreso_por_consola (char* leido);
+//void iniciar_consola_interactiva();
 
 
 

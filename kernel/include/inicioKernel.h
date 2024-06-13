@@ -19,7 +19,6 @@
 
 
 
-#include "atender_operacion.h"
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
@@ -38,10 +37,7 @@ pthread_mutex_t semaforo_bloqueado;
 
 
 
-void iniciar_Kernel(void);
-void iniciar_logs(void);
-void iniciar_configs(void);
-void iniciar_estructuras_planificacion();
+
 
 
 

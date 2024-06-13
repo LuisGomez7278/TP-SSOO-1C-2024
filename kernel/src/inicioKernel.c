@@ -5,7 +5,7 @@ void iniciar_Kernel(){
     iniciar_logs();
 	iniciar_configs();
 	//imprimir_configs();
-	iniciar_colas_de_estado();
+	iniciar_estructuras_planificacion();
 
 
 }
@@ -21,7 +21,7 @@ void iniciar_logs()
 		perror("No se pudo crear el logger");
 		exit(EXIT_FAILURE);
 	}
-	logger_debug= log_create("kernel_DB.log", "KERNEL_DB_LOG", true, LOG_LEVEL_TRACE);
+	logger_debug= log_create("log_kernel_debug.log", "KERNEL_DB_LOG", true, LOG_LEVEL_TRACE);
 	if(logger_debug==NULL){
 		perror("No se pudo crear el logger debug");
 		exit(EXIT_FAILURE);
@@ -61,7 +61,7 @@ void iniciar_estructuras_planificacion(){
 
 //SEMAFORO MULTIPROGRAMACION
 
-    sem_init(&semaforo_multiprogramacion, 0, grado_multiprogramacion);     
+    sem_init(&control_multiprogramacion, 0, grado_multiprogramacion);     
 
 // SEMAFOROS AUXILIARES 
 
@@ -73,7 +73,8 @@ void iniciar_estructuras_planificacion(){
     pthread_mutex_init(&semaforo_new, NULL);
     pthread_mutex_init(&semaforo_ready, NULL);
 	pthread_mutex_init(&semaforo_bloqueado, NULL);
-
+//mutex asignacion pid
+	pthread_mutex_init(&mutex_pid, NULL);
 
 
 }

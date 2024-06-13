@@ -56,6 +56,7 @@ extern t_list *lista_new;
 extern t_list *lista_ready;
 extern t_list *lista_exit;
 extern t_list *lista_bloqueado;
+extern t_list *lista_ready_prioridad;
 
 
 extern sem_t control_multiprogramacion;
@@ -66,9 +67,43 @@ extern pthread_mutex_t semaforo_new;
 extern pthread_mutex_t semaforo_ready;
 extern pthread_mutex_t semaforo_bloqueado;
 
+extern uint32_t identificador_PID;
+extern pthread_mutex_t mutex_pid;
 
 
+//atender_operacion.h:
+void atender_instruccion_validada(char* leido);
+void iniciar_proceso(char*leido);
 
+//planificacion.h
+void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo);
+void ingresar_en_lista(t_pcb* pcb, t_list* lista,  pthread_mutex_t* semaforo_mutex, sem_t* semaforo_contador, t_estado estado);
+void cambiar_grado_multiprogramacion(int nuevo_valor);
+
+//kernel-cpu-dispatch
+void atender_conexion_CPU_DISPATCH_KERNEL ();
+
+//inicio kernel
+void iniciar_Kernel(void);
+void iniciar_logs(void);
+void iniciar_configs(void);
+void iniciar_estructuras_planificacion();
+
+//consola.h
+bool validacion_de_ingreso_por_consola (char* leido);
+void iniciar_consola_interactiva();
+
+//Kernel-EntradaSalida.h
+void atender_conexion_ENTRADASALIDA_KERNEL();
+void escuchar_a_ENTRADASALIDA();
+
+//kernel-Memoria.h
+void atender_conexion_MEMORIA_KERNELL();
+void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
+void carga_exitosa_en_memoria();
+t_pcb* buscar_pcb_por_PID(t_list* lista, uint32_t pid_buscado);
+//servicios_kernel
+uint32_t asignar_pid();
 
 
 

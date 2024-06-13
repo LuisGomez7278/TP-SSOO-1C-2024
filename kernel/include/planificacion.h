@@ -17,7 +17,8 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
-#include "recursos.h"
+
+//#include "recursos.h"
 
 #include "extern_globales.h"
 
@@ -31,9 +32,9 @@
 
 
 
-
-void ingresar_en_lista(t_pcb* pcb, t_list* lista, char* modulo, pthread_mutex_t* semaforo_mutex, sem_t* semaforo, estado_code estado);
-void cambiar_grado_multiprogramacion(int nuevo_valor);
+//void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo);
+//void ingresar_en_lista(t_pcb* pcb, t_list* lista, char* modulo, pthread_mutex_t* semaforo_mutex, sem_t* semaforo_contador, t_estado estado);
+//void cambiar_grado_multiprogramacion(int nuevo_valor);
 
 
 

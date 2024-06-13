@@ -11,13 +11,13 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-#include "planificacion.h"
-#include "Kernel-CPU-dispatch.h"
-#include "Kernel-CPU-Interrupt.h"
-#include "Kernel-EntradaSalida.h"
-#include "Kernel-Memoria.h"
-#include "inicioKernel.h"
-#include "consola.h"
+//#include "planificacion.h"
+//#include "Kernel-CPU-dispatch.h"
+//#include "Kernel-CPU-Interrupt.h"
+//#include "Kernel-EntradaSalida.h"
+//#include "Kernel-Memoria.h"
+//#include "inicioKernel.h"
+//#include "consola.h"
 
 
 #include "extern_globales.h"
@@ -60,7 +60,7 @@
     t_list *lista_ready;
     t_list *lista_exit;
     t_list *lista_bloqueado;
-    
+    t_list *lista_ready_prioridad;
 
     
 

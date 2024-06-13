@@ -51,9 +51,9 @@ void iniciar_proceso(char*leido){
 
     
 
-    ingresar_en_lista(new_pcb, lista_new, char* modulo, semaforo_new, sem_t* semaforo, NUEVO);
-    sem_wait(&control_multiprogramacion);
+    ingresar_en_lista(new_pcb, lista_new, &semaforo_new, &cantidad_procesos_new , NUEVO); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
     
+    sem_wait(&control_multiprogramacion);           ///solicito a memoria solo si la multiprogramacion lo permite para cambiar la multiprogramacion hay una funcion creada
     
     solicitud_de_creacion_proceso_a_memoria(new_pcb->PID,leido);
 

@@ -26,13 +26,7 @@
 
 
 
-void atender_conexion_ENTRADASALIDA_KERNEL();
-void escuchar_a_ENTRADASALIDA();
-void enviar_a_ENTRADASALIDA();
 
-void atender_conexion_ENTRADASALIDA_KERNEL();
-void enviar_a_ENTRADASALIDA();
-void escuchar_a_ENTRADASALIDA();
 
 
 
