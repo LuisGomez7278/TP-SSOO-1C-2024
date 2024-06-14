@@ -1,6 +1,8 @@
 #include "../include/Kernel-CPU-dispatch.h"
     
 void atender_conexion_CPU_DISPATCH_KERNEL (){
+    log_info(logger, "Inicio conexion entre CPU y Kernel por dispatch");
+
     op_code codigo;
 
     uint32_t size;
@@ -22,6 +24,7 @@ void atender_conexion_CPU_DISPATCH_KERNEL (){
             log_info(logger, "CE.AX: %d", CE.AX);
             log_info(logger, "Se envia peticion a IO, codigo: %d", codigo);
             paquete = crear_paquete(codigo);
+            agregar_a_paquete_uint32(paquete, PID);
             agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);
             enviar_paquete(paquete, socket_entradasalida_kernel);
             eliminar_paquete(paquete);

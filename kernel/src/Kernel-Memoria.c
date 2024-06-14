@@ -1,7 +1,7 @@
 #include "../include/Kernel-Memoria.h"
 
 
-    void atender_conexion_MEMORIA_KERNELL(){
+void atender_conexion_MEMORIA_KERNEL(){
 
 //RECIBIR MENSAJE DE MEMORIA
     op_code codop = recibir_operacion(socket_memoria_kernel);

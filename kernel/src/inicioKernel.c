@@ -58,8 +58,4 @@ void iniciar_colas_de_estado(){
 	cola_exit = queue_create();
 	cola_bloqueado= queue_create();
 
-
-
-
-
 }
