@@ -57,6 +57,8 @@ free(estado_nuevo_string);
 pthread_mutex_unlock(semaforo_mutex);
 }
 
+
+
 void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo){
     	log_info(logger, "PID: %d - Cambio de estado %s -> %s", pid, codigo_estado_string(viejo), codigo_estado_string(nuevo));
 }
@@ -65,36 +67,141 @@ void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo){
 
 
 
-void cambiar_grado_multiprogramacion(int nuevo_valor) {                     ////// CON ESTA FUNCION AGREGO O DISMINUYO INSTANCIAS DEL SEMAFORO QUE GESTIONA LA MULTIPROGRAMCION
-    int actual_valor;
+void cambiar_grado_multiprogramacion(int nuevo_valor) {                         // CON ESTA FUNCION AGREGO O DISMINUYO INSTANCIAS DEL SEMAFORO QUE GESTIONA LA MULTIPROGRAMCION 
+    int actual_valor;                                                           // SIN PERDER LA INFORMACION DE LOS QUE YA ESTAN EN LA COLA DE WAIT
     sem_getvalue(&control_multiprogramacion, &actual_valor);
     
     if (nuevo_valor > actual_valor) {
         // Incrementar el semáforo
         for (int i = 0; i < nuevo_valor - actual_valor; i++) {
-            sem_post(&control_multiprogramacion);
+            sem_post(&control_multiprogramacion);                   //Suma instancias al semaforo
         }
     } else if (nuevo_valor < actual_valor) {
         // Decrementar el semáforo
         for (int i = 0; i < actual_valor - nuevo_valor; i++) {
-            sem_wait(&control_multiprogramacion);
+            sem_wait(&control_multiprogramacion);                   //Resta instancias al semaforo
         }
     }
 }
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        /////////////////////////////////////////////////////       PLANIFICADOR CORTO PLAZO               //////////////////////////////////////////////////////////////
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
-/////////////////////////////////////////////////////PLANIFICADOR CORTO PLAZO /////////////////////////////
 
-//uint32_t tiempo_actual(){
-	/*en milisegundos*/
-    /*
-	struct timeval hora_actual;
-	gettimeofday(&hora_actual, NULL);
-	uint32_t tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000);
-	return tiempo;
+
+
+void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* serializado_para_IO){ //esta funcion va con un while(1) abajo del recibe
+    int cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
+    
+    if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL)
+    {
+        tiempo_ejecucion= temporal_gettime(temporizador); //esto hay que ponerlo 
+        temporal_destroy(temporizador);
+        pthread_cancel(hilo_de_desalojo_por_quantum);
+    }
+
+
+    switch (motivo_desalojo)
+    {
+    case PAGE_FAULT: 
+        
+        break;
+    case OUT_OF_MEMORY:
+        
+        break;
+    case MENSAJE:
+        
+        break;
+    case DESALOJO_POR_WAIT:
+         
+        break;
+    case DESALOJO_POR_SIGNAL:
+        
+        break;
+    case DESALOJO_POR_QUANTUM:
+        
+        break;
+    case DESALOJO_POR_FIN_PROCESO:
+        
+        break;
+    case DESALOJO_POR_CONSOLA:
+        
+        break;
+    case DESALOJO_POR_IO_GEN_SLEEP:
+                              
+    case DESALOJO_POR_IO_STDIN:        
+    case DESALOJO_POR_IO_STDOUT:
+    case DESALOJO_POR_IO_FS_CREATE:
+    case DESALOJO_POR_IO_FS_DELETE:
+    case DESALOJO_POR_IO_FS_TRUNCATE:
+    case DESALOJO_POR_IO_FS_WRITE:
+    case DESALOJO_POR_IO_FS_READ:
+        break;        
+
+    default:
+        break;
+    }
+	
+	
+	
 }
-*/
+
+void enviar_proceso_a_ejecucion ()
+{
+sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
+    
+    if (list_size(lista_ready_prioridad)>0)
+    {   
+        pthread_mutex_lock(&semaforo_ready_prioridad);
+        t_pcb* pcb_a_ejecutar = list_remove(lista_ready_prioridad, 0);
+        pthread_mutex_unlock(&semaforo_ready_prioridad);
+    }
+    else{
+        pthread_mutex_lock(&semaforo_ready);
+        t_pcb* pcb_a_ejecutar = list_remove(lista_ready, 0);
+        pthread_mutex_unlock(&semaforo_ready);
+    
+    }
+
+    if(strcmp(algoritmo_planificacion,"VRR")==0 || strcmp(algoritmo_planificacion,"RR")==0){       //CREO HILO DE DESALOJO SI CORRESPONDIERA
+                
+        pthread_create(&hilo_de_desalojo_por_quantum,NULL,(void*) controlador_de_QUANTUM,NULL);
+        pthread_detach(hilo_de_desalojo_por_quantum);  
+    }
+    
+
+}
+
+
+void controlador_de_QUANTUM()
+{
+    t_temporal * temporizador= temporal_create();
+    usleep(quantum *1000);
+    void *interrupcion = (void *)(intptr_t)INT_QUANTUM;
+    send(socket_kernel_cpu_interrupt,interrupcion,sizeof(int_code),0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 void* pcp_planificar(void* args)
 {

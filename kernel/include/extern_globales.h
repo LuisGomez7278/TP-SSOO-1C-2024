@@ -62,9 +62,13 @@ extern t_list *lista_ready_prioridad;
 extern sem_t control_multiprogramacion;
 extern sem_t cantidad_procesos_new;
 extern sem_t cantidad_procesos_ready;
+extern sem_t cantidad_procesos_ready_prioritario;
+extern sem_t cantidad_procesos_en_algun_ready;
 
 extern pthread_mutex_t semaforo_new;
 extern pthread_mutex_t semaforo_ready;
+extern pthread_mutex_t semaforo_ready_prioridad;
+
 extern pthread_mutex_t semaforo_bloqueado;
 
 extern uint32_t identificador_PID;

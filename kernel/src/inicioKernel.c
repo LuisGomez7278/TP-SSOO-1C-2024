@@ -55,6 +55,7 @@ void iniciar_estructuras_planificacion(){
 
     lista_new = list_create();
 	lista_ready = list_create();
+	lista_ready_prioridad = list_create();
 	lista_exit = list_create();
 	lista_bloqueado= list_create();
 
@@ -67,12 +68,17 @@ void iniciar_estructuras_planificacion(){
 
     sem_init(&cantidad_procesos_new, 0, 0);
     sem_init(&cantidad_procesos_ready, 0, 0);
+    sem_init(&cantidad_procesos_ready_prioritario, 0, 0);
+	sem_init(&cantidad_procesos_en_algun_ready, 0, 0);
+
+	
 
 //MUTEX PARA MANIPULACION SEGURA DE LISTAS 
 
     pthread_mutex_init(&semaforo_new, NULL);
     pthread_mutex_init(&semaforo_ready, NULL);
 	pthread_mutex_init(&semaforo_bloqueado, NULL);
+	pthread_mutex_init(&semaforo_ready_prioridad, NULL);
 //mutex asignacion pid
 	pthread_mutex_init(&mutex_pid, NULL);
 

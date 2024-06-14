@@ -13,10 +13,6 @@
 #include <pthread.h>
 
 
-
-
-
-
 typedef enum instrucciones
 {
 	SET,

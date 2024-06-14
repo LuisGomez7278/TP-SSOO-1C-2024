@@ -16,10 +16,12 @@
 /*----------Estructuras----------*/
 
 // ---------- CÓDIGOS DE OPERACIÓN ---------- //
+
 typedef enum{
     CONTEXTO,
 	SIG_INS,
 	FETCH,
+    PROCESO_NO_CARGADO,
 	TAM_PAG,
     CREAR_PROCESO,
     ELIMINAR_PROCESO,
@@ -28,24 +30,32 @@ typedef enum{
     OUT_OF_MEMORY,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
-    } op_code;
+    HANDSHAKE,
+    PAQUETE,
+    DESALOJO_POR_WAIT,
+    DESALOJO_POR_SIGNAL,
+    DESALOJO_POR_QUANTUM,
+    DESALOJO_POR_FIN_PROCESO,
+    DESALOJO_POR_CONSOLA,    
+    DESALOJO_POR_IO_GEN_SLEEP,
+    DESALOJO_POR_IO_STDIN,
+    DESALOJO_POR_IO_STDOUT,
+    DESALOJO_POR_IO_FS_CREATE,
+    DESALOJO_POR_IO_FS_DELETE,
+    DESALOJO_POR_IO_FS_TRUNCATE,
+    DESALOJO_POR_IO_FS_WRITE,
+    DESALOJO_POR_IO_FS_READ
+} op_code;
 
-/*
+
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
     INT_NO,
+    INT_EXIT,
     INT_QUANTUM,
+    INT_DESALOJO,
     INT_CONSOLA
 } int_code;
-*/
-typedef enum MOTIVO_DE_DESALOJO
-{
-    FIN_PROCESO,
-    ENTRADA_SALIDA,
-    FIN_QUANTUM,
-    PEDIDO_CONSOLA,
-    OUT_OF_MEMORY_A_KERNEL
-} desalojo_code;
 
 typedef struct
 {

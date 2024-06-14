@@ -69,7 +69,9 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
 
 }
 
-void carga_exitosa_en_memoria(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA CARGAR EL PROCESO
+void carga_exitosa_en_memoria(){  
+
+//RECIBO EL PROCESO QUE CARGO EN MEMORIA
 
     uint32_t *sizeTotal=malloc(sizeof(uint32_t));
     int *desplazamiento=malloc(sizeof(int));
@@ -92,7 +94,9 @@ void carga_exitosa_en_memoria(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA 
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-/// Como ya chequee la multiprogramacion antes de enviar al proceso a cargar a memoria:
+
+//GESTIONO LAS LISTAS DE ESTADO    ------    Como ya chequee la multiprogramacion antes de enviar al proceso a cargar a memoria hago el cambio de listas:
+    
     t_pcb *pcb_ready= buscar_pcb_por_PID(lista_new,PID);
 
     if(pcb_ready==NULL){
@@ -104,7 +108,6 @@ void carga_exitosa_en_memoria(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA 
         ingresar_en_lista(pcb_ready, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
 
     }
-
 
 
 }
