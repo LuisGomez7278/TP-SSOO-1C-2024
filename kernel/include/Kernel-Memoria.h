@@ -18,25 +18,14 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-#include "extern_globales.h"
+extern int socket_memoria_kernel;
+ 
+extern t_log* logger;
+extern t_log* logger_debug;
+extern t_config* config;
 
-
-
-
-
-
-
- void atender_conexion_MEMORIA_KERNELL();
+void atender_conexion_MEMORIA_KERNEL();
 void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
 void carga_exitosa_en_memoria();
-
-
-
-
-
-
-
-
-
 
 #endif /*  KERNEL_MEMORIA_H_ */

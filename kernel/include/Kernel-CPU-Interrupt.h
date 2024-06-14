@@ -19,21 +19,8 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-#include "extern_globales.h"
-
-
-
-
 
 void atender_conexion_CPU_INTERRUPT_KERNEL();
-
-
-
-
-
-
-
-
 
 
 #endif /*  KERNEL_CPU_INTERRUPT_H_ */

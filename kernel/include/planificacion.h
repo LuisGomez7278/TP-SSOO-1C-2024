@@ -19,7 +19,6 @@
 #include "../../utils/include/conexiones.h"
 #include "recursos.h"
 
-#include "extern_globales.h"
 /*
 typedef  enum {
     FIFO,
