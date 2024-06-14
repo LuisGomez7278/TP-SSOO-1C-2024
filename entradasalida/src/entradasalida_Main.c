@@ -2,14 +2,6 @@
 
 int main(int argc, char* argv[]) {
 
-    char* ip_kernel;
-    char* puerto_kernel;
-    char* ip_memoria;
-    char* puerto_memoria;
-
-    int socket_entradasalida_memoria;
-    int socket_entradasalida_kernel;
-
     decir_hola("una Interfaz de Entrada/Salida");
 
 
