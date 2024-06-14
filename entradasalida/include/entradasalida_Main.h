@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
+#include "entradasalida_var_globales.h"
 #include "entradasalida_inicio.h"
 #include "entradasalida-memoria.h"
 #include "entradasalida-kernel.h"

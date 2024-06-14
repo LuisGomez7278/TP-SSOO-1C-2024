@@ -34,22 +34,22 @@ void iniciar_config(void){
     PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
     log_info(logger, "PUERTO MEMORIA leido: %s", PUERTO_MEMORIA);
     
-    TIPO_INTERFAZ = config_get_int_value(config, "TIPO_INTERFAZ");
-    log_info(logger, "TIPO INTERFAZ  leido: %d", TIPO_INTERFAZ);
+    TIPO_INTERFAZ = config_get_string_value(config, "TIPO_INTERFAZ");
+    log_info(logger, "TIPO INTERFAZ  leido: %s", TIPO_INTERFAZ);
 
     TIEMPO_UNIDAD_TRABAJO = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
-    log_info(logger, "TIEMPO UNIDAD TRABAJO leido: %s", TIEMPO_UNIDAD_TRABAJO);
+    log_info(logger, "TIEMPO UNIDAD TRABAJO leido: %d", TIEMPO_UNIDAD_TRABAJO);
 
     PATH_BASE_DIALFS = config_get_string_value(config, "PATH_BASE_DIALFS");
     log_info(logger, "PATH BASE DIALFS leido: %s", PATH_BASE_DIALFS);
 
     BLOCK_SIZE = config_get_int_value(config, "BLOCK_SIZE");
-    log_info(logger, "BLOCK SIZE leido: %s", BLOCK_SIZE);
+    log_info(logger, "BLOCK SIZE leido: %d", BLOCK_SIZE);
 
     BLOCK_COUNT = config_get_int_value(config, "BLOCK_COUNT");
-    log_info(logger, "BLOCK COUNT leido: %s", BLOCK_COUNT);
+    log_info(logger, "BLOCK COUNT leido: %d", BLOCK_COUNT);
 
     RETRASO_COMPACTACION = config_get_int_value(config, "RETRASO_COMPACTACION");
-    log_info(logger, "RETRASO COMPACTACION leido: %s", RETRASO_COMPACTACION);
+    log_info(logger, "RETRASO COMPACTACION leido: %d", RETRASO_COMPACTACION);
 
 }
