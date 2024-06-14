@@ -22,6 +22,7 @@ typedef enum{
 	FETCH,
     PROCESO_NO_CARGADO,
 	TAM_PAG,
+    TLB_MISS, // aviso para cpu: si llega -1 es que la pag no tiene asignado ningun marco 
     CREAR_PROCESO,
     ELIMINAR_PROCESO,
     CARGA_EXITOSA_PROCESO,
@@ -29,6 +30,12 @@ typedef enum{
     OUT_OF_MEMORY,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
+    MOV_OUT,
+    MOV_IN,
+    COPY_STRING,
+    RESIZE,
+    OK,
+    FALLO
 } op_code;
 
 

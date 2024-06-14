@@ -41,14 +41,18 @@ tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int marco_a
 
 int asignar_marco(uint32_t PID, int numero_pagina);
 void liberar_frames(t_list* paginas);
+uint32_t encontrar_frame(uint32_t PID, uint32_t pagina);
 int obtener_marco(int direccion_fisica);
 int obtener_desplazamiento(int direccion_fisica);
 
-void resize(uint32_t PID, int size);
-void añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, uint32_t PID);
+bool resize(uint32_t PID, int size);
+bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, uint32_t PID);
 void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas);
 
-bool escribir_memoria(int direccion_fisica, int bytes, char* valor, uint32_t PID);
+bool escribir_memoria(int direccion_fisica, uint8_t bytes, char* valor, uint32_t PID);
+bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID);
+
+uint32_t leer_memoria_uint32_t(int direccion_fisica, uint8_t bytes, uint32_t PID);
 char* leer_memoria(int direccion_fisica, int bytes, uint32_t PID);
 
 #endif //TP_MEMORIA_PAGINACION_H_

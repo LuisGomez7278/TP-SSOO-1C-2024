@@ -21,5 +21,9 @@ void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion);
 void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC);
 void fetch(int socket_cpu_memoria);
 void conexion_con_cpu(int socket_cpu_memoria);
+void frame(int socket_cpu_memoria);
+void movIn(int socket_cpu_memoria);
+void movOut(int socket_cpu_memoria);
+void copiar_string(int socket_cpu_memoria);
 
 #endif //TP_MEMORIA_CPU_H_
