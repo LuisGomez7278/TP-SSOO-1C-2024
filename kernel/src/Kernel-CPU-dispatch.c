@@ -1,6 +1,6 @@
 #include "../include/Kernel-CPU-dispatch.h"
     
-void atender_conexion_CPU_DISPATCH_KERNEL (){
+void atender_conexion_CPU_DISPATCH_KERNEL(){
     log_info(logger, "Inicio conexion entre CPU y Kernel por dispatch");
 
     op_code codigo;

@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
  
     socket_entradasalida_kernel = esperar_cliente(socket_escucha, logger);
 
-    void atender_conexion_CPU_DISPATCH_KERNEL();
+    atender_conexion_CPU_DISPATCH_KERNEL();
 
 
 
