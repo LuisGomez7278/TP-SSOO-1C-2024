@@ -53,7 +53,6 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 		log_info(logger,"Cola Ready Prioritario %s : %s",algoritmo_planificacion, log_cola_ready_prioritario);
 		free(log_cola_ready_prioritario);
 	}
-free(estado_nuevo_string);    
 pthread_mutex_unlock(semaforo_mutex);
 }
 
@@ -105,9 +104,9 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
         temporal_destroy(temporizador);
         pthread_cancel(hilo_de_desalojo_por_quantum);
     }
+    
 
-
-    switch (motivo_desalojo)
+    switch (cod_op)
     {
     case PAGE_FAULT: 
         
@@ -152,39 +151,53 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
 	
 }
 
-void enviar_proceso_a_ejecucion ()
+void enviar_proceso_a_ejecucion ()              ///   
 {
-sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
-    
+sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
+    t_pcb* pcb_a_ejecutar;
+
     if (list_size(lista_ready_prioridad)>0)
     {   
         pthread_mutex_lock(&semaforo_ready_prioridad);
-        t_pcb* pcb_a_ejecutar = list_remove(lista_ready_prioridad, 0);
+        pcb_a_ejecutar = list_remove(lista_ready_prioridad, 0);
         pthread_mutex_unlock(&semaforo_ready_prioridad);
     }
     else{
         pthread_mutex_lock(&semaforo_ready);
-        t_pcb* pcb_a_ejecutar = list_remove(lista_ready, 0);
+        pcb_a_ejecutar = list_remove(lista_ready, 0);
         pthread_mutex_unlock(&semaforo_ready);
     
     }
-
-    if(strcmp(algoritmo_planificacion,"VRR")==0 || strcmp(algoritmo_planificacion,"RR")==0){       //CREO HILO DE DESALOJO SI CORRESPONDIERA
-                
-        pthread_create(&hilo_de_desalojo_por_quantum,NULL,(void*) controlador_de_QUANTUM,NULL);
-        pthread_detach(hilo_de_desalojo_por_quantum);  
-    }
     
+    if(strcmp(algoritmo_planificacion,"VRR")==0 || strcmp(algoritmo_planificacion,"RR")==0){       //CREO HILO DE DESALOJO SI CORRESPONDIERA
+        int* quantum_ptr = malloc(sizeof(int));                                                    //LA UNICA DIFERENCIA ENTRE EL FIFO Y EL RR ES EL DESALOJO POR QUANTUM
+        if (quantum_ptr == NULL) {
+            perror("malloc");
+            return;
+        }
+        *quantum_ptr = pcb_a_ejecutar->quantum_restante;
 
+        pthread_t hilo_de_desalojo_por_quantum;                
+        pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, quantum_ptr); 
+        pthread_detach(hilo_de_desalojo_por_quantum);
+    }
+
+
+    enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);     
+    sem_post(&cantidad_procesos_en_algun_ready);
 }
 
 
-void controlador_de_QUANTUM()
+void interruptor_de_QUANTUM(void* quantum_de_pcb)
 {
-    t_temporal * temporizador= temporal_create();
-    usleep(quantum *1000);
+    int quantumRestante = *((int*)quantum_de_pcb);
+    temporizador= temporal_create();
+    int quantum_ejecucion=(quantum*1000)-quantumRestante;
+    log_trace(logger_debug,"El tiempo de espera registrado es %d",quantum_ejecucion);
+    usleep(quantum_ejecucion);
     void *interrupcion = (void *)(intptr_t)INT_QUANTUM;
     send(socket_kernel_cpu_interrupt,interrupcion,sizeof(int_code),0);
+    free(quantum_de_pcb);
 }
 
 
@@ -196,128 +209,3 @@ void controlador_de_QUANTUM()
 
 
 
-
-
-
-
-
-
-/*
-void* pcp_planificar(void* args)
-{
-
-    algoritmo_utilizado = determinar_algoritmo();
-
-
-    switch (algoritmo_utilizado)
-    {
-        case FIFO:
-
-            planificador_corto_plazo = list_create();
-            while (1)
-            {
-                planificar_fifo();
-                //enviar_CE(socket_kernel_cpu_dispatch,  contexto_actual, CE);
-                enviar_CE(socket_kernel_cpu_dispatch, CE, contexto_actual);
-
-                recibir_CE(socket_kernel_cpu_dispatch, CE, contexto_actual);
-                log_info(logger, "Contexto de ejecución recibido de CPU");
-                modificar_pcb(proceso_actual);
-
-                //operar_desalojo(proceso_actual);
-            }
-            break;
-
-        case RR:
-
-            planificador_corto_plazo = list_create();
-            int64_t quantum = config_get_int_value(config, "QUANTUM");
-            pthread_t hilo_cronometro;
-
-            while (1)
-            {
-                planificar_rr();
-                pthread_create(&hilo_cronometro, NULL, cronometrar, &quantum);
-                enviar_CE(conexion_CPU_DISPATCH, CE, contexto_actual);
-
-                recibir_CE(conexion_CPU_DISPATCH, CE, contexto_actual);
-                log_info(logger, "Contexto de ejecución recibido de CPU");
-                modificar_pcb(proceso_actual);
-
-                //operar_desalojo(proceso_actual);
-
-                pthread_cancel(hilo_cronometro);
-            }
-            break;
-
-        default:
-            break;
-    }
-}
-
-void planificar_fifo(){
-    sem_wait(&controlador_pcp);
-    proceso_actual = list_remove(planificador_corto_plazo, 0);
-    cambiar_estado(proceso_actual, EJECUCION);
-    log_info(logger, "Proceso %d cambia de estado a EJECUCION", proceso_actual->PID);
-    contexto_actual = *obtener_contexto_ejecucion(proceso_actual);
-    log_info(logger, "Contexto de ejecución del proceso %d enviado a CPU", proceso_actual->PID);
-
-}
-
-t_contexto_ejecucion* obtener_contexto_ejecucion(t_pcb* proceso){
-    t_contexto_ejecucion* auxiliar;
-    auxiliar-> PC = proceso->CE.PC;
-    auxiliar -> AX = proceso->CE.AX;
-    auxiliar -> BX = proceso->CE.BX;
-    auxiliar ->CX = proceso->CE.CX;
-    auxiliar ->DX = proceso->CE.DX;
-    auxiliar ->EAX = proceso->CE.EAX;
-    auxiliar ->EBX = proceso->CE.EBX;
-    auxiliar ->ECX = proceso->CE.ECX;
-    auxiliar ->EDX = proceso->CE.EDX;
-    auxiliar ->SI = proceso->CE.SI;
-    auxiliar ->DI = proceso->CE.DI;
-    return auxiliar;
-}
-
-
-void planificar_rr(){
-
-    sem_wait(&controlador_pcp);
-    sem_post(&controlador_pcp);
-    sem_wait(&proceso_ready);
-    proceso_actual = list_remove(planificador_corto_plazo, 0);
-    cambiar_estado(proceso_actual, EJECUCION);
-    log_info(logger, "Proceso %d cambia de estado a EJECUCION", proceso_actual->PID);
-    contexto_actual = *obtener_contexto_ejecucion(proceso_actual);
-    log_info(logger, "Contexto de ejecución del proceso %d enviado a CPU", proceso_actual->PID);
-
-}
-
-void cambiar_estado(t_pcb* proceso, t_estado nuevo_estado)
-{
-    proceso->estado = nuevo_estado;
-}
-
-t_algoritmo_planificacion determinar_algoritmo()
-{
-    char* cadena_aux = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
-
-    if (string_equals_ignore_case(cadena_aux, "FIFO"))
-    {
-        return FIFO;
-    } else if (string_equals_ignore_case(cadena_aux, "RR"))
-    {
-        return RR;
-    } else {return  ERROR;}
-}
-
-
-void* cronometrar(void* args)
-{
-    int* ptr = (int*) args;
-    usleep((*ptr) * 1000);
-    return NULL;
-}
-*/

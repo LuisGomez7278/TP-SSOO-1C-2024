@@ -23,13 +23,12 @@
 //#include "recursos.h"
 
 #include "extern_globales.h"
-
-t_temporal *temporizador= NULL;
+t_temporal * temporizador=NULL;
 uint64_t tiempo_ejecucion;
 pthread_t hilo_de_desalojo_por_quantum;
 
+void interruptor_de_QUANTUM(void* quantum_de_pcb);
 
-void controlador_de_QUANTUM();
 void enviar_proceso_a_ejecucion ();
 void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* serializado_para_IO);
 
