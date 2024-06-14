@@ -4,6 +4,7 @@
 #include <commons/log.h>
 #include <commons/config.h>
 #include "../../utils/include/conexiones.h"
+#include "../../utils/include/utils.h"
 
 extern t_log* logger;
 extern t_config* config;

@@ -1,6 +1,5 @@
 #include "../include/CPU_inicio.h"
 
-
 void iniciar_CPU(void){
     iniciar_logs();
     iniciar_config();
