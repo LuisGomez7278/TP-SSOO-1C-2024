@@ -8,10 +8,10 @@ int main(int argc, char* argv[]) {
     // socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
 
     // //iniciar Server de CPU
-    // socket_escucha = iniciar_servidor(puerto_escucha_dispatch, logger);
+    socket_escucha = iniciar_servidor(puerto_escucha_dispatch, logger);
 
     // //esperar conexion de kernel
-    // socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
+    socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
     // socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha, logger);
     
     t_instruccion* ins1;
@@ -22,24 +22,24 @@ int main(int argc, char* argv[]) {
 
     t_instruccion* ins2;   
     ins2 = malloc(sizeof(t_instruccion));
-    ins2->ins = SET;
-    ins2->arg1 = "BX";
+    ins2->ins = IO_GEN_SLEEP;
+    ins2->arg1 = "Int1";
     ins2->arg2 = "5";
-
-    t_instruccion* ins3;
-    ins3 = malloc(sizeof(t_instruccion));
-    ins3->ins = SUM;
-    ins3->arg1 = "AX";
-    ins3->arg2 = "BX";
     
+    // t_instruccion* ins3;
+    // ins3 = malloc(sizeof(t_instruccion));
+    // ins3->ins = SUM;
+    // ins3->arg1 = "AX";
+    // ins3->arg2 = "BX";
+
     log_info(logger, "I: AX: %d", contexto_interno.AX);
     ejecutar_instruccion(PID, &contexto_interno, ins1);
     log_info(logger, "II: AX: %d", contexto_interno.AX);
     ejecutar_instruccion(PID, &contexto_interno, ins2);
     log_info(logger, "III: BX: %d", contexto_interno.BX);
-    ejecutar_instruccion(PID, &contexto_interno, ins3);    
-    log_info(logger, "IV: AX: %d BX: %d", contexto_interno.AX, contexto_interno.BX);
-    
+    // ejecutar_instruccion(PID, &contexto_interno, ins3);    
+    // log_info(logger, "IV: AX: %d BX: %d", contexto_interno.AX, contexto_interno.BX);
+        
     // recibir_proceso();
 
     // while(true){
@@ -135,11 +135,11 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_STDIN;
         
-        char* direccion_r;
+        char* direccion_r = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         sprintf(direccion_r, "%d", *registro);
         
-        char* tamanio_r;
+        char* tamanio_r = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         sprintf(tamanio_r, "%d", *registro);
 
@@ -152,11 +152,11 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_STDOUT;
 
-        char* direccion_w;
+        char* direccion_w = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         sprintf(direccion_w, "%d", *registro);
         
-        char* tamanio_w;
+        char* tamanio_w = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         sprintf(tamanio_w, "%d", *registro);
 
@@ -185,7 +185,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_TRUNCATE;
 
-        char* tamanio_t;
+        char* tamanio_t = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         sprintf(tamanio_t, "%d", *registro);
 
@@ -198,15 +198,15 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_WRITE;
 
-        char* direccion_FS_w;
+        char* direccion_FS_w = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg3);
         sprintf(direccion_FS_w, "%d", *registro);
         
-        char* tamanio_FS_w;
+        char* tamanio_FS_w = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg4);
         sprintf(tamanio_FS_w, "%d", *registro);
 
-        char* puntero_FS_w;
+        char* puntero_FS_w = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg5);
         sprintf(puntero_FS_w, "%d", *registro);
 
@@ -219,15 +219,15 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_READ;
 
-        char* direccion_FS_r;
+        char* direccion_FS_r = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg3);
         sprintf(direccion_FS_r, "%d", *registro);
         
-        char* tamanio_FS_r;
+        char* tamanio_FS_r = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg4);
         sprintf(tamanio_FS_r, "%d", *registro);
 
-        char* puntero_FS_r;
+        char* puntero_FS_r = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg5);
         sprintf(puntero_FS_r, "%d", *registro);
 
@@ -246,7 +246,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     case EXIT:
         log_info(logger,"PID: %d - Ejecutando: EXIT", PID);
         contexto_interno->PC++;
-        motivo_desalojo = DESALOJO_POR_EXIT;
+        motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
         desalojar_proceso(motivo_desalojo);
         recibir_proceso();
         break;

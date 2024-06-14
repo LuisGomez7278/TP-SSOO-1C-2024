@@ -16,7 +16,7 @@
 /*----------Estructuras----------*/
 
 // ---------- CÓDIGOS DE OPERACIÓN ---------- //
-typedef enum{
+typedef enum CODIGOS_DE_OPERACIONES{
     CONTEXTO,
 	SIG_INS,
 	FETCH,
@@ -31,8 +31,11 @@ typedef enum{
 	MENSAJE,
     HANDSHAKE,
     PAQUETE,
-    DESALOJO_POR_EXIT,
     DESALOJO_POR_WAIT,
+    DESALOJO_POR_SIGNAL,
+    DESALOJO_POR_QUANTUM,
+    DESALOJO_POR_FIN_PROCESO,
+    DESALOJO_POR_CONSOLA,    
     DESALOJO_POR_INTERRUPCION,
     DESALOJO_POR_IO_GEN_SLEEP,
     DESALOJO_POR_IO_STDIN,
@@ -43,7 +46,6 @@ typedef enum{
     DESALOJO_POR_IO_FS_WRITE,
     DESALOJO_POR_IO_FS_READ
 } op_code;
-
 
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
@@ -112,6 +114,7 @@ char* leer_de_buffer_string(void* buffer, int* desplazamiento);
 cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento);
 void agregar_a_paquete_int_code(t_paquete* paquete, int_code codigo);
 int_code leer_de_buffer_int_code(void* buffer, int* desplazamiento);
+void leer_de_buffer_CE(void* buffer, int* desplazamiento, t_contexto_ejecucion* contexto_contenedor);
 
 
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);

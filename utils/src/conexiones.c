@@ -391,6 +391,20 @@ char* leer_de_buffer_string(void* buffer, int* desplazamiento)
     return valor;
 };
 
+void leer_de_buffer_CE(void* buffer, int* desplazamiento, t_contexto_ejecucion* contexto_contenedor){
+    contexto_contenedor->PC = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->AX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->BX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->CX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->DX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->EAX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->EBX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->ECX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->EDX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->SI = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->DI = leer_de_buffer_uint32(buffer, desplazamiento);
+}
+
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto)
 {
     agregar_a_paquete_uint32(paquete, contexto.PC);// uint32_t PC
@@ -424,17 +438,7 @@ void recibir_CE(int socket, uint32_t* PID_contenedor, t_contexto_ejecucion* cont
     buffer = recibir_buffer(&size, socket);
 
     (*PID_contenedor) = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->PC = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->AX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->BX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->CX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->DX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->EAX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->EBX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->ECX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->EDX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->SI = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->DI = leer_de_buffer_uint32(buffer, &desplazamiento);
+    leer_de_buffer_CE(buffer, &desplazamiento, contexto_contenedor);
 
     free(buffer);
 };
