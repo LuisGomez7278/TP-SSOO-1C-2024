@@ -35,20 +35,18 @@ void conexion_con_cpu(){
         case TLB_MISS:
             frame(socket_cpu_memoria);
             break;
-        /* // falta añadir el cop op para cada instruccion
-        case MOV_IN: 
+        case SOLICITUD_MOV_IN: 
             movIn(socket_cpu_memoria);
             break;
-        case MOV_OUT: 
+        case SOLICITUD_MOV_OUT: 
             movOut(socket_cpu_memoria);
             break;
-        case COPY_STRING: 
+        case SOLICITUD_COPY_STRING: 
             copiar_string(socket_cpu_memoria);
             break;
-        case RESIZE:
+        case SOLICITUD_RESIZE:
             ins_resize(socket_cpu_memoria);
             break;
-        */
         case -1:
             log_error(logger_debug, "el MODULO DE CPU SE DESCONECTO. Terminando servidor");
             continuarIterando = 0;
@@ -119,7 +117,7 @@ void movIn(int socket_cpu_memoria){
 
         uint32_t leido = leer_memoria_uint32_t(dir_fisica, bytes, PID);
 
-        t_paquete* paquete = crear_paquete(MOV_IN);
+        t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
         agregar_a_paquete_uint32(paquete, leido);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);            

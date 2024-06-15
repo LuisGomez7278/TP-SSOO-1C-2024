@@ -8,10 +8,10 @@ void conexion_con_es(){
         case MENSAJE:
             recibir_mensaje(socket_cpu_memoria,logger_debug);
             break;
-        case IO_READ:
+        case SOLICITUD_IO_READ:
             read_es();
             break;
-        case IO_WRITE:
+        case SOLICITUD_IO_WRITE:
             write_es();
             break;
         case -1:
@@ -37,7 +37,7 @@ void read_es(){
 
         char* leido = leer_memoria(dir_fisica, bytes, PID);
 
-        t_paquete* paquete = crear_paquete(IO_READ);
+        t_paquete* paquete = crear_paquete(SOLICITUD_IO_READ);
         agregar_a_paquete_string(paquete, strlen(leido), leido);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);            
