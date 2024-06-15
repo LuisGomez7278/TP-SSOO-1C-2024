@@ -10,8 +10,6 @@
 #include "CPU-kernel.h"
 #include "CPU_test.h"
 
-op_code motivo_desalojo;
-
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual);
 void* direccion_registro(t_contexto_ejecucion* contexto, char* registro);
 int tam_registro(char* registro);

@@ -24,5 +24,6 @@ char* algoritmo_TLB;
 uint32_t PID;
 int_code interrupcion;
 t_contexto_ejecucion contexto_interno;
+op_code motivo_desalojo;
 
 #endif /*  CPU_VAR_GLOBALES_H */
