@@ -23,8 +23,7 @@ char* puerto_escucha;
 int cant_frames;
 void* memoria_usuario; 
 
-int socket_cpu_memoria_dispatch;
-int socket_cpu_memoria_interrupt;
+int socket_cpu_memoria;
 int socket_kernel_memoria;
 int socket_entradasalida_memoria;
 int socket_escucha;

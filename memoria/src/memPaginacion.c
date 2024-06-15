@@ -264,7 +264,7 @@ int obtener_desplazamiento(int direccion_fisica) {
     return direccion_fisica % tam_pagina;
 }
 
-bool escribir_memoria(int direccion_fisica, uint8_t bytes, char* valor, uint32_t PID){
+bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_t PID){
     int bytes_escritos = 0;
     int direccion_actual = direccion_fisica;
     int bytes_restantes = bytes;

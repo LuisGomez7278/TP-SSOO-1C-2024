@@ -20,7 +20,8 @@
 void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion);
 void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC);
 void fetch(int socket_cpu_memoria);
-void conexion_con_cpu(int socket_cpu_memoria);
+void atender_conexion_CPU_MEMORIA();
+void conexion_con_cpu();
 void frame(int socket_cpu_memoria);
 void movIn(int socket_cpu_memoria);
 void movOut(int socket_cpu_memoria);

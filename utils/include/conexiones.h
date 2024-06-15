@@ -28,12 +28,10 @@ typedef enum{
     CARGA_EXITOSA_PROCESO,
     PAGE_FAULT,
     OUT_OF_MEMORY,
+    IO_READ, // solicitud de io a memoria para leer algo
+    IO_WRITE, // solicitud de io a memoria para escribir algo
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
-    MOV_OUT,
-    MOV_IN,
-    COPY_STRING,
-    RESIZE,
     OK,
     FALLO
 } op_code;

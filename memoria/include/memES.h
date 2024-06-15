@@ -14,8 +14,11 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
+#include "memPaginacion.h"
 #include "../include/extGlobales.h"
 
-void atender_conexion_ENTRADASALIDA_MEMORIA();
+void conexion_con_es();
+void read_es();
+void write_es();
 
 #endif //TP_MEMORIA_ES_H_

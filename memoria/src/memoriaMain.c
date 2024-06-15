@@ -86,8 +86,7 @@ int main(int argc, char* argv[]) {
 
     //free(leido);
 
-    if (socket_cpu_memoria_dispatch) {liberar_conexion(socket_cpu_memoria_dispatch);}
-    if (socket_cpu_memoria_interrupt) {liberar_conexion(socket_cpu_memoria_interrupt);}
+    if (socket_cpu_memoria) {liberar_conexion(socket_cpu_memoria);}
     if (socket_kernel_memoria) {liberar_conexion(socket_kernel_memoria);}
     if (socket_entradasalida_memoria) {liberar_conexion(socket_entradasalida_memoria);}
     if (socket_escucha) {liberar_conexion(socket_escucha);}
@@ -201,8 +200,8 @@ t_instruccion* parsear_instruccion(char* linea){
     case SET: 
     case SUM:
     case SUB:
-    case MOV_INN:
-    case MOV_OUTT:
+    case MOV_IN:
+    case MOV_OUT:
     case JNZ:
     case IO_GEN_SLEEP:
     case IO_FS_CREATE:
@@ -231,8 +230,8 @@ t_instruccion* parsear_instruccion(char* linea){
         break;    
 
     // 1 argumento
-    case RESIZEE:
-    case COPY_STRINGG:
+    case RESIZE:
+    case COPY_STRING:
     case WAIT:
     case SIGNAL:
         if (string_array_size(tokens)!=2)
@@ -287,11 +286,11 @@ cod_ins hash_ins(char* ins){
     if (string_equals_ignore_case(ins, "SET")){return SET;}
     else if (string_equals_ignore_case(ins, "SUM")){return SUM;}
     else if (string_equals_ignore_case(ins, "SUB")){return SUB;}
-    else if (string_equals_ignore_case(ins, "MOV_IN")){return MOV_INN;}
-    else if (string_equals_ignore_case(ins, "MOV_OUT")){return MOV_OUTT;}
-    else if (string_equals_ignore_case(ins, "RESIZE")){return RESIZEE;}
+    else if (string_equals_ignore_case(ins, "MOV_IN")){return MOV_IN;}
+    else if (string_equals_ignore_case(ins, "MOV_OUT")){return MOV_OUT;}
+    else if (string_equals_ignore_case(ins, "RESIZE")){return RESIZE;}
     else if (string_equals_ignore_case(ins, "JNZ")){return JNZ;}
-    else if (string_equals_ignore_case(ins, "COPY_STRING")){return COPY_STRINGG;}
+    else if (string_equals_ignore_case(ins, "COPY_STRING")){return COPY_STRING;}
     else if (string_equals_ignore_case(ins, "IO_GEN_SLEEP")){return IO_GEN_SLEEP;}
     else if (string_equals_ignore_case(ins, "IO_STDIN_READ")){return IO_STDIN_READ;}
     else if (string_equals_ignore_case(ins, "IO_STDOUT_WRITE")){return IO_STDOUT_WRITE;}

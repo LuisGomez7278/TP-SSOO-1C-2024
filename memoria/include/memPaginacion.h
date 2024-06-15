@@ -49,7 +49,7 @@ bool resize(uint32_t PID, int size);
 bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, uint32_t PID);
 void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas);
 
-bool escribir_memoria(int direccion_fisica, uint8_t bytes, char* valor, uint32_t PID);
+bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_t PID);
 bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID);
 
 uint32_t leer_memoria_uint32_t(int direccion_fisica, uint8_t bytes, uint32_t PID);

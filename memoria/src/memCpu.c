@@ -1,12 +1,26 @@
 #include "../include/memCpu.h"
 
-void conexion_con_cpu(int socket_cpu_memoria){
-    op_code codigo;
+/*
+void atender_conexion_CPU_MEMORIA(){
+    //ENVIAR MENSAJE A CPU
+    enviar_mensaje("MEMORIA manda mensaje a CPU", socket_cpu_memoria);
+    log_info(logger, "Se envio el primer mensaje a kernel");
 
-    while(true){
-        codigo = recibir_operacion(socket_cpu_memoria);
-        switch (codigo)
-        {
+    // CREO HILO ESCUCHA CPU
+    pthread_t hilo_escucha_cpu_memoria;
+    pthread_create(&hilo_escucha_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
+    pthread_detach(hilo_escucha_cpu_memoria);
+}
+*/
+
+void conexion_con_cpu(){
+    bool continuarIterando = true;
+    while(continuarIterando){
+        op_code codigo = recibir_operacion(socket_cpu_memoria);
+        switch (codigo){
+        case MENSAJE:
+            recibir_mensaje(socket_cpu_memoria,logger_debug);
+            break;
         case FETCH:
             fetch(socket_cpu_memoria);
             break;
@@ -21,10 +35,11 @@ void conexion_con_cpu(int socket_cpu_memoria){
         case TLB_MISS:
             frame(socket_cpu_memoria);
             break;
-        case MOV_IN: //recibe pid, dir y bytes. responde uint leido
+        /* // falta añadir el cop op para cada instruccion
+        case MOV_IN: 
             movIn(socket_cpu_memoria);
             break;
-        case MOV_OUT: //recibe pid, dir, bytes y uint. OK/ERROR
+        case MOV_OUT: 
             movOut(socket_cpu_memoria);
             break;
         case COPY_STRING: 
@@ -33,9 +48,15 @@ void conexion_con_cpu(int socket_cpu_memoria){
         case RESIZE:
             ins_resize(socket_cpu_memoria);
             break;
+        */
+        case -1:
+            log_error(logger_debug, "el MODULO DE CPU SE DESCONECTO. Terminando servidor");
+            continuarIterando = 0;
+            break;
         default:
             break;
         }
+        
     }
 }
 
@@ -120,7 +141,7 @@ void movOut(int socket_cpu_memoria){
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
         uint32_t dir_fisica = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint8(buffer, desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
         uint32_t escribir = leer_de_buffer_uint32(buffer, desplazamiento);
 
         bool escrito = escribir_uint32_t_en_memoria(dir_fisica, bytes, escribir, PID);
@@ -154,7 +175,7 @@ void copiar_string(int socket_cpu_memoria){
         uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
         uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, desplazamiento);
         uint32_t dir_fisica_escribir = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint8(buffer, desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
 
         char* leido = leer_memoria(dir_fisica_leer, bytes, PID);
         bool escrito = escribir_memoria(dir_fisica_escribir, bytes, leido, PID);
@@ -186,7 +207,7 @@ void ins_resize(int socket_cpu_memoria){
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint8(buffer, desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
 
         bool exito = resize(PID, bytes);
 

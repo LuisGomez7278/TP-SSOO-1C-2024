@@ -18,7 +18,7 @@
 #include "../include/memPaginacion.h"
 
 void atender_conexion_KERNEL_MEMORIA();
-void escuchando_KERNEL_memoria();
+void conexion_con_kernel();
 void crear_proceso();
 void eliminar_proceso();
 void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID);
