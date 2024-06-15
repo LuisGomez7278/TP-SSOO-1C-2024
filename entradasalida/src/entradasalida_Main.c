@@ -16,16 +16,18 @@ int main(int argc, char* argv[]) {
 
     bool continuarIterando = true;
     while (continuarIterando) {
+        uint32_t PID;
         int cod_op = recibir_operacion(socket_entradasalida_kernel);   ////se queda esperando en recv por ser bloqueante
         switch (cod_op) {
         case MENSAJE:
-            recibir_mensaje(socket_entradasalida_kernel,logger);
+            recibir_mensaje(socket_entradasalida_kernel, logger);
             break;
-        case INSTRUCCION:
-            log_info(logger,"Se va a procesar la instruccion de Kernel");
-            t_instruccion* instruccion = recibir_instruccion_IO(socket_entradasalida_kernel,logger);
+        case DESALOJO_POR_IO_GEN_SLEEP:
             log_info(logger,"Se ha recibido la instruccion de Kernel");
-            ejecutar_instruccion_IO(instruccion);
+            t_instruccion* instruccion = recibir_instruccion_IO(&PID);
+            log_info(logger,"PID: %d - Operacion:IO_GEN_SLEEP", PID);
+
+            ejecutar_instruccion_IO(instruccion, PID);
             log_info(logger,"Se ha ejecutado la instruccion de Kernel");
         case -1:
             log_error(logger, "La ENTRADASALIDA SE DESCONECTO. Terminando servidor");
@@ -55,25 +57,37 @@ void validar_argumentos(char* nombre_interfaz, char* config_interfaz)
     }
 }
 
-t_instruccion* recibir_instruccion_IO(int socket_cliente, t_log* logger)
+t_instruccion* recibir_instruccion_IO(uint32_t* PID)
 {
-    int size;
+    uint32_t size;
     void* buffer;
-    int* tam_recibido = malloc(sizeof(int));
-    buffer = recibir_buffer(&size, socket_cliente);
-    t_instruccion* instruccion = deserializar_instruccion(buffer, tam_recibido);
-    log_info(logger, "Recibi instruccion");
+    int desplazamiento = 0;
+    buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+    PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+    t_instruccion* instruccion = malloc(sizeof(t_instruccion));
+
+    instruccion->ins = leer_de_buffer_cod_ins(buffer, &desplazamiento);
+    instruccion->arg1 = leer_de_buffer_string(buffer, &desplazamiento);
+    instruccion->arg2 = leer_de_buffer_string(buffer, &desplazamiento);
+    instruccion->arg3 = leer_de_buffer_string(buffer, &desplazamiento);
+    instruccion->arg4 = leer_de_buffer_string(buffer, &desplazamiento);
+    instruccion->arg5 = leer_de_buffer_string(buffer, &desplazamiento);
+
+    log_info(logger, "Recibi instruccion, codigo: %d", instruccion->ins);
     free(buffer);
-    free(tam_recibido);
+
+    return instruccion;
 }
 
-void ejecutar_instruccion_IO(t_instruccion* instruccion)
+void ejecutar_instruccion_IO(t_instruccion* instruccion, uint32_t PID)
 {
     cod_ins codigo_instruccion = instruccion->ins;
 	switch(codigo_instruccion) {
 	case IO_GEN_SLEEP:
         int unidadesDeTrabajo = atoi(instruccion->arg2);
         usleep(unidadesDeTrabajo);
+        notificar_kernel(PID);
 	case IO_STDIN_READ:
         //ejecutar_instruccion_memoria(instruccion);
 	break;
@@ -85,3 +99,10 @@ void ejecutar_instruccion_IO(t_instruccion* instruccion)
 	}
 }
 
+void notificar_kernel(uint32_t PID)
+{
+    t_paquete* paquete = crear_paquete(FINALIZA_IO);
+    agregar_a_paquete_uint32(PID);
+    enviar_paquete(paquete, socket_entradasalida_kernel);
+    eliminar_paquete(paquete);
+}

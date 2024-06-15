@@ -21,7 +21,7 @@ void atender_conexion_CPU_DISPATCH_KERNEL(){
             
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             leer_de_buffer_CE(buffer, &desplazamiento, &CE);
-            log_info(logger, "CE.AX: %d", CE.AX);
+            log_info(logger, "PID: %d, CE.AX: %d", PID, CE.AX);//Solo para pruebas
             log_info(logger, "Se envia peticion a IO, codigo: %d", codigo);
             paquete = crear_paquete(codigo);
             agregar_a_paquete_uint32(paquete, PID);

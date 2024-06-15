@@ -29,8 +29,8 @@ extern int BLOCK_COUNT;
 extern int RETRASO_COMPACTACION;
 
 void validar_argumentos(char* nombre_interfaz, char* config_interfaz);
-t_instruccion* recibir_instruccion_IO(int socket_cliente, t_log* logger);
-void ejecutar_instruccion_IO(t_instruccion* instruccion);
-
+t_instruccion* recibir_instruccion_IO(uint32_t* PID);
+void ejecutar_instruccion_IO(t_instruccion* instruccion, uint32_t PID);
+void notificar_kernel(uint32_t PID);
 
 #endif //TP_ENTRADASALIDA_MAIN_H_
