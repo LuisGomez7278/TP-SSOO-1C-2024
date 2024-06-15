@@ -73,6 +73,7 @@ extern pthread_mutex_t semaforo_bloqueado;
 
 extern uint32_t identificador_PID;
 extern pthread_mutex_t mutex_pid;
+extern uint32_t pcb_actual_en_cpu;
 
 
 //atender_operacion.h:

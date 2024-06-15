@@ -31,7 +31,7 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 			}
 		}
 		string_append(&log_cola_ready, "]");
-		log_info(logger,"Cola Ready %s : %s",algoritmo_planificacion, log_cola_ready);
+		log_info(logger,"Cola Ready %s : %s \n",algoritmo_planificacion, log_cola_ready);
 		free(log_cola_ready);
 	}
     
@@ -96,7 +96,9 @@ void cambiar_grado_multiprogramacion(int nuevo_valor) {                         
 
 
 void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* serializado_para_IO){ //esta funcion va con un while(1) abajo del recibe
-    int cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
+    
+    op_code cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
+    
     
     if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL)
     {
@@ -104,17 +106,19 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
         temporal_destroy(temporizador);
         pthread_cancel(hilo_de_desalojo_por_quantum);
     }
-    
+
+    //////////////////////////////   ACA HAY QUE DESERIALIZAR  SEGUN CORRESPONDA CADA FUNCION suponemos que el pcb extraido se llama: pcb_dispatch
+                                // LO DECLARO PARA QUE NO ME ARROJE ERRORES
+
+    t_pcb *pcb_dispatch=malloc(sizeof(t_pcb));
 
     switch (cod_op)
     {
+
     case PAGE_FAULT: 
         
         break;
     case OUT_OF_MEMORY:
-        
-        break;
-    case MENSAJE:
         
         break;
     case DESALOJO_POR_WAIT:
@@ -127,7 +131,11 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
         
         break;
     case DESALOJO_POR_FIN_PROCESO:
-        
+            op_code codigo_de_operacion=ELIMINAR_PROCESO;
+            //ENVIO PID A MEMORIA PARA QUE ELIMINE EL PROCESO
+            enviar_instruccion_con_PID_por_socket(codigo_de_operacion,pcb_dispatch->PID,socket_memoria_kernel);
+
+
         break;
     case DESALOJO_POR_CONSOLA:
         
@@ -146,12 +154,16 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
     default:
         break;
     }
-	
-	
+
+enviar_siguiente_proceso_a_ejecucion();	
+free(pcb_dispatch);	
 	
 }
 
-void enviar_proceso_a_ejecucion ()              ///   
+
+
+void enviar_siguiente_proceso_a_ejecucion ()    
+        ///   
 {
 sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
     t_pcb* pcb_a_ejecutar;
@@ -181,8 +193,9 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
         pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, quantum_ptr); 
         pthread_detach(hilo_de_desalojo_por_quantum);
     }
-
-
+    pcb_actual_en_cpu=pcb_a_ejecutar->PID;
+    pcb_a_ejecutar->estado=EXEC;
+    log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u\n", pcb_a_ejecutar->PID);
     enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);     
     sem_post(&cantidad_procesos_en_algun_ready);
 }
@@ -193,7 +206,9 @@ void interruptor_de_QUANTUM(void* quantum_de_pcb)
     int quantumRestante = *((int*)quantum_de_pcb);
     temporizador= temporal_create();
     int quantum_ejecucion=(quantum*1000)-quantumRestante;
-    log_trace(logger_debug,"El tiempo de espera registrado es %d",quantum_ejecucion);
+
+    log_trace(logger_debug,"El tiempo de espera registrado es %d\n",quantum_ejecucion);
+    
     usleep(quantum_ejecucion);
     void *interrupcion = (void *)(intptr_t)INT_QUANTUM;
     send(socket_kernel_cpu_interrupt,interrupcion,sizeof(int_code),0);

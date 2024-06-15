@@ -117,6 +117,11 @@ cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento);
 
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
+void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int socket_a_enviar);
+uint32_t recibir_de_buffer_solo_PID(int socket_a_recibir);
+
+
+
 /*----------Fin Serializacion----------*/
 
 /*----------Pruebas funcionamiento----------*/

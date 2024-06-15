@@ -95,16 +95,20 @@ void carga_exitosa_en_memoria(){
         log_error(logger_debug,"Error al recibir el buffer");
     }
 
-//GESTIONO LAS LISTAS DE ESTADO    ------    Como ya chequee la multiprogramacion antes de enviar al proceso a cargar a memoria hago el cambio de listas:
-    
+//GESTIONO LAS LISTAS DE ESTADO    
+    sem_wait(&control_multiprogramacion);           ///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    
+
     t_pcb *pcb_ready= buscar_pcb_por_PID(lista_new,PID);
 
     if(pcb_ready==NULL){
         log_error(logger_debug,"Error al buscar el proceso con PID= %u en la lista New",PID);
     }else{
+        pthread_mutex_lock(&semaforo_new);
         if (!list_remove_element(lista_new, pcb_ready)){
             log_error(logger_debug,"Error al eliminar el elemento PID= u% de la lista NEW",PID);
         }
+        pthread_mutex_unlock(&semaforo_new);
+
         ingresar_en_lista(pcb_ready, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
 
     }

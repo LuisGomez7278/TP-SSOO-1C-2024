@@ -71,8 +71,10 @@ void crear_proceso_solicitado_por_kernel(){  ///PID Y PATH PARCIAL SON LOS QUE S
 
         log_info(logger_debug,"LLEGO UN PROCESO PARA CARGAR: PID= %u  direccion= %s  ",PID,path_parcial);
         
-        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);                      /////// FUERZO LA RESPUESTA CARGA EXITOSA, LUEGO ESTA LINEA HAY QUE SACARLA
-                                                                                                //  Y LLAMAR A LA FUNCION "contestar_a_kernel_carga_proceso"DONDE CORRESPONDA
+
+
+                                                                                                           /////// FUERZO LA RESPUESTA CARGA EXITOSA, LUEGO ESTA LINEA HAY QUE SACARLA
+        enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID,socket_kernel_memoria);            //  Y LLAMAR A LA FUNCION "contestar_a_kernel_carga_proceso"DONDE CORRESPONDA
 
         free(sizeTotal);
         free(desplazamiento);
@@ -85,16 +87,16 @@ void crear_proceso_solicitado_por_kernel(){  ///PID Y PATH PARCIAL SON LOS QUE S
 }
 
 
-void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){
+/*
+void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){                  ///ESTA FUNCION YA LA HICE GENERICA, "enviar_instruccion_con_PID_por_socket"
+                                                                                                //(DESPUES HABRIA QUE ELIMINARLA)
 
     t_paquete *paquete= crear_paquete (codigo_operacion);
     agregar_a_paquete_uint32(paquete,PID);
     enviar_paquete(paquete,socket_kernel_memoria);              //--------------ESTA FUNCION SERIALIZA EL PAQUETE ANTES DE ENVIARLO --quedaria un void*= cod_op||SIZE TOTAL||PID(uint_32)
     eliminar_paquete(paquete);
 
-
-
 }
-
+*/                  
 
 

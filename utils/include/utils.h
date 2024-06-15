@@ -48,11 +48,11 @@ typedef struct instruccion
 
 typedef enum 
 {
-    NUEVO,
+    NEW,
     READY,
     READY_PRIORITARIO,
-    EJECUCION,
-    BLOQUEO,
+    EXEC,
+    BLOCKED,
     EXITT,
     ERROR
 } t_estado;
