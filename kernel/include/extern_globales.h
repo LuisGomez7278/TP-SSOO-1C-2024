@@ -103,7 +103,7 @@ void atender_conexion_ENTRADASALIDA_KERNEL();
 void escuchar_a_ENTRADASALIDA();
 
 //kernel-Memoria.h
-void atender_conexion_MEMORIA_KERNELL();
+void atender_conexion_MEMORIA_KERNEL();
 void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
 void carga_exitosa_en_memoria();
 t_pcb* buscar_pcb_por_PID(t_list* lista, uint32_t pid_buscado);

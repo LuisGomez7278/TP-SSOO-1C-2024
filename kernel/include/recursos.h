@@ -20,7 +20,8 @@
 #include "../../utils/include/conexiones.h"
 #include "planificacion.h"
 #include <commons/collections/dictionary.h>
-#include "extern_globales.h"
+
+
 /*
 typedef struct
 {

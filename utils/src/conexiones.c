@@ -391,6 +391,20 @@ char* leer_de_buffer_string(void* buffer, int* desplazamiento)
     return valor;
 };
 
+void leer_de_buffer_CE(void* buffer, int* desplazamiento, t_contexto_ejecucion* contexto_contenedor){
+    contexto_contenedor->PC = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->AX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->BX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->CX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->DX = leer_de_buffer_uint8(buffer, desplazamiento);
+    contexto_contenedor->EAX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->EBX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->ECX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->EDX = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->SI = leer_de_buffer_uint32(buffer, desplazamiento);
+    contexto_contenedor->DI = leer_de_buffer_uint32(buffer, desplazamiento);
+}
+
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto)
 {
     agregar_a_paquete_uint32(paquete, contexto.PC);// uint32_t PC
@@ -424,41 +438,40 @@ void recibir_CE(int socket, uint32_t* PID_contenedor, t_contexto_ejecucion* cont
     buffer = recibir_buffer(&size, socket);
 
     (*PID_contenedor) = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->PC = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->AX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->BX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->CX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->DX = leer_de_buffer_uint8(buffer, &desplazamiento);
-    contexto_contenedor->EAX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->EBX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->ECX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->EDX = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->SI = leer_de_buffer_uint32(buffer, &desplazamiento);
-    contexto_contenedor->DI = leer_de_buffer_uint32(buffer, &desplazamiento);
+    leer_de_buffer_CE(buffer, &desplazamiento, contexto_contenedor);
 
     free(buffer);
 };
 
-void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo){    
+void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo)
+{    
     paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(cod_ins));
-
 	memcpy(paquete->buffer->stream + paquete->buffer->size, &codigo, sizeof(cod_ins));
-
 	paquete->buffer->size += sizeof(cod_ins);    
-}
+};
 
 cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento)
 {
     cod_ins codigo;
-
     memcpy(&codigo,  buffer + (*desplazamiento), sizeof(cod_ins));
-
-    (*desplazamiento) += sizeof(cod_ins);
-    
+    (*desplazamiento) += sizeof(cod_ins);    
     return codigo;
 };
 
+void agregar_a_paquete_int_code(t_paquete* paquete, int_code codigo)
+{    
+    paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(int_code));
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &codigo, sizeof(int_code));
+	paquete->buffer->size += sizeof(int_code);    
+};
 
+int_code leer_de_buffer_int_code(void* buffer, int* desplazamiento)
+{
+    int_code codigo;
+    memcpy(&codigo,  buffer + (*desplazamiento), sizeof(int_code));
+    (*desplazamiento) += sizeof(int_code);    
+    return codigo;
+};
 
 void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int socket_a_enviar){
 
@@ -471,8 +484,7 @@ void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PI
 
 uint32_t recibir_de_buffer_solo_PID (int socket_a_recibir){      /// PARA EJECUTAR ESTA INSTRUCCION CONSIDERO QUE EL CODIGO DE OPERACION YA ESTA EXTRAIDO, SOLO QUEDA=  void*= SIZE TOTAL||PID(uint_32)
     uint32_t *sizeTotal=malloc(sizeof(uint32_t));
-    int *desplazamiento=malloc(sizeof(int));
-    *desplazamiento=0;
+    int desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_a_recibir);
     uint32_t PID = 0; 
 

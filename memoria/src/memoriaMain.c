@@ -11,12 +11,12 @@ int main(int argc, char* argv[]) {
     
     socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
 
-    /*
+    
     // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug,"Esperando que se conecte CPU");
-    socket_cpu_memoria_dispatch = esperar_cliente(socket_escucha,logger_debug);
-    socket_cpu_memoria_interrupt = esperar_cliente(socket_escucha,logger_debug);
-*/
+    socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
+    
+
     // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug,"Esperando que se concte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
@@ -126,7 +126,6 @@ t_list* leer_pseudocodigo(char* path){
     while (fgets(linea, 50, archivo) != NULL)
     {
         instr = parsear_instruccion(linea);
-        // log_info(logger, "Ins: %d", instr->ins);
         if (!instr) 
         {
             log_error(logger_debug, "El archivo de pseudocodigo tiene errores/instrucciones invalidas");
@@ -335,4 +334,3 @@ t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     instruccion =  list_get(lista_instrucciones, PC);
     return instruccion;
 }
-

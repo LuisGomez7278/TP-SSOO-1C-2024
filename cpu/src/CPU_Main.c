@@ -5,8 +5,9 @@ int main(int argc, char* argv[]) {
     iniciar_CPU();
 
     // crear conexion
-    // socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
-
+    socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
+    log_info(logger, "Conectado a MEMORIA");
+    recibir_tamanio_de_pagina();
     // //iniciar Server de CPU
     socket_escucha = iniciar_servidor(puerto_escucha_dispatch, logger);
 
@@ -14,9 +15,6 @@ int main(int argc, char* argv[]) {
     socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
     socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha, logger);
     
-//////////////   PRUEBAS DE CICLO DE EJECUCION  
-
-
     t_instruccion* ins1;
     ins1 = malloc(sizeof(t_instruccion));
     ins1->ins = SET;
@@ -43,9 +41,9 @@ int main(int argc, char* argv[]) {
     // ejecutar_instruccion(PID, &contexto_interno, ins3);    
     // log_info(logger, "IV: AX: %d BX: %d", contexto_interno.AX, contexto_interno.BX);
         
-    // recibir_proceso(); RECIBE CONTEXTO
+    // recibir_proceso();
 
-    // while(true){                                                                                         
+    // while(true){
     //     t_instruccion* ins_actual = fetch(PID, contexto_interno.PC, socket_cpu_memoria);
     //     ejecutar_instruccion(PID, &contexto_interno, ins_actual);
     //     if (check_interrupt(interrupcion)) {
