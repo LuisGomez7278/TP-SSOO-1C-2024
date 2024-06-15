@@ -17,8 +17,8 @@
 #include "../../utils/include/conexiones.h"
 
 #include "atender_operacion.h"
-#include "extern_globales.h"
 
+extern t_log* logger_debug;
 
 
 #ifndef TPANUAL_CONSOLA_H

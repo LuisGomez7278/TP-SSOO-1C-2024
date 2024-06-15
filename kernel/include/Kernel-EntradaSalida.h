@@ -19,22 +19,15 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-#include "extern_globales.h"
-
-
-
-
-
+extern int socket_entradasalida_kernel;
+extern int socket_escucha;
+ 
+extern t_log* logger;
+extern t_log* logger_debug;
+extern t_config* config;
 
 void atender_conexion_ENTRADASALIDA_KERNEL();
 void escuchar_a_ENTRADASALIDA();
 void enviar_a_ENTRADASALIDA();
-
-void atender_conexion_ENTRADASALIDA_KERNEL();
-void enviar_a_ENTRADASALIDA();
-void escuchar_a_ENTRADASALIDA();
-
-
-
 
 #endif /*  KERNEL_ENTRADASALIDA_H_ */

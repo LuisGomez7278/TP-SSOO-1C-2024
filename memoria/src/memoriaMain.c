@@ -105,7 +105,6 @@ t_list* leer_pseudocodigo(char* path){
     while (fgets(linea, 50, archivo) != NULL)
     {
         instr = parsear_instruccion(linea);
-        // log_info(logger, "Ins: %d", instr->ins);
         if (!instr) 
         {
             log_error(logger_debug, "El archivo de pseudocodigo tiene errores/instrucciones invalidas");
@@ -314,4 +313,3 @@ t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     instruccion =  list_get(lista_instrucciones, PC);
     return instruccion;
 }
-
