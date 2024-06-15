@@ -3,8 +3,8 @@
 
 void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz)
 {
-    iniciar_logs();
-    iniciar_config();
+    iniciar_logs(nombre_interfaz);
+    iniciar_config(config_interfaz);
 
 }
 
