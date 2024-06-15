@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 //CONECTO CON MEMORIA
     socket_memoria_kernel = crear_conexion(ip_memoria, puerto_memoria);
     log_info(logger_debug,"Kernel conectado a MEMORIA");
-/*
+
  //CONECTO CON CPU
     socket_kernel_cpu_dispatch = crear_conexion(ip_cpu, puerto_cpu_dispatch);
     log_info(logger_debug,"Kernel conectado a CPU dispatch");
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     log_info(logger_debug,"Kernel conectado a CPU interrupt");
 
 // ENTRADAS SALIDAS LAS CONECTO DENTRO DEL HILO, YA QUE PODRIA ACEPTAR UNA O MULTIPLES CONEXIONES
-*/
+
 
 
   
