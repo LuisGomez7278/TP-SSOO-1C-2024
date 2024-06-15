@@ -31,7 +31,7 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 			}
 		}
 		string_append(&log_cola_ready, "]");
-		log_info(logger,"Cola Ready %s : %s \n",algoritmo_planificacion, log_cola_ready);
+		log_info(logger,"Lista de procesos en estado READY %s : %s \n",algoritmo_planificacion, log_cola_ready);
 		free(log_cola_ready);
 	}
     
@@ -50,7 +50,7 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 
 
 		string_append(&log_cola_ready_prioritario, "]");
-		log_info(logger,"Cola Ready Prioritario %s : %s",algoritmo_planificacion, log_cola_ready_prioritario);
+		log_info(logger,"Lista de procesos en estado READY Prioritario %s : %s",algoritmo_planificacion, log_cola_ready_prioritario);
 		free(log_cola_ready_prioritario);
 	}
 pthread_mutex_unlock(semaforo_mutex);
