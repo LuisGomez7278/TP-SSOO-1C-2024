@@ -13,11 +13,6 @@
 #include <pthread.h>
 
 
-
-
-
-
-
 typedef enum instrucciones
 {
 	SET,
@@ -53,10 +48,11 @@ typedef struct instruccion
 
 typedef enum 
 {
-    NUEVO,
-    LISTO,
-    EJECUCION,
-    BLOQUEO,
+    NEW,
+    READY,
+    READY_PRIORITARIO,
+    EXEC,
+    BLOCKED,
     EXITT,
     ERROR
 } t_estado;
@@ -80,8 +76,9 @@ typedef struct pcb_de_proceso
 {
    	uint32_t PID;
     t_estado estado;
-    uint32_t quantum;
+    uint32_t quantum_restante;
     t_contexto_ejecucion CE;
+    
 } t_pcb;
 
 typedef enum CODIGOS_DE_INTERFACES
@@ -99,5 +96,5 @@ void read_console(t_log *);
 t_config *start_config(char* path);
 t_log *start_logger(char* fileName, char* processName, t_log_level logLevel);
 void end_program(t_log* logger, t_config* config);
-
+char* codigo_estado_string(t_estado codigo);
 #endif

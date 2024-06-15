@@ -3,92 +3,113 @@
 int main(int argc, char* argv[]) {
     
     cargarConfig();
-    //SERVER
+    inicializarMem();                                                           ////ACA INICIA PAGINACION
+    bool a = crear_procesoM(path_base, 1);
+
+
     // INICIALIZO  SERVIDOR DE MEMORIA 
-    /*
+    
     socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
 
-
+    /*
     // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug,"Esperando que se conecte CPU");
     socket_cpu_memoria_dispatch = esperar_cliente(socket_escucha,logger_debug);
     socket_cpu_memoria_interrupt = esperar_cliente(socket_escucha,logger_debug);
-
+*/
     // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug,"Esperando que se concte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
     // CREO HILO ENTRADA-SALIDA Y ADENTRO DEL HILO SOPORTO MULTIPLES CONEXIONES
     pthread_t hilo_entradaSalida_memoria;
-    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)atender_conexion_ENTRADASALIDA_MEMORIA,NULL);
+    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
     pthread_detach(hilo_entradaSalida_memoria);
 
     // CREO HILO KERNEL 
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
-    pthread_detach(hilo_kernel_memoria); */
+    pthread_join(hilo_kernel_memoria,NULL); 
 
-    // uint32_t PID = 1;
-    // t_contexto_ejecucion CE;
-    // CE.PC = 2;
-    // CE.AX = 1;
-    // CE.BX = 0;
-    // CE.CX = 0;
-    // CE.DX = 0;
-    // CE.EAX = 32;
-    // CE.EBX = 0;
-    // CE.ECX = 0;
-    // CE.EDX = 0;
-    // CE.SI = 0;
-    // CE.DI = 0;
-    // log_info(logger, "CE listo para enviar, datos: PID=%d, PC=%d, AX=%d, EAX=%d, SI=%d", PID, CE.PC, CE.AX, CE.EAX, CE.SI);
+
+//HABLARLO CON GONZALO PRUEBAS??        //////////////////////////////////
+    //------------------------------------------
+
+/*  
+     uint32_t PID = 1;
+     t_contexto_ejecucion CE;
+     CE.PC = 2;
+     CE.AX = 1;
+     CE.BX = 0;
+     CE.CX = 0;
+     CE.DX = 0;
+     CE.EAX = 32;
+     CE.EBX = 0;
+     CE.ECX = 0;
+     CE.EDX = 0;
+     CE.SI = 0;
+     CE.DI = 0;
+     log_info(logger, "CE listo para enviar, datos: PID=%d, PC=%d, AX=%d, EAX=%d, SI=%d", PID, CE.PC, CE.AX, CE.EAX, CE.SI);
+  
+     enviar_CE(socket_cpu_memoria, PID, CE);
+     log_info(logger, "CE enviado con exito");
+  
+     log_info(logger, "path de archivo: %s", path);
     
-    // enviar_CE(socket_cpu_memoria, PID, CE);
-    // log_info(logger, "CE enviado con exito");
-    
-    // log_info(logger, "path de archivo: %s", path);
-    
-    //iniciar Server de CPU
-    //socket_escucha = iniciar_servidor(puerto_escucha, logger);
+    ////////////////////////////////////////////////////////////////////////////
 
-    //socket_cpu_memoria = esperar_cliente(socket_escucha, logger);
+    socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
-    //conexion_con_cpu(socket_cpu_memoria);
-    
-    // // PRUEBAS MEMORIA crear proceso, asignar tamaño, escribir y leer.
-    inicializarMem();
+    socket_cpu_memoria = esperar_cliente(socket_escucha, logger);
 
-    bool a = crear_procesoM(path_base, 1);
+    conexion_con_cpu(socket_cpu_memoria);
+    */
+    //------------------------------------------
 
+
+
+
+    //PRUEBAS COMENTADAS POR THIAGO SOBRE MEMORIA
+    //------------------------------------------
+/*
     resize(1, 50);
     
-    //resize(1, -40);
+    resize(1, 0);
 
     tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
 
-    /*if(tpg == NULL){
+    if(tpg == NULL){
         perror("AAA");    
-    }*/
+    }
 
-    char* buffer = "Hola mundo, todo bien. LoL";
+    char* buffer = "Hola planeta tierra, hoy es lunes";
 
-    bool escribir_bien = escribir_memoria(30, 27, buffer, 1);
+    bool escribir_bien = escribir_memoria(10, 22, buffer, 1);
+    bool escribir_int = escribir_uint32_t_en_memoria(10, sizeof(84), 84, 1);
+
     if(escribir_bien){log_info(logger_debug, "Perfecto");}
 
-    char* leido = leer_memoria(30, 22, 1);
+    char* leido = leer_memoria(8, 22, 1);
+    int leido_int = leer_memoria_uint32_t(10, sizeof(84), 1);
     
+    log_info(logger, "%.*s", 22, buffer);
+    log_info(logger_debug, "Int Leido: %d", leido_int);
     if(leido==NULL){perror("Rompio");}
 
     free(leido);
+*/
+    //--------------------------------------------
 
-    if (socket_cpu_memoria_dispatch) {liberar_conexion(socket_cpu_memoria_dispatch);}
-    if (socket_cpu_memoria_interrupt) {liberar_conexion(socket_cpu_memoria_interrupt);}
+
+    if (socket_cpu_memoria) {liberar_conexion(socket_cpu_memoria);}
     if (socket_kernel_memoria) {liberar_conexion(socket_kernel_memoria);}
     if (socket_entradasalida_memoria) {liberar_conexion(socket_entradasalida_memoria);}
     if (socket_escucha) {liberar_conexion(socket_escucha);}
 
     return 0;
 }
+
+//-------------------------------         FUNCIONES     -----------------------------------------
 
 t_list* leer_pseudocodigo(char* path){
     FILE* archivo =  fopen(path, "r");
@@ -121,7 +142,7 @@ t_list* leer_pseudocodigo(char* path){
 }
 
 t_instruccion* parsear_instruccion(char* linea){
-    t_instruccion* instruccion = malloc(sizeof(t_instruccion*));
+    t_instruccion* instruccion = malloc(sizeof(t_instruccion));
     char* ins;
     char* a1;
     char* a2;

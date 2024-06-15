@@ -40,8 +40,7 @@ extern t_log* logger_debug;
 
 extern t_config* config;
 
-extern int socket_cpu_memoria_dispatch;
-extern int socket_cpu_memoria_interrupt;
+extern int socket_cpu_memoria;
 extern int socket_kernel_memoria;
 extern int socket_entradasalida_memoria;
 extern int socket_escucha;

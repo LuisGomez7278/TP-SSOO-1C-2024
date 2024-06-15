@@ -22,11 +22,18 @@ typedef enum CODIGOS_DE_OPERACIONES{
 	FETCH,
     PROCESO_NO_CARGADO,
 	TAM_PAG,
+    TLB_MISS, // aviso para cpu: si llega -1 es que la pag no tiene asignado ningun marco 
     CREAR_PROCESO,
     ELIMINAR_PROCESO,
     CARGA_EXITOSA_PROCESO,
     PAGE_FAULT,
     OUT_OF_MEMORY,
+    SOLICITUD_IO_READ, // solicitud de io a memoria para leer algo
+    SOLICITUD_IO_WRITE, // solicitud de io a memoria para escribir algo
+    SOLICITUD_MOV_OUT,
+    SOLICITUD_MOV_IN,
+    SOLICITUD_RESIZE,
+    SOLICITUD_COPY_STRING,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
     HANDSHAKE,
@@ -46,6 +53,10 @@ typedef enum CODIGOS_DE_OPERACIONES{
     DESALOJO_POR_IO_FS_WRITE,
     DESALOJO_POR_IO_FS_READ,
     FINALIZA_IO
+    HANDSHAKE,
+    PAQUETE,
+    OK,
+    FALLO
 } op_code;
 
 typedef enum CODIGOS_DE_INTERRUPCIONES
@@ -120,7 +131,14 @@ void leer_de_buffer_CE(void* buffer, int* desplazamiento, t_contexto_ejecucion* 
 
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
+void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int socket_a_enviar);
+uint32_t recibir_de_buffer_solo_PID(int socket_a_recibir);
+
+
+
 /*----------Fin Serializacion----------*/
+
+/*----------Pruebas funcionamiento----------*/
 void verificar_paquete(void* );
 void imprimir_paquete(t_paquete* paquete);
 #endif //CONEXIONES_TP_H_

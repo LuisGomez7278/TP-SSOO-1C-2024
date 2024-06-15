@@ -48,5 +48,13 @@ void end_program(t_log* logger, t_config* config)
     config_destroy(config);
 }
 
-
+char* codigo_estado_string(t_estado codigo){  ////////////////////////// TRANSFORMA EL CODIGO DE ESTADO EN UN STRING PARA LOGGEO
+	if(codigo == NEW) 				return "NUEVO";
+	if(codigo == READY) 			return "READY";
+    if(codigo == READY_PRIORITARIO) return "READY_PRIORITARIO";
+	if(codigo == EXEC) 		return "EJECUCION";
+	if(codigo == BLOCKED) 			return "BLOQUEO";
+	if(codigo == EXITT) 			return "EXITT";
+	else							return "ERROR";
+}
 

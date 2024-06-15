@@ -1,47 +1,37 @@
 #include "../include/memKernel.h"
 
+
 void atender_conexion_KERNEL_MEMORIA(){
     //ENVIAR MENSAJE A KERNEL
-        enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
-        log_info(logger, "Se envio el primer mensaje a kernel");
+    enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
+    log_info(logger, "Se envio el primer mensaje a kernel");
 
     // CREO HILO ESCUCHA KERNEL
-            pthread_t hilo_escucha_kenel_memoria;
-            pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)escuchando_KERNEL_memoria,NULL);
-            pthread_detach(hilo_escucha_kenel_memoria);
-        
-
+    pthread_t hilo_escucha_kenel_memoria;
+    pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)conexion_con_kernel,NULL);
+    pthread_join(hilo_escucha_kenel_memoria,NULL);
 }
 
-void escuchando_KERNEL_memoria(){
-//RECIBO PRIMER MENSAJE DE KERNEL
-    op_code codop2 = recibir_operacion(socket_kernel_memoria);
-    if (codop2 == MENSAJE) {log_info(logger, "LLego un mensaje");}
-    else {log_info(logger, "LLego otra cosa");}
-    recibir_mensaje(socket_kernel_memoria, logger);
-
+void conexion_con_kernel(){
     bool continuarIterando = true;
-        while (continuarIterando) {
-            int cod_op = recibir_operacion(socket_kernel_memoria);   ////se queda esperando en recv por ser bloqueante
-            switch (cod_op) {
-            case MENSAJE:
-                recibir_mensaje(socket_kernel_memoria,logger_debug);
-                break;
-            case CREAR_PROCESO:
-                crear_proceso();
-                break;
-            case ELIMINAR_PROCESO:
-                eliminar_proceso();
-                break;
-            case -1:
-                log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
-                continuarIterando = 0;
-                break;
-            default:
-                log_warning(logger_debug,"Operacion desconocida de KERNEL. No quieras meter la pata");
-                break;
-            }
+    while (continuarIterando) {
+        op_code codigo = recibir_operacion(socket_kernel_memoria);   
+        switch (codigo){
+        case MENSAJE:
+            recibir_mensaje(socket_kernel_memoria,logger_debug);
+            break;
+        case CREAR_PROCESO:
+            crear_proceso();
+            break;
+        case ELIMINAR_PROCESO:
+            eliminar_proceso();
+            break;
+        default:
+            log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
+            continuarIterando = 0;
+            break;
         }
+    }
 }
 
 void crear_proceso(){ // llega el pid y el path de instrucciones
@@ -59,7 +49,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         bool creado = crear_procesoM(path_parcial, PID);
 
         if(creado){
-        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);
+        enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID,socket_kernel_memoria);
         }    
     } else {
         // Manejo de error en caso de que recibir_buffer devuelva NULL
@@ -91,9 +81,16 @@ void eliminar_proceso(){ // llega un pid
     free(buffer);
 }
 
-void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){
-    t_paquete *paquete = crear_paquete (codigo_operacion);
+/*
+void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){                  ///ESTA FUNCION YA LA HICE GENERICA, "enviar_instruccion_con_PID_por_socket"
+                                                                                                //(DESPUES HABRIA QUE ELIMINARLA)
+
+    t_paquete *paquete= crear_paquete (codigo_operacion);
     agregar_a_paquete_uint32(paquete,PID);
-    enviar_paquete(paquete,socket_kernel_memoria);          
+    enviar_paquete(paquete,socket_kernel_memoria);              //--------------ESTA FUNCION SERIALIZA EL PAQUETE ANTES DE ENVIARLO --quedaria un void*= cod_op||SIZE TOTAL||PID(uint_32)
     eliminar_paquete(paquete);
+
 }
+*/                  
+
+
