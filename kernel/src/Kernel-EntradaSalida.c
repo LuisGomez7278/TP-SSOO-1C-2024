@@ -17,11 +17,7 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
     recibir_mensaje(socket_entradasalida_kernel, logger);
 
 /*
-    pthread_t hilo_enviar_ENTRADASALIDA_KERNEL;
-    pthread_create(&hilo_enviar_ENTRADASALIDA_KERNEL,NULL,(void*)enviar_a_ENTRADASALIDA,NULL);
-    pthread_detach( hilo_enviar_ENTRADASALIDA_KERNEL);
 
-    
     pthread_t hilo_escucha_ENTRADASALIDA_KERNEL;
     pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_ENTRADASALIDA,NULL);
     pthread_join(hilo_escucha_ENTRADASALIDA_KERNEL,NULL);
@@ -29,15 +25,6 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
 }
 
 
-void enviar_a_ENTRADASALIDA(){/*
-
-    enviar_mensaje("KERNEL",fd_entradaSalida);
-    
-    while (1){
-        paquete(fd_entradaSalida);
-}
-*/
-}
 
 
 

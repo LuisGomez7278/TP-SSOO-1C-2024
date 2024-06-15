@@ -16,17 +16,17 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-#include "atender_operacion.h"
 
-extern t_log* logger_debug;
+#include "extern_globales.h"
+
 
 
 #ifndef TPANUAL_CONSOLA_H
 #define TPANUAL_CONSOLA_H
 
 
-bool validacion_de_ingreso_por_consola (char* leido);
-void iniciar_consola_interactiva();
+//bool validacion_de_ingreso_por_consola (char* leido);
+//void iniciar_consola_interactiva();
 
 
 

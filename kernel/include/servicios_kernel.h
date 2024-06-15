@@ -20,13 +20,15 @@
 #include <commons/collections/queue.h>
 
 
-
-extern uint32_t identificador_PID;
-extern pthread_mutex_t mutex_pid;
+#include "extern_globales.h"
 
 
+uint32_t identificador_PID=1;
+pthread_mutex_t mutex_pid;
 
-uint32_t asignar_pid();
+
+
+
 
 
 

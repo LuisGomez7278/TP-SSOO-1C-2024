@@ -5,7 +5,7 @@ void iniciar_Kernel(){
     iniciar_logs();
 	iniciar_configs();
 	//imprimir_configs();
-	iniciar_colas_de_estado();
+	iniciar_estructuras_planificacion();
 
 
 }
@@ -21,7 +21,7 @@ void iniciar_logs()
 		perror("No se pudo crear el logger");
 		exit(EXIT_FAILURE);
 	}
-	logger_debug= log_create("kernel_DB.log", "KERNEL_DB_LOG", true, LOG_LEVEL_TRACE);
+	logger_debug= log_create("log_kernel_debug.log", "KERNEL_DB_LOG", true, LOG_LEVEL_TRACE);
 	if(logger_debug==NULL){
 		perror("No se pudo crear el logger debug");
 		exit(EXIT_FAILURE);
@@ -51,11 +51,37 @@ void iniciar_configs(){
 
 }
 
-void iniciar_colas_de_estado(){
+void iniciar_estructuras_planificacion(){
 
-    cola_new = queue_create();
-	cola_ready = queue_create();
-	cola_exit = queue_create();
-	cola_bloqueado= queue_create();
+    lista_new = list_create();
+	lista_ready = list_create();
+	lista_ready_prioridad = list_create();
+	lista_exit = list_create();
+	lista_bloqueado= list_create();
+
+
+//SEMAFORO MULTIPROGRAMACION
+
+    sem_init(&control_multiprogramacion, 0, grado_multiprogramacion);     
+
+// SEMAFOROS AUXILIARES 
+
+    sem_init(&cantidad_procesos_new, 0, 0);
+    sem_init(&cantidad_procesos_ready, 0, 0);
+    sem_init(&cantidad_procesos_ready_prioritario, 0, 0);
+	sem_init(&cantidad_procesos_en_algun_ready, 0, 0);
+
+	
+
+//MUTEX PARA MANIPULACION SEGURA DE LISTAS 
+
+    pthread_mutex_init(&semaforo_new, NULL);
+    pthread_mutex_init(&semaforo_ready, NULL);
+	pthread_mutex_init(&semaforo_bloqueado, NULL);
+	pthread_mutex_init(&semaforo_ready_prioridad, NULL);
+//mutex asignacion pid
+	pthread_mutex_init(&mutex_pid, NULL);
+
 
 }
+

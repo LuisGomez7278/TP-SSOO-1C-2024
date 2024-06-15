@@ -1,7 +1,7 @@
 #include "../include/Kernel-Memoria.h"
 
 
-void atender_conexion_MEMORIA_KERNEL(){
+    void atender_conexion_MEMORIA_KERNELL(){
 
 //RECIBIR MENSAJE DE MEMORIA
     op_code codop = recibir_operacion(socket_memoria_kernel);
@@ -25,8 +25,13 @@ void atender_conexion_MEMORIA_KERNEL(){
             case CARGA_EXITOSA_PROCESO:
                 carga_exitosa_en_memoria();
                 break;
+            case PAGE_FAULT:
+            case OUT_OF_MEMORY:
+                 sem_post(&control_multiprogramacion);
+                 log_error(logger_debug,"Page fault || out of memory falta implementar");
+                 break;
             case -1:
-                log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
+                log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO. Terminando servidor");
                 continuarIterando=0;
                 break;
             default:
@@ -64,21 +69,21 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
 
 }
 
-void carga_exitosa_en_memoria(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA CARGAR EL PROCESO
+void carga_exitosa_en_memoria(){  
+
+//RECIBO EL PROCESO QUE CARGO EN MEMORIA
 
     uint32_t *sizeTotal=malloc(sizeof(uint32_t));
     int *desplazamiento=malloc(sizeof(int));
     *desplazamiento=0;
     void* buffer= recibir_buffer(sizeTotal,socket_memoria_kernel);
-    
-   // verificar_paquete(buffer);
+    uint32_t PID = 0; 
 
     if (buffer != NULL) {
-        uint32_t tam_buffer=leer_de_buffer_uint32(buffer,desplazamiento);
-        uint32_t PID= leer_de_buffer_uint32(buffer,desplazamiento);
+        uint32_t tam_buffer = *sizeTotal;
+        PID = leer_de_buffer_uint32(buffer, desplazamiento);
+ 
         
-
-
         log_info(logger_debug,"CARGA EXITOSA DEL PROCESO: PID= %u  tam_buffer= %u  ",PID,tam_buffer);
         
         free(sizeTotal);
@@ -89,8 +94,39 @@ void carga_exitosa_en_memoria(){  ///PID Y PATH PARCIAL SON LOS QUE SIRVEN PARA 
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
+
+//GESTIONO LAS LISTAS DE ESTADO    
+    sem_wait(&control_multiprogramacion);           ///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    
+
+    t_pcb *pcb_ready= buscar_pcb_por_PID(lista_new,PID);
+
+    if(pcb_ready==NULL){
+        log_error(logger_debug,"Error al buscar el proceso con PID= %u en la lista New",PID);
+    }else{
+        pthread_mutex_lock(&semaforo_new);
+        if (!list_remove_element(lista_new, pcb_ready)){
+            log_error(logger_debug,"Error al eliminar el elemento PID= u% de la lista NEW",PID);
+        }
+        pthread_mutex_unlock(&semaforo_new);
+
+        ingresar_en_lista(pcb_ready, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
+
+    }
+
+
 }
 
 
+t_pcb* buscar_pcb_por_PID(t_list* lista, uint32_t pid_buscado){
+	
+    int elementos = list_size(lista);
+	for (int i = 0; i < elementos; i++) {
+		t_pcb* pcb = list_get(lista, i);
+		if (pid_buscado == pcb->PID){
+			return pcb;
+		}
+	}
+	return NULL;
+}
 
 
