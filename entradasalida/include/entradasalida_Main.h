@@ -28,6 +28,9 @@ extern int BLOCK_SIZE;
 extern int BLOCK_COUNT;
 extern int RETRASO_COMPACTACION;
 
+char* nombre_interfaz;
+char* config_interfaz;
+
 void validar_argumentos(char* nombre_interfaz, char* config_interfaz);
 t_instruccion* recibir_instruccion_IO(uint32_t* PID);
 void ejecutar_instruccion_IO(t_instruccion* instruccion, uint32_t PID);
