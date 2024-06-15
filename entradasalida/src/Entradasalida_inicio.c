@@ -1,55 +1,80 @@
 #include "../include/entradasalida_inicio.h"
 
 
-void iniciar_entradasalida(void){
+void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz)
+{
     iniciar_logs();
     iniciar_config();
 
 }
 
-void iniciar_logs(void){
-    logger = start_logger("log_entadasalida.log", "LOG CPU", LOG_LEVEL_INFO);
+void iniciar_logs(char* nombre_interfaz)
+{
+    char* path_log = "log_";
+    string_append(&path_log, nombre_interfaz);
+    char* nombre_log = string_duplicate(path_log);
+    string_append(&path_log, ".log");
+    logger = start_logger(path_log, nombre_log, LOG_LEVEL_INFO);
+
 	if(logger==NULL){
 		perror("No se pudo crear el logger");
 		exit(EXIT_FAILURE);
 	}
 }
 
-void iniciar_config(void){
-    config = start_config("./entradasalida.config");
+void iniciar_config(char* config_interfaz)
+{
+    char* path_config = "./";
+    string_append(&path_config, config_interfaz);
+    config = start_config(path_config);
 	if(config==NULL){
 		perror("No se pudo crear la config");
 		exit(EXIT_FAILURE);
 	}
 
-    IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
-    log_info(logger, "IP KERNEL leido: %s", IP_KERNEL);
-
-    PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
-    log_info(logger, "PUERTO KERNEL leido: %s", PUERTO_KERNEL);
-
-    IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
-    log_info(logger, "IP MEMORIA leido: %s", IP_MEMORIA);
-
-    PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
-    log_info(logger, "PUERTO MEMORIA leido: %s", PUERTO_MEMORIA);
-    
     TIPO_INTERFAZ = config_get_string_value(config, "TIPO_INTERFAZ");
-    log_info(logger, "TIPO INTERFAZ  leido: %s", TIPO_INTERFAZ);
+    cod_interfaz interfaz = get_tipo_interfaz(TIPO_INTERFAZ);
 
-    TIEMPO_UNIDAD_TRABAJO = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
-    log_info(logger, "TIEMPO UNIDAD TRABAJO leido: %d", TIEMPO_UNIDAD_TRABAJO);
+    switch (interfaz)
+    {
+    case GENERICA:
+        TIEMPO_UNIDAD_TRABAJO = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");    
+        IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
+        PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
+        break;
+    case STDIN:
+    case STDOUT:
+        IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
+        PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
+        IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
+        PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
+        break;
+    case DIALFS:
+        IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
+        PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
+        IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
+        PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
+        TIEMPO_UNIDAD_TRABAJO = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
+        PATH_BASE_DIALFS = config_get_string_value(config, "PATH_BASE_DIALFS");
+        BLOCK_SIZE = config_get_int_value(config, "BLOCK_SIZE");
+        BLOCK_COUNT = config_get_int_value(config, "BLOCK_COUNT");
+        RETRASO_COMPACTACION = config_get_int_value(config, "RETRASO_COMPACTACION");
+        break;
+    default:
+		perror("No se pudo cargar datos de la config");
+		exit(EXIT_FAILURE);
+        break;
+    }
 
-    PATH_BASE_DIALFS = config_get_string_value(config, "PATH_BASE_DIALFS");
-    log_info(logger, "PATH BASE DIALFS leido: %s", PATH_BASE_DIALFS);
+}
 
-    BLOCK_SIZE = config_get_int_value(config, "BLOCK_SIZE");
-    log_info(logger, "BLOCK SIZE leido: %d", BLOCK_SIZE);
-
-    BLOCK_COUNT = config_get_int_value(config, "BLOCK_COUNT");
-    log_info(logger, "BLOCK COUNT leido: %d", BLOCK_COUNT);
-
-    RETRASO_COMPACTACION = config_get_int_value(config, "RETRASO_COMPACTACION");
-    log_info(logger, "RETRASO COMPACTACION leido: %d", RETRASO_COMPACTACION);
-
+cod_interfaz get_tipo_interfaz(char* TIPO_INTERFAZ){
+    if (string_equals_ignore_case(TIPO_INTERFAZ, "GENERICA")) {return GENERICA;}
+    else if (string_equals_ignore_case(TIPO_INTERFAZ, "STDIN")) {return STDIN;}
+    else if (string_equals_ignore_case(TIPO_INTERFAZ, "STDOUT")) {return STDOUT;}
+    else if (string_equals_ignore_case(TIPO_INTERFAZ, "DIALFS")) {return DIALFS;}
+    else {
+        log_error(logger, "Se intento crear una interfaz de un tipo no valido");
+        return -1;
+    }
 }

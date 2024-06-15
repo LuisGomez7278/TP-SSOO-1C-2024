@@ -84,6 +84,15 @@ typedef struct pcb_de_proceso
     t_contexto_ejecucion CE;
 } t_pcb;
 
+typedef enum CODIGOS_DE_INTERFACES
+{
+    GENERICA,
+    STDIN,
+    STDOUT,
+    DIALFS
+} cod_interfaz;
+
+
 //Funciones de Utils.
 void decir_hola(char* );
 void read_console(t_log *);

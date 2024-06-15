@@ -22,8 +22,10 @@ extern int BLOCK_SIZE;
 extern int BLOCK_COUNT;
 extern int RETRASO_COMPACTACION;
 
-void iniciar_entradasalida(void);
-void iniciar_logs(void);
-void iniciar_config(void);
+void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz);
+void iniciar_logs(char* nombre_interfaz);
+void iniciar_config(char* config_interfaz);
+cod_interfaz get_tipo_interfaz(char* TIPO_INTERFAZ);
+
 
 #endif /*  ENTRADASALIDA_INICIO_H_ */
