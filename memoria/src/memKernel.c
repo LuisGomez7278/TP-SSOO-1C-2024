@@ -9,7 +9,7 @@ void atender_conexion_KERNEL_MEMORIA(){
     // CREO HILO ESCUCHA KERNEL
     pthread_t hilo_escucha_kenel_memoria;
     pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)conexion_con_kernel,NULL);
-    pthread_detach(hilo_escucha_kenel_memoria);
+    pthread_join(hilo_escucha_kenel_memoria,NULL);
 }
 
 void conexion_con_kernel(){
@@ -26,12 +26,9 @@ void conexion_con_kernel(){
         case ELIMINAR_PROCESO:
             eliminar_proceso();
             break;
-        case -1:
+        default:
             log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
             continuarIterando = 0;
-            break;
-        default:
-            log_warning(logger_debug,"Operacion desconocida de KERNEL. No quieras meter la pata");
             break;
         }
     }
