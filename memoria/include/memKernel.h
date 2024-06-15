@@ -1,6 +1,5 @@
-#ifndef MEMORIA_KERNEL_H_
-#define MEMORIA_KERNEL_H_
-
+#ifndef TP_MEMORIA_KERNEL_H_
+#define TP_MEMORIA_KERNEL_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,26 +11,16 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include <string.h>
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
-#include "extern_globales.h"
+#include "extGlobales.h"
+#include "../include/memPaginacion.h"
 
 void atender_conexion_KERNEL_MEMORIA();
-void escuchando_KERNEL_memoria();
-void crear_proceso_solicitado_por_kernel();
+void conexion_con_kernel();
+void crear_proceso();
+void eliminar_proceso();
 void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID);
 
-
-
-
-
-
-
-
-
-
-
-
-#endif /*  MEMORIA_KERNEL_H_ */
+#endif //TP_MEMORIA_KERNEL_H_

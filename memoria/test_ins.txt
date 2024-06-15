@@ -1,0 +1,3 @@
+SET AX 2
+SET BX 1
+SUM AX BXS

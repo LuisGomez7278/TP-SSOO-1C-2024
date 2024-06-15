@@ -23,11 +23,18 @@ typedef enum{
 	FETCH,
     PROCESO_NO_CARGADO,
 	TAM_PAG,
+    TLB_MISS, // aviso para cpu: si llega -1 es que la pag no tiene asignado ningun marco 
     CREAR_PROCESO,
     ELIMINAR_PROCESO,
     CARGA_EXITOSA_PROCESO,
     PAGE_FAULT,
     OUT_OF_MEMORY,
+    SOLICITUD_IO_READ, // solicitud de io a memoria para leer algo
+    SOLICITUD_IO_WRITE, // solicitud de io a memoria para escribir algo
+    SOLICITUD_MOV_OUT,
+    SOLICITUD_MOV_IN,
+    SOLICITUD_RESIZE,
+    SOLICITUD_COPY_STRING,
 	RECIBIR_CE_DISPATCH,
 	MENSAJE,
     HANDSHAKE,
@@ -44,7 +51,9 @@ typedef enum{
     DESALOJO_POR_IO_FS_DELETE,
     DESALOJO_POR_IO_FS_TRUNCATE,
     DESALOJO_POR_IO_FS_WRITE,
-    DESALOJO_POR_IO_FS_READ
+    DESALOJO_POR_IO_FS_READ,
+    OK,
+    FALLO
 } op_code;
 
 

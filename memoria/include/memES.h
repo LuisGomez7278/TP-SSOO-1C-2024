@@ -1,5 +1,5 @@
-#ifndef INICIO_MEMORIA_H_
-#define  INICIO_MEMORIA_H_
+#ifndef TP_MEMORIA_ES_H_
+#define TP_MEMORIA_ES_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,18 +14,11 @@
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
-#include "extern_globales.h"
+#include "memPaginacion.h"
+#include "../include/extGlobales.h"
 
+void conexion_con_es();
+void read_es();
+void write_es();
 
-
-void iniciar_memoria();
-
-
-
-
-
-
-
-
-
-#endif /*  INICIO_MEMORIA_H_*/
+#endif //TP_MEMORIA_ES_H_
