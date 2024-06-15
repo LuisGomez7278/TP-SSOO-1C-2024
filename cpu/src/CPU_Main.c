@@ -5,8 +5,8 @@ int main(int argc, char* argv[]) {
     iniciar_CPU();
 
     // crear conexion
-    // socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
-
+    socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
+    recibir_tamanio_de_pagina();
     // //iniciar Server de CPU
     socket_escucha = iniciar_servidor(puerto_escucha_dispatch, logger);
 

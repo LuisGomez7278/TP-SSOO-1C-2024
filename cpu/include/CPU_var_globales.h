@@ -20,6 +20,7 @@ int socket_escucha;
 
 int cant_entradas_TLB;
 char* algoritmo_TLB;
+uint32_t tamanio_de_pagina;
 
 uint32_t PID;
 int_code interrupcion;

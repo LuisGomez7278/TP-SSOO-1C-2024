@@ -11,7 +11,9 @@ int main(int argc, char* argv[]) {
     iniciar_entradasalida(nombre_interfaz, config_interfaz);
 
     socket_entradasalida_memoria = crear_conexion(IP_MEMORIA, PUERTO_MEMORIA);
+    log_info(logger, "Se creo la conexion entre IO y Memoria");
     socket_entradasalida_kernel = crear_conexion(IP_KERNEL, PUERTO_KERNEL);
+    log_info(logger, "Se creo la conexion entre IO y Kernel");
 
     bool continuarIterando = true;
     while (continuarIterando) {

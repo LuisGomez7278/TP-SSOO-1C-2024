@@ -35,3 +35,23 @@ t_instruccion* recibir_instruccion(int socket_cpu_memoria){
 
     return instr;
 }
+
+void recibir_tamanio_de_pagina()
+{
+    op_code codigo = recibir_operacion(socket_cpu_memoria);
+    if (codigo != TAM_PAG){
+        log_error(logger, "Llego otra cosa en lugar del tamaño maximo de pagina, codigo: %d", codigo);
+        tamanio_de_pagina = 0;
+    }
+    else
+    {
+        uint32_t size;
+        int desplazamiento = 0;
+        void* buffer = recibir_buffer(&size, socket_cpu_memoria);
+
+        tamanio_de_pagina = leer_de_buffer_uint32(buffer, &desplazamiento);
+        log_info(logger, "Llego el tamanio de pagina: %d", tamanio_de_pagina);
+        free(buffer);
+    }
+
+}

@@ -17,12 +17,19 @@ void atender_conexion_CPU_DISPATCH_KERNEL(){
         switch (codigo)
         {
         case DESALOJO_POR_IO_GEN_SLEEP:
+        case DESALOJO_POR_IO_STDIN:
+        case DESALOJO_POR_IO_STDOUT:
+        case DESALOJO_POR_IO_FS_CREATE:
+        case DESALOJO_POR_IO_FS_DELETE:
+        case DESALOJO_POR_IO_FS_TRUNCATE:
+        case DESALOJO_POR_IO_FS_WRITE:
+        case DESALOJO_POR_IO_FS_READ:
             buffer = recibir_buffer(&size, socket_kernel_cpu_dispatch);
             
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             leer_de_buffer_CE(buffer, &desplazamiento, &CE);
-            log_info(logger, "PID: %d, CE.AX: %d", PID, CE.AX);//Solo para pruebas
-            log_info(logger, "Se envia peticion a IO, codigo: %d", codigo);
+
+            log_info(logger, "PID: %d envia peticion a IO, codigo: %d", PID, codigo);
             paquete = crear_paquete(codigo);
             agregar_a_paquete_uint32(paquete, PID);
             agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);
@@ -33,41 +40,6 @@ void atender_conexion_CPU_DISPATCH_KERNEL(){
             // planificador_corto_plazo(codigo, PID, CE);
 
             break;
-        
-        case DESALOJO_POR_IO_STDIN:
-            buffer = recibir_buffer(&size, socket_kernel_cpu_dispatch);
-            
-            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-            leer_de_buffer_CE(buffer, &desplazamiento, &CE);
-            
-            paquete = crear_paquete(codigo);
-            agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);
-            enviar_paquete(paquete, socket_entradasalida_kernel);
-            eliminar_paquete(paquete);
-
-            //TODO
-            // planificador_corto_plazo(codigo, PID, CE);
-            break;
-        case DESALOJO_POR_IO_STDOUT:
-            
-            break;
-        case DESALOJO_POR_IO_FS_CREATE:
-            
-            break;
-        case DESALOJO_POR_IO_FS_DELETE:
-            
-            break;
-        case DESALOJO_POR_IO_FS_TRUNCATE:
-            
-            break;
-        case DESALOJO_POR_IO_FS_WRITE:
-            
-            break;
-
-        case DESALOJO_POR_IO_FS_READ:
-
-            break;
-
         case DESALOJO_POR_WAIT:
 
             break;

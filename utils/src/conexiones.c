@@ -474,20 +474,9 @@ int_code leer_de_buffer_int_code(void* buffer, int* desplazamiento)
 };
 
 
-
-void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int socket_a_enviar){
-
-    t_paquete *paquete= crear_paquete (codigo_operacion);
-    agregar_a_paquete_uint32(paquete,PID);
-    enviar_paquete(paquete,socket_a_enviar);              //--------------ESTA FUNCION SERIALIZA EL PAQUETE ANTES DE ENVIARLO --quedaria un void*= cod_op||SIZE TOTAL||PID(uint_32)
-    eliminar_paquete(paquete);
-
-}
-
 uint32_t recibir_de_buffer_solo_PID (int socket_a_recibir){      /// PARA EJECUTAR ESTA INSTRUCCION CONSIDERO QUE EL CODIGO DE OPERACION YA ESTA EXTRAIDO, SOLO QUEDA=  void*= SIZE TOTAL||PID(uint_32)
     uint32_t *sizeTotal=malloc(sizeof(uint32_t));
-    int *desplazamiento=malloc(sizeof(int));
-    *desplazamiento=0;
+    int desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_a_recibir);
     uint32_t PID = 0; 
 
