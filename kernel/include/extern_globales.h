@@ -34,7 +34,7 @@ extern int quantum;
 extern char** recursos;
 extern char** instancias_recursos;
 extern int grado_multiprogramacion;
-
+extern int* instancias_recursos_int;
 
 
 extern int socket_kernel_cpu_dispatch;
@@ -110,6 +110,8 @@ t_pcb* buscar_pcb_por_PID(t_list* lista, uint32_t pid_buscado);
 //servicios_kernel
 uint32_t asignar_pid();
 
-
+//recursos.h
+int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas);
+void construir_lista_de_recursos();
 
 #endif /*  VARIABLES_GLOBALES_H_ */
