@@ -23,16 +23,10 @@
 #include "extern_globales.h"
 
 
-typedef struct RECURSOS {
-    char* nombre_recurso;        
-    int instancias_del_recurso; 
-    int instancias_utilizadas_del_recurso;  
-    t_list* lista_de_espera;     
-    struct recurso* siguiente_recurso; 
-} t_recurso;
 
 
 
+t_recurso* lista_de_recursos;
 int cantidadDeRecursos;
 
 

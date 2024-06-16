@@ -11,11 +11,11 @@ int main(int argc, char* argv[]) {
     
     socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
 
-    
+    /*
     // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug,"Esperando que se conecte CPU");
     socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
-    
+    */
 
     // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug,"Esperando que se concte KERNEL");

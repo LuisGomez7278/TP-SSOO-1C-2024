@@ -2,6 +2,7 @@
 
 
 void iniciar_Kernel(){
+
     iniciar_logs();
 	iniciar_configs();
 	//imprimir_configs();
@@ -15,7 +16,8 @@ void iniciar_Kernel(){
 
 
 void iniciar_logs()
-{
+{	
+	printf("INICIANDO LOGGER\n");
 	logger = start_logger("log_kernel.log", "LOG KERNEL", LOG_LEVEL_INFO);
 	if(logger==NULL){
 		perror("No se pudo crear el logger");
@@ -30,12 +32,14 @@ void iniciar_logs()
 }
 
 void iniciar_configs(){
-
+	printf("INICIANDO CONFIGS\n");
 	config = start_config("./kernel.config");
 	if(config==NULL){
 		perror("No se pudo crear la config");
 		exit(EXIT_FAILURE);
 	}
+
+	printf("LEYENDO VALORES DE CONFIGS\n");
 
     ip_cpu 							 = config_get_string_value(config, "IP_CPU");
     puerto_cpu_dispatch				 = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
@@ -49,12 +53,20 @@ void iniciar_configs(){
 	instancias_recursos				 = config_get_array_value(config,"INSTANCIAS_RECURSOS");
 	grado_multiprogramacion			 = config_get_int_value(config,"GRADO_MULTIPROGRAMACION");
 
-	instancias_recursos_int			 = convertir_a_enteros_la_lista_de_instancias(char** instancias_recursos);
+	instancias_recursos_int			 = convertir_a_enteros_la_lista_de_instancias(instancias_recursos);
 	
+
 	construir_lista_de_recursos(); 
+	
+	imprimir_recursos();
+
 }
 
+
+
 void iniciar_estructuras_planificacion(){
+
+	printf("INICIANDO ESTRUCTURAS DE PLANIFICACION\n");
 
     lista_new = list_create();
 	lista_ready = list_create();

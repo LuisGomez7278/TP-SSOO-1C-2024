@@ -12,6 +12,13 @@
 #include <semaphore.h>
 #include <pthread.h>
 
+typedef struct RECURSOS {
+    char* nombre_recurso;        
+    int instancias_del_recurso; 
+    int instancias_solicitadas_del_recurso;  
+    t_list* lista_de_espera;     
+    struct RECURSOS* siguiente_recurso; 
+} t_recurso;
 
 typedef enum instrucciones
 {

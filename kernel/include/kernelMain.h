@@ -39,7 +39,7 @@
 	char** recursos;
 	char** instancias_recursos;
 	int grado_multiprogramacion;
-    int* instancias_recursos_int;
+    int* instancias_recursos_int=NULL;
 
 
 

@@ -122,6 +122,21 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
         
         break;
     case DESALOJO_POR_WAIT:
+        switch (wait_recursos(recurso_solicitado, pcb_dispatch);)
+        {
+        case 1:             //PCB EN ESPERA DEL RECURSO
+
+            break;
+        case 2:             //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
+            
+            break;
+        case -1:             //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
+            
+            break;
+        default:
+            log_error(logger_debug,"La funcion wait devolvio error");
+            break;
+        }
          
         break;
     case DESALOJO_POR_SIGNAL:

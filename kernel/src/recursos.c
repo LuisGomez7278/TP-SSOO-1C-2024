@@ -1,17 +1,6 @@
 
 #include "../include/recursos.h"
 
-    char* recursos[] = {"Recurso1", "Recurso2", "Recurso3", NULL};
-
-    // Iterar sobre los elementos
-    for (char** ptr = recursos; *ptr != NULL; ptr++) {
-        printf("%s\n", *ptr);
-    }
-
-
-void wait_a_recurso (char*)
-
-
 
 
 int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
@@ -34,78 +23,80 @@ int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
 
 
 
-
-
  void construir_lista_de_recursos() {
-    t_recurso* lista_de_recursos = NULL;
-    t_recurso* auxiliar = NULL;
     
+    t_recurso* auxiliar = NULL;
+    t_recurso* ultimo = NULL;
+
     for (int i = 0; i < cantidadDeRecursos; i++) {
         auxiliar = malloc(sizeof(t_recurso));
-
+        
 
         auxiliar->nombre_recurso = malloc(strlen(recursos[i]) + 1);
  
         strcpy(auxiliar->nombre_recurso, recursos[i]);
 
         auxiliar->instancias_del_recurso = instancias_recursos_int[i];
-        auxiliar->instancias_utilizadas_del_recurso = 0;
-        auxiliar->lista_de_espera = NULL;
+        auxiliar->instancias_solicitadas_del_recurso = 0;
+        auxiliar->lista_de_espera = list_create();
         auxiliar->siguiente_recurso = NULL;
 
         if (lista_de_recursos == NULL) {
-            lista_de_recursos = auxiliar;  // Primer nodo de la lista
-        } 
+            lista_de_recursos = auxiliar;  
+        } else {
+            ultimo->siguiente_recurso = auxiliar;  
+        }
+        ultimo = auxiliar; 
     }
     
 }
 
 
 
+void imprimir_recursos(){
+    t_recurso* auxiliar = lista_de_recursos;
 
-
-
-}
-
-
-
-
-
-
-/*
-int obtener_cantidad_recursos(char** config_recursos){
-    int i = 0;
-    while (config_recursos[i] != NULL)
-    {
-        i++;
+    while(auxiliar!=NULL){
+        log_info(logger_debug, "El recurso '%s', tiene %d instancias, de las cuales utiliza %d \n",auxiliar->nombre_recurso,auxiliar->instancias_del_recurso,auxiliar->instancias_solicitadas_del_recurso);
+        auxiliar = auxiliar->siguiente_recurso;
     }
-    return i;
+
+
 }
 
-void cargar_recursos(char** recursos, char** instancias_recursos, int cant_recursos){
-    for (int i = 0; i<cant_recursos; i++)
-    {
-        t_recurso* rec = malloc(sizeof(t_recurso));
-        rec->instancias = atoi(instancias_recursos[i]); //No se si funciona, es un char**
-        rec->n_recurso = i;
-        rec->bloqueados = list_create();
 
-        dictionary_put(dict_recursos, recursos[i], rec);
-    }
-}
 
-void liberar_recursos(t_pcb* pcb, char** lista_recursos)
-{
-    for (int i = 0; i < cantidad_recursos; i++)
-    {
-        t_recurso* rec = dictionary_get(dict_recursos, lista_recursos[i]);
 
-        while (pcb->recursos_proceso[i] > 0)
-        {
-            rec->instancias += 1;
-            pcb->recursos_proceso[i] -= 1;
+
+
+
+
+int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
+    t_recurso* auxiliar = lista_de_recursos;
+    
+    while(auxiliar!=NULL){
+        if(strcmp(auxiliar->nombre_recurso,recurso_solicitado)==0){
+            break;
+        }else{
+            auxiliar = auxiliar->siguiente_recurso;
         }
 
-        dictionary_put(dict_recursos, lista_recursos[i], rec);
     }
-}*/
+
+    if(auxiliar==NULL){
+        return -1;
+    }
+    if (auxiliar->instancias_del_recurso-auxiliar->instancias_solicitadas_del_recurso<=0)
+    {
+        list_add(auxiliar->lista_de_espera,pcb_solicitante);
+        auxiliar->instancias_solicitadas_del_recurso-=1;
+        return 1;
+        
+    }else{
+        auxiliar->instancias_solicitadas_del_recurso-=1;
+        return 2;
+    }
+    
+
+}
+

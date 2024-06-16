@@ -35,7 +35,7 @@ extern char** recursos;
 extern char** instancias_recursos;
 extern int grado_multiprogramacion;
 extern int* instancias_recursos_int;
-
+extern t_recurso* lista_de_recursos;
 
 extern int socket_kernel_cpu_dispatch;
 extern int socket_kernel_cpu_interrupt; //queda libre por ahora
@@ -113,5 +113,6 @@ uint32_t asignar_pid();
 //recursos.h
 int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas);
 void construir_lista_de_recursos();
-
+void imprimir_recursos();
+int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
 #endif /*  VARIABLES_GLOBALES_H_ */
