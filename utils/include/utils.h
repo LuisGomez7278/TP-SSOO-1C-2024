@@ -83,7 +83,7 @@ typedef struct pcb_de_proceso
 {
    	uint32_t PID;
     t_estado estado;
-    uint32_t quantum_restante;
+    uint32_t quantum_ejecutado;
     t_contexto_ejecucion CE;
     
 } t_pcb;

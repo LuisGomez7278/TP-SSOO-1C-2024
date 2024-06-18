@@ -171,7 +171,7 @@ void imprimir_paquete(t_paquete* paquete) {
     // Liberar la memoria asignada para el string
     free(string);
 }
-
+/*
 void verificar_paquete(void* buffer) {
     op_code codigo_operacion;
     uint32_t size;
@@ -213,7 +213,7 @@ void verificar_paquete(void* buffer) {
     free(str);
 }
 
-
+*/
 
 
 
@@ -334,7 +334,7 @@ void agregar_a_paquete_uint8(t_paquete* paquete, uint8_t numero)
 }
 
 
-void agregar_a_paquete_uint32(t_paquete* paquete, uint32_t numero)
+void agregar_a_paquete_uint32(t_paquete* paquete, uint32_t numero)     //ESTA FUNCION AGREGA SOLO UN UINT_32, NO AGREGA UN PREFIJO CON EL TAMAÑO
 {
     paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(uint32_t));
 
@@ -347,7 +347,7 @@ void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string
 {
     paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + tamanio + sizeof(uint32_t));
 
-	memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio, sizeof(uint32_t));
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio, sizeof(uint32_t));                                //ESTA FUNCION AGREGA EL TAMANIO Y UN STRING=  UINT_32||STRING
 	memcpy(paquete->buffer->stream + paquete->buffer->size + sizeof(uint32_t), string, tamanio);
 
 	paquete->buffer->size += tamanio + sizeof(uint32_t);
@@ -489,8 +489,7 @@ uint32_t recibir_de_buffer_solo_PID (int socket_a_recibir){      /// PARA EJECUT
     uint32_t PID = 0; 
 
     if (buffer != NULL) {
-        uint32_t tam_buffer = *sizeTotal;
-        PID = leer_de_buffer_uint32(buffer, desplazamiento);
+        PID = leer_de_buffer_uint32(buffer, &desplazamiento);
     }
     return PID;
 }

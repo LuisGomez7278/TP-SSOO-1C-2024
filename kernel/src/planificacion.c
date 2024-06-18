@@ -102,7 +102,7 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
     
     if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL)
     {
-        tiempo_ejecucion= temporal_gettime(temporizador); //esto hay que ponerlo 
+        tiempo_ya_ejecutado= temporal_gettime(temporizador); //recupero el valor antes de eliminar el temporizador
         temporal_destroy(temporizador);
         pthread_cancel(hilo_de_desalojo_por_quantum);
     }
@@ -111,44 +111,59 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
                                 // LO DECLARO PARA QUE NO ME ARROJE ERRORES
 
     t_pcb *pcb_dispatch=malloc(sizeof(t_pcb));
-
-    switch (cod_op)
-    {
+    char*recurso_solicitado="Esto es una prueba";
+    switch (cod_op){
 
     case PAGE_FAULT: 
         
         break;
     case OUT_OF_MEMORY:
-        
+        enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+        enviar_siguiente_proceso_a_ejecucion();
         break;
     case DESALOJO_POR_WAIT:
-        switch (wait_recursos(recurso_solicitado, pcb_dispatch);)
-        {
-        case 1:             //PCB EN ESPERA DEL RECURSO
 
-            break;
-        case 2:             //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
-            
-            break;
-        case -1:             //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
-            
-            break;
-        default:
-            log_error(logger_debug,"La funcion wait devolvio error");
-            break;
-        }
-         
-        break;
+        switch (wait_recursos(recurso_solicitado, pcb_dispatch)) {
+            case 1:                                                                                             //PCB QUEDO EN COLA DE ESPERA DEL RECURSO
+                enviar_siguiente_proceso_a_ejecucion();	
+
+                break;
+            case 2:                                                                                            //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
+                enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch,tiempo_ya_ejecutado);
+
+                break;
+            case -1:                                                                                                    //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
+                enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+                enviar_siguiente_proceso_a_ejecucion();	    
+                break;
+            default:
+                log_error(logger_debug,"La funcion wait devolvio error");
+                break;
+            }
+        break; 
     case DESALOJO_POR_SIGNAL:
-        
+        switch(signal_recursos (recurso_solicitado)){
+            case 1:
+            enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch,tiempo_ya_ejecutado);            //SIGNAL EXITOSO, DEVUELVO EL PROCESO A EJECUCION
+            break;
+            case -1:
+            enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+            enviar_siguiente_proceso_a_ejecucion();
+
+        }
+
         break;
     case DESALOJO_POR_QUANTUM:
-        
+            pcb_dispatch->quantum_ejecutado=0;                                                                  //RESETEO EL CONTADOR Y LO PONGO NUEVAMENTE EN READY
+            ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY);
+            sem_post(&cantidad_procesos_en_algun_ready); 
+            sem_post(&cantidad_procesos_ready);
+            enviar_siguiente_proceso_a_ejecucion();
         break;
     case DESALOJO_POR_FIN_PROCESO:
-            op_code codigo_de_operacion=ELIMINAR_PROCESO;
+           
             //ENVIO PID A MEMORIA PARA QUE ELIMINE EL PROCESO
-            enviar_instruccion_con_PID_por_socket(codigo_de_operacion,pcb_dispatch->PID,socket_memoria_kernel);
+            enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
 
 
         break;
@@ -168,10 +183,10 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
 
     default:
         break;
-    }
+    }   
 
-enviar_siguiente_proceso_a_ejecucion();	
-free(pcb_dispatch);	
+
+    free(pcb_dispatch);	
 	
 }
 
@@ -202,7 +217,7 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
             perror("malloc");
             return;
         }
-        *quantum_ptr = pcb_a_ejecutar->quantum_restante;
+        *quantum_ptr = pcb_a_ejecutar->quantum_ejecutado;
 
         pthread_t hilo_de_desalojo_por_quantum;                
         pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, quantum_ptr); 
@@ -214,6 +229,7 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
     enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);     
     sem_post(&cantidad_procesos_en_algun_ready);
 }
+
 
 
 void interruptor_de_QUANTUM(void* quantum_de_pcb)
@@ -231,7 +247,24 @@ void interruptor_de_QUANTUM(void* quantum_de_pcb)
 }
 
 
+void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar,u_int64_t quantum_recien_ejecutado){                         //ESTA FUNCION ES PARA CUANDO SE SOLICITA UN RECURSO Y PUEDE SEGUIR EJECUTANDO
+pcb_a_reenviar->quantum_ejecutado+=quantum_recien_ejecutado;
 
+    int* quantum_ptr = malloc(sizeof(int));                                                    
+    if (quantum_ptr == NULL) {
+        perror("malloc");
+        return;
+    }
+    *quantum_ptr = pcb_a_reenviar->quantum_ejecutado;
+    pthread_t hilo_de_desalojo_por_quantum;                
+    pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, quantum_ptr); 
+    pthread_detach(hilo_de_desalojo_por_quantum);
+    
+
+    enviar_CE(socket_kernel_cpu_dispatch, pcb_a_reenviar->PID,pcb_a_reenviar->CE);     
+    log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u\n", pcb_a_reenviar->PID);
+    
+}
 
 
 

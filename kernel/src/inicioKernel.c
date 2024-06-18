@@ -17,7 +17,6 @@ void iniciar_Kernel(){
 
 void iniciar_logs()
 {	
-	printf("INICIANDO LOGGER\n");
 	logger = start_logger("log_kernel.log", "LOG KERNEL", LOG_LEVEL_INFO);
 	if(logger==NULL){
 		perror("No se pudo crear el logger");
@@ -32,14 +31,12 @@ void iniciar_logs()
 }
 
 void iniciar_configs(){
-	printf("INICIANDO CONFIGS\n");
 	config = start_config("./kernel.config");
 	if(config==NULL){
 		perror("No se pudo crear la config");
 		exit(EXIT_FAILURE);
 	}
 
-	printf("LEYENDO VALORES DE CONFIGS\n");
 
     ip_cpu 							 = config_get_string_value(config, "IP_CPU");
     puerto_cpu_dispatch				 = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
@@ -66,7 +63,7 @@ void iniciar_configs(){
 
 void iniciar_estructuras_planificacion(){
 
-	printf("INICIANDO ESTRUCTURAS DE PLANIFICACION\n");
+	
 
     lista_new = list_create();
 	lista_ready = list_create();

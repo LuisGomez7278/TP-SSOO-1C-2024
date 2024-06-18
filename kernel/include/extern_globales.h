@@ -115,4 +115,5 @@ int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas);
 void construir_lista_de_recursos();
 void imprimir_recursos();
 int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
+int signal_recursos ( char*recurso_solicitado);
 #endif /*  VARIABLES_GLOBALES_H_ */

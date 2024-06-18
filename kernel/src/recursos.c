@@ -57,7 +57,7 @@ void imprimir_recursos(){
     t_recurso* auxiliar = lista_de_recursos;
 
     while(auxiliar!=NULL){
-        log_info(logger_debug, "El recurso '%s', tiene %d instancias, de las cuales utiliza %d \n",auxiliar->nombre_recurso,auxiliar->instancias_del_recurso,auxiliar->instancias_solicitadas_del_recurso);
+        log_info(logger_debug, "El recurso '%s', tiene %d instancias, de las cuales utiliza %d",auxiliar->nombre_recurso,auxiliar->instancias_del_recurso,auxiliar->instancias_solicitadas_del_recurso);
         auxiliar = auxiliar->siguiente_recurso;
     }
 
@@ -97,6 +97,36 @@ int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
         return 2;
     }
     
+
+}
+
+
+int signal_recursos ( char*recurso_solicitado){
+     t_recurso* auxiliar = lista_de_recursos;
+    
+    while(auxiliar!=NULL){
+        if(strcmp(auxiliar->nombre_recurso,recurso_solicitado)==0){
+            break;
+        }else{
+            auxiliar = auxiliar->siguiente_recurso;
+        }
+
+    }
+
+    if(auxiliar==NULL){
+        return -1;
+    }else {
+        auxiliar->instancias_del_recurso+=1;
+    }
+
+
+    if (auxiliar->instancias_del_recurso>0 && list_size(auxiliar->lista_de_espera)>0)
+    {   
+        t_pcb *pcb_liberado=list_remove(auxiliar->lista_de_espera,0);
+        ingresar_en_lista(pcb_liberado, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY);
+    }
+
+    return 1;
 
 }
 
