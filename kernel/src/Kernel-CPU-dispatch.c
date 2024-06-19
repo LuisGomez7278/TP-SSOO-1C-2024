@@ -155,13 +155,12 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
     }
 }
 
-void respuesta_CPU_recurso(op_code respuesta)
+void respuesta_CPU_recurso(op_code respuesta)//Envia solo el op_code, si hace falta se puede pasar a conexiones.h
 {
-    t_paquete* paquete = crear_paquete(respuesta);
-    enviar_paquete(paquete, socket_kernel_cpu_dispatch);
-    eliminar_paquete(paquete);
+	void* a_enviar = malloc(sizeof(op_code)); //crea un stream
+	memcpy(a_enviar, &respuesta, sizeof(op_code)); //copia el op_code al stream
+	send(socket_kernel_cpu_dispatch, a_enviar, sizeof(op_code), 0); //envia el stream
 }
-
 /*
 CPU solo tiene el CE y la PID, para completar la pcb necesita el estado y el quantum
 pero el estado necesariamente es EXEC cuando viene de CPU y el quentum lo estas calculando arriba por lo que veo
