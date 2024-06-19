@@ -238,10 +238,32 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case WAIT:
         log_info(logger,"PID: %d - Ejecutando: WAIT - %s", PID, ins_actual->arg1);
+        enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);
+        if (esperar_respuesta_recurso());
+        {
+            contexto_interno->PC++;
+            log_info(logger,"PID: %d - WAIT de recurso: %s fue exitoso", PID, ins_actual->arg1);
+        }
+        else
+        {
+            log_info(logger,"PID: %d - WAIT de recurso: %s fallo", PID, ins_actual->arg1);
+        }
+        recibir_proceso();
         break;
 
     case SIGNAL:
         log_info(logger,"PID: %d - Ejecutando: SIGNAL - %s", PID, ins_actual->arg1);
+        enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);
+        if (esperar_respuesta_recurso());
+        {
+            contexto_interno->PC++;
+            log_info(logger,"PID: %d - SIGNAL de recurso: %s fue exitoso", PID, ins_actual->arg1);
+        }
+        else
+        {
+            log_info(logger,"PID: %d - SIGNAL de recurso: %s fallo", PID, ins_actual->arg1);
+        }
+        recibir_proceso();
         break;
 
     case EXIT:
