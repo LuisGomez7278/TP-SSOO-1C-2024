@@ -162,13 +162,18 @@ void respuesta_CPU_recurso(op_code respuesta)
     eliminar_paquete(paquete);
 }
 
+/*
+CPU solo tiene el CE y la PID, para completar la pcb necesita el estado y el quantum
+pero el estado necesariamente es EXEC cuando viene de CPU y el quentum lo estas calculando arriba por lo que veo
+asi que le asigno 0
+*/
 t_pcb pcb_de_cpu(uint32_t PID, t_contexto_ejecucion CE)
 {
     t_pcb* pcb;
     pcb->PID = PID;
     pcb->CE = CE;
     pcb->estado = EXEC;
-    pcb->quantum_restante = 0;//por lo que entendi de la implementacion, pero puede que este mal
+    pcb->quantum_restante = 0;
 
     return pcb;
 }
