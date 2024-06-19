@@ -14,7 +14,7 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
 
     char* recurso_solicitado = "Esto es una prueba";
 
-    op_code codigo;
+    op_code cod_op;
     uint32_t size;
     int desplazamiento = 0;
     void* buffer;
@@ -27,8 +27,8 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
     t_paquete* paquete;// es para los IO, seguro se cambie
 
     while(true){
-        codigo = recibir_operacion(socket_kernel_cpu_dispatch);
-        switch (codigo)
+        cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
+        switch (cod_op)
         {
         case DESALOJO_POR_IO_GEN_SLEEP:
         case DESALOJO_POR_IO_STDIN:
@@ -47,9 +47,9 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
             log_info(logger, "PID: %d envia peticion a interfaz %s", PID, nombre_interfaz);
 
             //hay que replantearlo con multiplexacion
-            paquete = crear_paquete(codigo);
+            paquete = crear_paquete(cod_op);
             agregar_a_paquete_uint32(paquete, PID);
-            agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);
+            agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
             enviar_paquete(paquete, socket_entradasalida_kernel);
             eliminar_paquete(paquete);
             //
