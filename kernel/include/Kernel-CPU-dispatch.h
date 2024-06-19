@@ -25,6 +25,7 @@
 
 
 
+uint64_t tiempo_ya_ejecutado;
 
 
 
