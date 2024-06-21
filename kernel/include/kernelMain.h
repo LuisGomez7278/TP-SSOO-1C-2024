@@ -35,20 +35,20 @@
     char* puerto_cpu_interrupt;
     char* puerto_escucha;
     char* algoritmo_planificacion;
-	int quantum;
+	int32_t quantum;
 	char** recursos;
 	char** instancias_recursos;
-	int grado_multiprogramacion;
+	int32_t grado_multiprogramacion;
     int* instancias_recursos_int=NULL;
 
 
 
 
-    int socket_kernel_cpu_dispatch;
-    int socket_kernel_cpu_interrupt; //queda libre por ahora
-    int socket_memoria_kernel;
-    int socket_entradasalida_kernel;
-    int socket_escucha;
+    int32_t socket_kernel_cpu_dispatch;
+    int32_t socket_kernel_cpu_interrupt; //queda libre por ahora
+    int32_t socket_memoria_kernel;
+    int32_t socket_entradasalida_kernel;
+    int32_t socket_escucha;
 
 
 

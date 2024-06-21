@@ -25,7 +25,7 @@ void conexion_con_es(){
 
 void read_es(){                                                                     ///CONTESTA EL CASE DE READ, LEE Y DEVUELVE EL VALOR LEIDO EN MEMORIA
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    int32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer!=NULL){
@@ -51,7 +51,7 @@ void read_es(){                                                                 
 
 void write_es(){                                                                   ///CONTESTA EL CASE DE WRITE, ESCRIBE Y DEVUELVE OK O ERROR
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    int32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){

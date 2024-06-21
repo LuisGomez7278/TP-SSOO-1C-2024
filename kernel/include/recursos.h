@@ -27,8 +27,8 @@
 
 
 t_recurso* lista_de_recursos;
-int cantidadDeRecursos;
-
+int32_t cantidadDeRecursos;
+pthread_mutex_t mutex_recursos;
 
 
 
@@ -36,19 +36,19 @@ int cantidadDeRecursos;
 /*
 typedef struct
 {
-    int instancias;
-    int n_recurso;
+    int32_t instancias;
+    int32_t n_recurso;
     t_list *bloqueados;
 } t_recurso;
 
 t_dictionary *dict_recursos;
 char** config_recursos;
 char** config_instancias_recursos;
-int cantidad_recursos;
+int32_t cantidad_recursos;
 
-int obtener_cantidad_recursos(char** config_recursos);
+int32_t obtener_cantidad_recursos(char** config_recursos);
 
-void cargar_recursos(char** recursos, char** instancias_recursos, int cant_recursos);
+void cargar_recursos(char** recursos, char** instancias_recursos, int32_t cant_recursos);
 
 void liberar_recursos(t_pcb* pcb, char** lista_recursos);
 

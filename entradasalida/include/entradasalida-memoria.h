@@ -7,7 +7,7 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-extern int socket_entradasalida_memoria;
+extern int32_t socket_entradasalida_memoria;
 
 extern t_log* logger;
 extern t_config* config;

@@ -1,6 +1,6 @@
 #include "../include/CPU_Main.h"
 
-int main(int argc, char* argv[]) {
+int32_t main(int32_t argc, char* argv[]) {
 
     iniciar_CPU();
 
@@ -69,7 +69,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     int* registro_destino;
     int* registro_origen;
     int* registro;
-    int valor;
+    int32_t valor;
 
     switch (codigo)
     {

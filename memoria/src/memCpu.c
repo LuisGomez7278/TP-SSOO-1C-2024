@@ -57,7 +57,7 @@ void conexion_con_cpu(){
     }
 }
 
-void fetch(int socket_cpu_memoria){ 
+void fetch(int32_t socket_cpu_memoria){ 
     uint32_t PID=0; 
     uint32_t PC=0;
     recibir_fetch(socket_cpu_memoria, &PID, &PC);
@@ -77,9 +77,9 @@ void fetch(int socket_cpu_memoria){
     log_info(logger_debug, "instruccion enviada");
 }
 
-void frame(int socket_cpu_memoria){
+void frame(int32_t socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    int32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -104,9 +104,9 @@ void frame(int socket_cpu_memoria){
     free(buffer);
 }
 
-void movIn(int socket_cpu_memoria){
+void movIn(int32_t socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    int32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -130,9 +130,9 @@ void movIn(int socket_cpu_memoria){
     free(buffer);
 }
 
-void movOut(int socket_cpu_memoria){
+void movOut(int32_t socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    int32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -163,9 +163,9 @@ void movOut(int socket_cpu_memoria){
     free(buffer);
 }
 
-void copiar_string(int socket_cpu_memoria){
+void copiar_string(int32_t socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    int32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -197,9 +197,9 @@ void copiar_string(int socket_cpu_memoria){
     free(buffer);
 }
 
-void ins_resize(int socket_cpu_memoria){
+void ins_resize(int32_t socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    int32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -228,16 +228,16 @@ void ins_resize(int socket_cpu_memoria){
     free(buffer);
 }
 
-void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC){
+void recibir_fetch(int32_t socket_cpu_memoria, uint32_t* PID, uint32_t* PC){
     uint32_t size;
-    int desplazamiento = 0;
+    int32_t desplazamiento = 0;
     void* buffer = recibir_buffer(&size, socket_cpu_memoria);
 
     *PID = leer_de_buffer_uint32(buffer, &desplazamiento);
     *PC = leer_de_buffer_uint32(buffer, &desplazamiento);
 }
 
-void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
+void enviar_instruccion(int32_t socket_cpu_memoria, t_instruccion* instruccion){
     t_paquete* paquete = crear_paquete(FETCH);
     //log_info(logger, "Paquete creado");
     agregar_a_paquete_cod_ins(paquete, instruccion->ins);

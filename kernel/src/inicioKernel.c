@@ -92,6 +92,8 @@ void iniciar_estructuras_planificacion(){
 	pthread_mutex_init(&semaforo_bloqueado, NULL);
 	pthread_mutex_init(&semaforo_bloqueado_prioridad, NULL);
 	pthread_mutex_init(&semaforo_ready_prioridad, NULL);
+	pthread_mutex_init(&mutex_recursos, NULL);
+	
 
 //mutex asignacion pid
 	pthread_mutex_init(&mutex_pid, NULL);

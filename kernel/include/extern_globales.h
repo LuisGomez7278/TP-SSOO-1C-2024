@@ -30,24 +30,24 @@ extern char* puerto_cpu_dispatch;
 extern char* puerto_cpu_interrupt;
 extern char* puerto_escucha;
 extern char* algoritmo_planificacion;
-extern int quantum;
+extern int32_t quantum;
 extern char** recursos;
 extern char** instancias_recursos;
-extern int grado_multiprogramacion;
+extern int32_t grado_multiprogramacion;
 extern int* instancias_recursos_int;
 extern t_recurso* lista_de_recursos;
 
-extern int socket_kernel_cpu_dispatch;
-extern int socket_kernel_cpu_interrupt; //queda libre por ahora
-extern int socket_memoria_kernel;
-extern int socket_entradasalida_kernel;
-extern int socket_escucha;
+extern int32_t socket_kernel_cpu_dispatch;
+extern int32_t socket_kernel_cpu_interrupt; //queda libre por ahora
+extern int32_t socket_memoria_kernel;
+extern int32_t socket_entradasalida_kernel;
+extern int32_t socket_escucha;
 
 extern t_log* logger;
 extern t_log* logger_debug;
 extern t_config* config;
 
-extern int conexion_CPU_DISPATCH;
+extern int32_t conexion_CPU_DISPATCH;
 extern t_log* logger;
 extern t_config *config;
 
@@ -71,6 +71,7 @@ extern pthread_mutex_t semaforo_ready;
 extern pthread_mutex_t semaforo_ready_prioridad;
 extern pthread_mutex_t semaforo_bloqueado_prioridad;
 extern pthread_mutex_t semaforo_bloqueado;
+extern pthread_mutex_t mutex_recursos;
 
 extern uint32_t identificador_PID;
 extern pthread_mutex_t mutex_pid;
@@ -84,7 +85,7 @@ void iniciar_proceso(char*leido);
 //planificacion.h
 void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo);
 void ingresar_en_lista(t_pcb* pcb, t_list* lista,  pthread_mutex_t* semaforo_mutex, sem_t* semaforo_contador, t_estado estado);
-void cambiar_grado_multiprogramacion(int nuevo_valor);
+void cambiar_grado_multiprogramacion(int32_t nuevo_valor);
 void gestionar_dispatch ();
 
 //kernel-cpu-dispatch
@@ -116,8 +117,8 @@ uint32_t asignar_pid();
 int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas);
 void construir_lista_de_recursos();
 void imprimir_recursos();
-int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
-int signal_recursos ( char*recurso_solicitado,uint32_t PID);
+int32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
+int32_t signal_recursos ( char*recurso_solicitado,uint32_t PID);
 void eliminar_proceso_de_lista_recursos (uint32_t PID);
 
 #endif /*  VARIABLES_GLOBALES_H_ */

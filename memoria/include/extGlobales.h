@@ -32,18 +32,18 @@ extern t_log* logger;
 //CONFIG
 extern char* puerto_escucha;
 extern char* path_base;
-extern int tam_pagina;
-extern int tam_memoria;
-extern int retardo;
-extern int cant_frames;
+extern int32_t tam_pagina;
+extern int32_t tam_memoria;
+extern int32_t retardo;
+extern int32_t cant_frames;
 extern t_log* logger_debug;
 
 extern t_config* config;
 
-extern int socket_cpu_memoria;
-extern int socket_kernel_memoria;
-extern int socket_entradasalida_memoria;
-extern int socket_escucha;
+extern int32_t socket_cpu_memoria;
+extern int32_t socket_kernel_memoria;
+extern int32_t socket_entradasalida_memoria;
+extern int32_t socket_escucha;
 
 t_list* leer_pseudocodigo(char* path);
 // memoria de instrucciones

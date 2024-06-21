@@ -82,33 +82,33 @@ typedef struct
 
 /*----------Cliente----------*/
 
-int crear_conexion(char* ip, char* puerto);
-void liberar_conexion(int socket_cliente);
+int32_t crear_conexion(char* ip, char* puerto);
+void liberar_conexion(int32_t socket_cliente);
 
 /*----------Fin Cliente----------*/
 
 /*----------Servidor----------*/
 
-int iniciar_servidor(char* puerto_escucha, t_log* logger);
-int esperar_cliente(int socket, t_log* logger);
+int32_t iniciar_servidor(char* puerto_escucha, t_log* logger);
+int32_t esperar_cliente(int32_t socket, t_log* logger);
 
 /*----------Fin Servidor----------*/
 
 /*----------Mensajeria----------*/
-void enviar_mensaje(char* mensaje, int socket);
+void enviar_mensaje(char* mensaje, int32_t socket);
 t_paquete* crear_paquete(op_code codigo);
 void crear_buffer(t_paquete* paquete);
-void enviar_paquete(t_paquete* paquete, int socket);
-void* serializar_paquete(t_paquete* paquete, int bytes);
+void enviar_paquete(t_paquete* paquete, int32_t socket);
+void* serializar_paquete(t_paquete* paquete, int32_t bytes);
 void eliminar_paquete(t_paquete* paquete);
 
-op_code recibir_operacion(int socket);
-t_list* recibir_paquete(int socket);
-void recibir_mensaje(int socket, t_log* logger);
-void* recibir_buffer(uint32_t* size, int socket);
+op_code recibir_operacion(int32_t socket);
+t_list* recibir_paquete(int32_t socket);
+void recibir_mensaje(int32_t socket, t_log* logger);
+void* recibir_buffer(uint32_t* size, int32_t socket);
 
-void enviar_CE(int socket, uint32_t PID, t_contexto_ejecucion contexto);
-void recibir_CE(int socket, uint32_t* PID, t_contexto_ejecucion* contexto_contenedor);
+void enviar_CE(int32_t socket, uint32_t PID, t_contexto_ejecucion contexto);
+void recibir_CE(int32_t socket, uint32_t* PID, t_contexto_ejecucion* contexto_contenedor);
 /*----------Fin Mensajeria----------*/
 
 
@@ -129,8 +129,8 @@ void leer_de_buffer_CE(void* buffer, int* desplazamiento, t_contexto_ejecucion* 
 
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
-void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int socket_a_enviar);
-uint32_t recibir_de_buffer_solo_PID(int socket_a_recibir);
+void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int32_t socket_a_enviar);
+uint32_t recibir_de_buffer_solo_PID(int32_t socket_a_recibir);
 
 
 

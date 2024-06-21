@@ -17,16 +17,16 @@
 #include "extGlobales.h"
 #include "memPaginacion.h"
 
-void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion);
-void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC);
-void fetch(int socket_cpu_memoria);
+void enviar_instruccion(int32_t socket_cpu_memoria, t_instruccion* instruccion);
+void recibir_fetch(int32_t socket_cpu_memoria, uint32_t* PID, uint32_t* PC);
+void fetch(int32_t socket_cpu_memoria);
 void atender_conexion_CPU_MEMORIA();
 void conexion_con_cpu();
-void frame(int socket_cpu_memoria);
-void movIn(int socket_cpu_memoria);
-void movOut(int socket_cpu_memoria);
-void copiar_string(int socket_cpu_memoria);
-void ins_resize(int socket_cpu_memoria);
+void frame(int32_t socket_cpu_memoria);
+void movIn(int32_t socket_cpu_memoria);
+void movOut(int32_t socket_cpu_memoria);
+void copiar_string(int32_t socket_cpu_memoria);
+void ins_resize(int32_t socket_cpu_memoria);
 
 
 #endif //TP_MEMORIA_CPU_H_

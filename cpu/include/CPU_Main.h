@@ -12,7 +12,7 @@
 
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual);
 void* direccion_registro(t_contexto_ejecucion* contexto, char* registro);
-int tam_registro(char* registro);
+int32_t tam_registro(char* registro);
 bool check_interrupt(int_code interrupcion);
 
 #endif //TP_CPU_MAIN_H_

@@ -14,8 +14,8 @@
 
 typedef struct RECURSOS {
     char* nombre_recurso;        
-    int instancias_del_recurso; 
-    int instancias_solicitadas_del_recurso;  
+    int32_t instancias_del_recurso; 
+    int32_t instancias_solicitadas_del_recurso;  
     t_list* lista_de_espera;     
     struct RECURSOS* siguiente_recurso; 
 } t_recurso;

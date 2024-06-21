@@ -15,18 +15,18 @@
 t_log* logger;
 t_log* logger_debug;
 char* path_base;
-int tam_pagina;
-int tam_memoria;
-int retardo;
+int32_t tam_pagina;
+int32_t tam_memoria;
+int32_t retardo;
 t_config* config;
 char* puerto_escucha;
-int cant_frames;
+int32_t cant_frames;
 void* memoria_usuario; 
 
-int socket_cpu_memoria;
-int socket_kernel_memoria;
-int socket_entradasalida_memoria;
-int socket_escucha;
+int32_t socket_cpu_memoria;
+int32_t socket_kernel_memoria;
+int32_t socket_entradasalida_memoria;
+int32_t socket_escucha;
 
 
 #endif //TP_MEMORIA_MAIN_H_

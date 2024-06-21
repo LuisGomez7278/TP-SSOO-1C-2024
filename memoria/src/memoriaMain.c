@@ -1,6 +1,6 @@
 #include "../include/memoriaMain.h"
 
-int main(int argc, char* argv[]) {
+int32_t main(int32_t argc, char* argv[]) {
     
     cargarConfig();
     inicializarMem();                                                           ////ACA INICIA PAGINACION
@@ -85,15 +85,15 @@ int main(int argc, char* argv[]) {
     char* buffer = "Hola planeta tierra, hoy es lunes";
 
     bool escribir_bien = escribir_memoria(10, 22, buffer, 1);
-    bool escribir_int = escribir_uint32_t_en_memoria(10, sizeof(84), 84, 1);
+    bool escribir_int32_t = escribir_uint32_t_en_memoria(10, sizeof(84), 84, 1);
 
     if(escribir_bien){log_info(logger_debug, "Perfecto");}
 
     char* leido = leer_memoria(8, 22, 1);
-    int leido_int = leer_memoria_uint32_t(10, sizeof(84), 1);
+    int32_t leido_int32_t = leer_memoria_uint32_t(10, sizeof(84), 1);
     
     log_info(logger, "%.*s", 22, buffer);
-    log_info(logger_debug, "Int Leido: %d", leido_int);
+    log_info(logger_debug, "int32_t Leido: %d", leido_int);
     if(leido==NULL){perror("Rompio");}
 
     free(leido);

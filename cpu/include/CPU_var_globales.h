@@ -13,12 +13,12 @@ char* ip_memoria;
 char* puerto_memoria;
 char* puerto_escucha_dispatch;
 char* puerto_escucha_interrupt;
-int socket_cpu_kernel_dispatch;
-int socket_cpu_kernel_interrupt;
-int socket_cpu_memoria;
-int socket_escucha;
+int32_t socket_cpu_kernel_dispatch;
+int32_t socket_cpu_kernel_interrupt;
+int32_t socket_cpu_memoria;
+int32_t socket_escucha;
 
-int cant_entradas_TLB;
+int32_t cant_entradas_TLB;
 char* algoritmo_TLB;
 uint32_t tamanio_de_pagina;
 

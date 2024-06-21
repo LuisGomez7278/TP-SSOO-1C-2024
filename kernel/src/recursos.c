@@ -5,7 +5,7 @@
 
 int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
     
-    int contador = 0;
+    int32_t contador = 0;
     while (array_de_cadenas[contador] != NULL) {
         contador++;
     }
@@ -14,7 +14,7 @@ int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
     int* array_de_enteros = malloc(contador * sizeof(int));
 
     // Convierte cada cadena a un entero y almacénalo en el array de enteros
-    for (int i = 0; i < contador; i++) {
+    for (int32_t i = 0; i < contador; i++) {
         array_de_enteros[i] = atoi(array_de_cadenas[i]);
     }
     cantidadDeRecursos=contador;
@@ -28,7 +28,7 @@ int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
     t_recurso* auxiliar = NULL;
     t_recurso* ultimo = NULL;
 
-    for (int i = 0; i < cantidadDeRecursos; i++) {
+    for (int32_t i = 0; i < cantidadDeRecursos; i++) {
         auxiliar = malloc(sizeof(t_recurso));
         
 
@@ -67,11 +67,7 @@ void imprimir_recursos(){
 
 
 
-
-
-
-
-int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
+int32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
     t_recurso* auxiliar = lista_de_recursos;
     
     while(auxiliar!=NULL){
@@ -83,16 +79,19 @@ int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
 
     }
 
-    if(auxiliar==NULL){
+    if(auxiliar==NULL){                                                                       //RECURSO NO ENCONTRADO
         return -1;
     }
-    if (auxiliar->instancias_del_recurso-auxiliar->instancias_solicitadas_del_recurso<=0)
+    if (auxiliar->instancias_del_recurso - auxiliar->instancias_solicitadas_del_recurso<=0)             //RECURSO ENCONTRADO SIN INSTANCIAS DISPONIBLES
     {
+        log_info(logger, "PID: %d - Cambio de estado READY -> BLOQUEADO", pcb_solicitante->PID);
+        pthread_mutex_lock(&mutex_recursos);
         list_add(auxiliar->lista_de_espera,pcb_solicitante);
+        pthread_mutex_unlock(&mutex_recursos);
         auxiliar->instancias_solicitadas_del_recurso-=1;
         return 1;
         
-    }else{
+    }else{                                                                                                  // //RECURSO ENCONTRADO CON INSTANCIAS DISPONIBLES
         auxiliar->instancias_solicitadas_del_recurso-=1;
         return 2;
     }
@@ -101,7 +100,7 @@ int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
 }
 
 
-int signal_recursos ( char*recurso_solicitado,uint32_t PID){
+int32_t signal_recursos ( char*recurso_solicitado,uint32_t PID){                                    
     t_recurso* auxiliar = lista_de_recursos;
 
     
@@ -114,11 +113,11 @@ int signal_recursos ( char*recurso_solicitado,uint32_t PID){
 
     }
   
-    if(auxiliar==NULL){
+    if(auxiliar==NULL){                                                                //RECURSO NO ENCONTRADO
         return -1;
     }
     
-    if(buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID)==NULL){
+    if(buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID)==NULL){               //RECURSO NO ASIGNADO AL PROCESO
         return -2;
     }
        
@@ -126,13 +125,14 @@ int signal_recursos ( char*recurso_solicitado,uint32_t PID){
     
 
 
-    if (auxiliar->instancias_del_recurso>0 && list_size(auxiliar->lista_de_espera)>0)
+    if (auxiliar->instancias_del_recurso>0 && list_size(auxiliar->lista_de_espera)>0)                               //VERIFICO SI HABIA UN PROCESO ESPERANDO EL RECURSO
     {   
         t_pcb *pcb_liberado=list_remove(auxiliar->lista_de_espera,0);
-        ingresar_en_lista(pcb_liberado, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY);
+        ingresar_en_lista(pcb_liberado, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);
+        
     }
 
-    return 1;
+    return 1;                                                                                                       //SIGNAL EXITOSO
 
 }
 
@@ -143,10 +143,12 @@ void eliminar_proceso_de_lista_recursos (uint32_t PID){
     t_recurso* auxiliar = lista_de_recursos;
 
     while(auxiliar!=NULL){
-        pcb_a_eliminar=buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID);
+        pcb_a_eliminar=buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             if(list_remove_element(auxiliar->lista_de_espera,pcb_a_eliminar)){
                 auxiliar->instancias_solicitadas_del_recurso+=1;
+            }else{
+                log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista de recursos pero no se pudo eliminar.",PID);
             }
         }
 

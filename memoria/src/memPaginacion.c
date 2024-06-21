@@ -34,7 +34,7 @@ void eliminar_procesoM(uint32_t PID){
     liberar_frames(proceso->paginas);
 
     // Eliminar el proceso de la lista de procesos
-    for (int i = 0; i < list_size(procesos); i++) {
+    for (int32_t i = 0; i < list_size(procesos); i++) {
         procesoM* p = list_get(procesos, i);
         if (p->pid == PID) {
             list_remove_and_destroy_element(procesos, i, free);
@@ -50,7 +50,7 @@ void eliminar_procesoM(uint32_t PID){
     // Buscar y eliminar la tabla de páginas del proceso
     tabla_pag_proceso* tabla_pag_p = obtener_tabla_pag_proceso(PID);
     if (tabla_pag_p != NULL) {
-        for (int i = 0; i < list_size(tablaDePaginas); i++) {
+        for (int32_t i = 0; i < list_size(tablaDePaginas); i++) {
             tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
             if (tabla->pid == PID) {
                 list_remove_and_destroy_element(tablaDePaginas, i, free);
@@ -74,7 +74,7 @@ uint32_t encontrar_frame(uint32_t PID, uint32_t pagina){
 }
 
 void liberar_frames(t_list* paginas){
-    for (int i = 0; i < list_size(paginas); i++) {
+    for (int32_t i = 0; i < list_size(paginas); i++) {
         tabla_pag* pagina = list_get(paginas, i);
         if (pagina->presencia) {
             bitarray_clean_bit(bitmap, pagina->marco);
@@ -82,15 +82,15 @@ void liberar_frames(t_list* paginas){
     }
 }
 
-bool resize(uint32_t PID, int size) {
+bool resize(uint32_t PID, int32_t size) {
     tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
     if (tabla_proceso == NULL) {
         log_error(logger, "Proceso con PID %d no encontrado", PID);
         return false;
     }
 
-    int num_paginas_actuales = list_size(tabla_proceso->paginas);
-    int num_paginas_requeridas;
+    int32_t num_paginas_actuales = list_size(tabla_proceso->paginas);
+    int32_t num_paginas_requeridas;
 
     if (size > 0) {
         // Añadir páginas
@@ -108,7 +108,7 @@ bool resize(uint32_t PID, int size) {
 }
 
 bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, uint32_t PID) {
-    for (int i = 0; i < num_paginas; i++) {
+    for (int32_t i = 0; i < num_paginas; i++) {
         tabla_pag* nueva_pagina = malloc(sizeof(tabla_pag));
         if (nueva_pagina == NULL) {
             log_error(logger, "Error al asignar memoria para la nueva página");
@@ -118,8 +118,8 @@ bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, ui
         nueva_pagina->presencia = false;  // Inicialmente no presente
 
         list_add(tabla->paginas, nueva_pagina);
-        int numero_pagina = list_size(tabla->paginas) - 1;
-        int marco = asignar_marco(PID, numero_pagina);
+        int32_t numero_pagina = list_size(tabla->paginas) - 1;
+        int32_t marco = asignar_marco(PID, numero_pagina);
         if (marco == -1) {
             log_error(logger, "Out Of Memory");
             return false;
@@ -130,9 +130,9 @@ bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, ui
     return true;
 }
 
-void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas) {
-    for (int i = 0; i < num_paginas; i++) {
-        int index = list_size(tabla->paginas) - 1;
+void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int32_t num_paginas) {
+    for (int32_t i = 0; i < num_paginas; i++) {
+        int32_t index = list_size(tabla->paginas) - 1;
         if (index < 0) break;
 
         // Obtener la página a eliminar antes de eliminarla de la lista
@@ -170,7 +170,7 @@ void añadirTablaALista(t_list* paginas, uint32_t PID){
 }
 
 tabla_pag_proceso* obtener_tabla_pag_proceso(uint32_t PID){
-    for (int i = 0; i < list_size(tablaDePaginas); i++) {
+    for (int32_t i = 0; i < list_size(tablaDePaginas); i++) {
         tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
         if (tabla->pid == PID) {
             //log_info(logger, "Tabla de paginas del proceso PID: %d obtenida con exito", PID);
@@ -180,15 +180,15 @@ tabla_pag_proceso* obtener_tabla_pag_proceso(uint32_t PID){
     return NULL;
 }
 
-tabla_pag* obtener_pagina_proceso(tabla_pag_proceso* tabla_proceso, int numero_pagina) {
+tabla_pag* obtener_pagina_proceso(tabla_pag_proceso* tabla_proceso, int32_t numero_pagina) {
     if (numero_pagina < list_size(tabla_proceso->paginas)) {
         return list_get(tabla_proceso->paginas, numero_pagina);
     }
     return NULL;
 }
 
-tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int marco_actual) {
-    for (int i = 0; i < list_size(tabla_proceso->paginas); i++) {
+tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int32_t marco_actual) {
+    for (int32_t i = 0; i < list_size(tabla_proceso->paginas); i++) {
         tabla_pag* entrada_pagina = list_get(tabla_proceso->paginas, i);
         if (entrada_pagina->marco == marco_actual && entrada_pagina->presencia) {
             // Verificar si hay una página siguiente
@@ -201,7 +201,7 @@ tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int marco_a
 }
 
 procesoM* buscar_proceso_por_pid(uint32_t pid){
-    for (int i = 0; i < list_size(procesos); i++) {
+    for (int32_t i = 0; i < list_size(procesos); i++) {
         procesoM* proceso = list_get(procesos, i);
         if (proceso->pid == pid) {
             return proceso;
@@ -220,7 +220,7 @@ t_list* obtener_instrs(uint32_t pid){
     return NULL;
 }
 
-int asignar_marco(uint32_t PID, int numero_pagina) {
+int32_t asignar_marco(uint32_t PID, int32_t numero_pagina) {
     tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
     if (tabla_proceso == NULL) {
         log_error(logger, "Error: no se encontró la tabla de páginas del proceso");
@@ -233,10 +233,10 @@ int asignar_marco(uint32_t PID, int numero_pagina) {
     }
 
     // Buscar un marco libre en el bitarray
-    int cant_frames = bitarray_get_max_bit(bitmap);
-    int marco_libre = -1;
+    int32_t cant_frames = bitarray_get_max_bit(bitmap);
+    int32_t marco_libre = -1;
 
-    for (int i = 0; i < cant_frames; i++) {
+    for (int32_t i = 0; i < cant_frames; i++) {
         if (!bitarray_test_bit(bitmap, i)) { // Si el bit está en 0, el marco está libre
             marco_libre = i;
             bitarray_set_bit(bitmap, i); // Marcar el bit como ocupado
@@ -256,25 +256,25 @@ int asignar_marco(uint32_t PID, int numero_pagina) {
 }
 
 
-int obtener_marco(int direccion_fisica) {
+int32_t obtener_marco(int32_t direccion_fisica) {
     return direccion_fisica / tam_pagina;
 }
 
-int obtener_desplazamiento(int direccion_fisica) {
+int32_t obtener_desplazamiento(int32_t direccion_fisica) {
     return direccion_fisica % tam_pagina;
 }
 
-bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_t PID){
-    int bytes_escritos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = bytes;
+bool escribir_memoria(int32_t direccion_fisica, uint32_t bytes, char* valor, uint32_t PID){
+    int32_t bytes_escritos = 0;
+    int32_t direccion_actual = direccion_fisica;
+    int32_t bytes_restantes = bytes;
 
     while (bytes_restantes > 0){
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
+        int32_t marco = obtener_marco(direccion_actual);
+        int32_t offset = obtener_desplazamiento(direccion_actual);
     
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_escribir;
+        int32_t espacio_en_marco = tam_pagina - offset;
+        int32_t bytes_a_escribir;
 
         if(bytes_restantes < espacio_en_marco){
         bytes_a_escribir = bytes_restantes; 
@@ -307,17 +307,17 @@ bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_
     return true;
 }
 
-bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID) {
-    int bytes_escritos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = bytes;
+bool escribir_uint32_t_en_memoria(int32_t direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID) {
+    int32_t bytes_escritos = 0;
+    int32_t direccion_actual = direccion_fisica;
+    int32_t bytes_restantes = bytes;
 
     while (bytes_restantes > 0) {
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
+        int32_t marco = obtener_marco(direccion_actual);
+        int32_t offset = obtener_desplazamiento(direccion_actual);
 
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_escribir = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
+        int32_t espacio_en_marco = tam_pagina - offset;
+        int32_t bytes_a_escribir = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
 
         memcpy((char*)memoria_usuario + (marco * tam_pagina) + offset, ((char*)&valor) + bytes_escritos, bytes_a_escribir);
 
@@ -344,17 +344,17 @@ bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t
     return true;
 }
 
-char* leer_memoria(int direccion_fisica, int size, uint32_t PID){
+char* leer_memoria(int32_t direccion_fisica, int32_t size, uint32_t PID){
     char* buffer = malloc(size);
-    int bytes_leidos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = size;
+    int32_t bytes_leidos = 0;
+    int32_t direccion_actual = direccion_fisica;
+    int32_t bytes_restantes = size;
 
     while (bytes_restantes > 0) {
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_leer = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
+        int32_t marco = obtener_marco(direccion_actual);
+        int32_t offset = obtener_desplazamiento(direccion_actual);
+        int32_t espacio_en_marco = tam_pagina - offset;
+        int32_t bytes_a_leer = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
 
         memcpy(buffer + bytes_leidos, (char*)memoria_usuario + (marco * tam_pagina) + offset, bytes_a_leer);
 
@@ -382,17 +382,17 @@ char* leer_memoria(int direccion_fisica, int size, uint32_t PID){
     return buffer;
 }
 
-uint32_t leer_memoria_uint32_t(int direccion_fisica, uint8_t bytes, uint32_t PID) {
+uint32_t leer_memoria_uint32_t(int32_t direccion_fisica, uint8_t bytes, uint32_t PID) {
     uint32_t valor = 0;
-    int bytes_leidos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = bytes;
+    int32_t bytes_leidos = 0;
+    int32_t direccion_actual = direccion_fisica;
+    int32_t bytes_restantes = bytes;
 
     while (bytes_restantes > 0) {
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_leer = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
+        int32_t marco = obtener_marco(direccion_actual);
+        int32_t offset = obtener_desplazamiento(direccion_actual);
+        int32_t espacio_en_marco = tam_pagina - offset;
+        int32_t bytes_a_leer = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
 
         memcpy((char*)&valor + bytes_leidos, (char*)memoria_usuario + (marco * tam_pagina) + offset, bytes_a_leer);
 

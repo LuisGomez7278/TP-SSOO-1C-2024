@@ -6,7 +6,7 @@ void atender_conexion_entradasalida_KERNEL(){
     op_code codigo;
 
     uint32_t size;
-    int desplazamiento = 0;
+    int32_t desplazamiento = 0;
     void* buffer;
     uint32_t PID;
     char* nombre_interfaz;

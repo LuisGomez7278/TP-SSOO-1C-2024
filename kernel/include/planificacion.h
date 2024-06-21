@@ -25,10 +25,10 @@
 #include "extern_globales.h"
 
 t_temporal * temporizador=NULL;
-uint32_t tiempo_ya_ejecutado;
+uint32_t tiempo_recien_ejecutado=0;
 pthread_t hilo_de_desalojo_por_quantum;
 uint32_t pcb_actual_en_cpu=0;
-uint32_t backup_de_quantum_ejecutado;
+uint32_t backup_de_quantum_ejecutado=0;
 
 void interruptor_de_QUANTUM(void* quantum_de_pcb);
 

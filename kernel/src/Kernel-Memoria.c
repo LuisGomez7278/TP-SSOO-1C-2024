@@ -17,7 +17,7 @@
        
 
         while (continuarIterando) {
-            int cod_op = recibir_operacion(socket_memoria_kernel);   ////se queda esperando en recv por ser bloqueante
+            int32_t cod_op = recibir_operacion(socket_memoria_kernel);   ////se queda esperando en recv por ser bloqueante
             switch (cod_op) {
             case MENSAJE:
                 recibir_mensaje(socket_memoria_kernel,logger_debug);
@@ -54,7 +54,7 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
     //estructura: codigo operacion, pid, path_para_memoria
     op_code codigo_de_operacion=CREAR_PROCESO;
     char* path_para_memoria=leido_array[1];
-    int tamanio=strlen(path_para_memoria);                      //--------------LO GUARDO EN UN INT DE 32 BITS PORQUE EL STRLEN DEVUELVE 64 BITS 
+    int32_t tamanio=strlen(path_para_memoria);                      //--------------LO GUARDO EN UN int32_t DE 32 BITS PORQUE EL STRLEN DEVUELVE 64 BITS 
 
 //PREAPARO EL STREAM DE DATOS, LOS SERIALIZO Y ENVIO
 
@@ -72,7 +72,7 @@ void carga_exitosa_en_memoria(){
 //RECIBO EL PROCESO QUE CARGO EN MEMORIA
 
     uint32_t *sizeTotal=malloc(sizeof(uint32_t));
-    int *desplazamiento=malloc(sizeof(int));
+    int32_t *desplazamiento=malloc(sizeof(int));
     *desplazamiento=0;
     void* buffer= recibir_buffer(sizeTotal,socket_memoria_kernel);
     uint32_t PID = 0; 

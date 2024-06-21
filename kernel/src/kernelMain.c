@@ -1,6 +1,6 @@
 #include "../include/kernelMain.h"
 
-int main(int argc, char* argv[]) {
+int32_t main(int32_t argc, char* argv[]) {
 
 //INICIALIZO LOS LOGS Y CONGIFURACIONES Y COLAS DE ESTADO
     iniciar_Kernel();
