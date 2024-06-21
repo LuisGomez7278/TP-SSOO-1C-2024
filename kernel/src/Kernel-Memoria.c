@@ -25,11 +25,9 @@
             case CARGA_EXITOSA_PROCESO:
                 carga_exitosa_en_memoria();
                 break;
-            case PAGE_FAULT:
-            case OUT_OF_MEMORY:
-                 sem_post(&control_multiprogramacion);
-                 log_error(logger_debug,"Page fault || out of memory falta implementar");
-                 break;
+            case ERROR_AL_CARGAR_EL_PROCESO:
+                log_error(logger_debug,"Error al cargar el proceso en memoria");
+            break;
             case -1:
                 log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO. Terminando servidor");
                 continuarIterando=0;
@@ -96,9 +94,10 @@ void carga_exitosa_en_memoria(){
     }
 
 //GESTIONO LAS LISTAS DE ESTADO    
-    sem_wait(&control_multiprogramacion);           ///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    
+   
+    sem_wait(&control_multiprogramacion);           ///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    --------------------------------------------------------------
 
-    t_pcb *pcb_ready= buscar_pcb_por_PID(lista_new,PID);
+    t_pcb *pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID);
 
     if(pcb_ready==NULL){
         log_error(logger_debug,"Error al buscar el proceso con PID= %u en la lista New",PID);
@@ -117,15 +116,21 @@ void carga_exitosa_en_memoria(){
 }
 
 
-t_pcb* buscar_pcb_por_PID(t_list* lista, uint32_t pid_buscado){
-	
-    int elementos = list_size(lista);
-	for (int i = 0; i < elementos; i++) {
-		t_pcb* pcb = list_get(lista, i);
-		if (pid_buscado == pcb->PID){
-			return pcb;
-		}
-	}
+t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
+	t_link_element* aux=lista->head;
+    t_pcb* pcb_auxiliar;
+ 
+
+    while (aux!=NULL)
+    {
+        pcb_auxiliar= (t_pcb*) aux->data; 
+
+    if (pcb_auxiliar->PID==pid_buscado){
+        return pcb_auxiliar;
+    }
+    aux=aux->next;
+    }
+    
 	return NULL;
 }
 

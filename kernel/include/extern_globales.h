@@ -84,6 +84,7 @@ void iniciar_proceso(char*leido);
 void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo);
 void ingresar_en_lista(t_pcb* pcb, t_list* lista,  pthread_mutex_t* semaforo_mutex, sem_t* semaforo_contador, t_estado estado);
 void cambiar_grado_multiprogramacion(int nuevo_valor);
+void gestionar_dispatch ();
 
 //kernel-cpu-dispatch
 void atender_conexion_CPU_DISPATCH_KERNEL ();
@@ -106,7 +107,7 @@ void escuchar_a_ENTRADASALIDA();
 void atender_conexion_MEMORIA_KERNEL();
 void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
 void carga_exitosa_en_memoria();
-t_pcb* buscar_pcb_por_PID(t_list* lista, uint32_t pid_buscado);
+t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado);
 //servicios_kernel
 uint32_t asignar_pid();
 
@@ -115,5 +116,5 @@ int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas);
 void construir_lista_de_recursos();
 void imprimir_recursos();
 int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
-int signal_recursos ( char*recurso_solicitado);
+int signal_recursos ( char*recurso_solicitado,uint32_t PID);
 #endif /*  VARIABLES_GLOBALES_H_ */

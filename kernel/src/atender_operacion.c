@@ -55,7 +55,7 @@ void iniciar_proceso(char*leido){
     
 
     solicitud_de_creacion_proceso_a_memoria(new_pcb->PID,leido);                // ENVIO A CARGAR EL PROGRAMA A EJECUTAR, YA QUE SUPUESTAMENTE ARRANCA CON UNA PAGINA VACIA
-                                                                                // EL SEMAFORO DE CONTROL DE MULTIPROGRAMACION LO COLOCO ANTES DEL PASO DE LISTA
+                                                                                // EL SEMAFORO DE CONTROL DE MULTIPROGRAMACION LO COLOCO ANTES DEL PASO A LISTA READY 
 
 
 

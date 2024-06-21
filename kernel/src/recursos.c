@@ -101,8 +101,9 @@ int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
 }
 
 
-int signal_recursos ( char*recurso_solicitado){
-     t_recurso* auxiliar = lista_de_recursos;
+int signal_recursos ( char*recurso_solicitado,uint32_t PID){
+    t_recurso* auxiliar = lista_de_recursos;
+
     
     while(auxiliar!=NULL){
         if(strcmp(auxiliar->nombre_recurso,recurso_solicitado)==0){
@@ -112,12 +113,17 @@ int signal_recursos ( char*recurso_solicitado){
         }
 
     }
-
+  
     if(auxiliar==NULL){
         return -1;
-    }else {
-        auxiliar->instancias_del_recurso+=1;
     }
+    
+    if(buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID)==NULL){
+        return -2;
+    }
+       
+     auxiliar->instancias_del_recurso+=1;
+    
 
 
     if (auxiliar->instancias_del_recurso>0 && list_size(auxiliar->lista_de_espera)>0)

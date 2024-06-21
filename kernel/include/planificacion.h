@@ -33,10 +33,10 @@ uint32_t pcb_actual_en_cpu=0;
 void interruptor_de_QUANTUM(void* quantum_de_pcb);
 
 void enviar_siguiente_proceso_a_ejecucion ();
-void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* serializado_para_IO);
+
 void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_enviar,u_int64_t quantum_recien_ejecutado);
 
-
+void respuesta_CPU_recurso(op_code respuesta);
 
 
 

@@ -26,6 +26,7 @@ typedef enum CODIGOS_DE_OPERACIONES{
     CREAR_PROCESO,
     ELIMINAR_PROCESO,
     CARGA_EXITOSA_PROCESO,
+    ERROR_AL_CARGAR_EL_PROCESO,
     OUT_OF_MEMORY,
     SOLICITUD_IO_READ, // solicitud de io a memoria para leer algo
     SOLICITUD_IO_WRITE, // solicitud de io a memoria para escribir algo

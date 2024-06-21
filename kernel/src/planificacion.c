@@ -95,9 +95,17 @@ void cambiar_grado_multiprogramacion(int nuevo_valor) {                         
 
 
 
-void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* serializado_para_IO){ //esta funcion va con un while(1) abajo del recibe
+void gestionar_dispatch (){ //esta funcion va con un while(1) abajo del recibe
+op_code cod_op;
+int desplazamiento;
+uint32_t size;
+int continuarIterando=1;
+char* recurso_solicitado;
+
+while(continuarIterando){    
+
+    cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
     
-    op_code cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
     
     
     if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL)
@@ -105,34 +113,52 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
         tiempo_ya_ejecutado= temporal_gettime(temporizador); //recupero el valor antes de eliminar el temporizador
         temporal_destroy(temporizador);
         pthread_cancel(hilo_de_desalojo_por_quantum);
+    }else{
+        tiempo_ya_ejecutado=0;
     }
 
-    //////////////////////////////   ACA HAY QUE DESERIALIZAR  SEGUN CORRESPONDA CADA FUNCION suponemos que el pcb extraido se llama: pcb_dispatch
-                                // LO DECLARO PARA QUE NO ME ARROJE ERRORES
 
-    t_pcb *pcb_dispatch=malloc(sizeof(t_pcb));
-    char*recurso_solicitado="Esto es una prueba";
+
+    
+    void* buffer = recibir_buffer(&size, socket_kernel_cpu_dispatch);
+
+    t_pcb *pcb_dispatch=malloc(sizeof(t_pcb));        
+    desplazamiento = 0;
+    
+    pcb_dispatch->PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+    leer_de_buffer_CE(buffer, &desplazamiento, &pcb_dispatch->CE);
+    pcb_dispatch->quantum_ejecutado=tiempo_ya_ejecutado;
+
     switch (cod_op){
-
-    case PAGE_FAULT: 
-        
+    case MENSAJE:
+        recibir_mensaje(socket_memoria_kernel,logger_debug);
         break;
     case OUT_OF_MEMORY:
-        enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+        log_info(logger, "Finaliza el proceso PID: %d Motivo: OUT_OF_MEMORY ", pcb_dispatch->PID);
+        enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel); ///debo eliminar de lista de recursos
         enviar_siguiente_proceso_a_ejecucion();
         break;
+
     case DESALOJO_POR_WAIT:
+        recurso_solicitado = leer_de_buffer_string(buffer, &desplazamiento);
 
         switch (wait_recursos(recurso_solicitado, pcb_dispatch)) {
-            case 1:                                                                                             //PCB QUEDO EN COLA DE ESPERA DEL RECURSO
+
+            case 1:
+                log_info(logger, "PID: %d - Bloqueado por recurso: %s", pcb_dispatch->PID, recurso_solicitado);
+                respuesta_CPU_recurso(FALLO);                                                                                             //PCB QUEDO EN COLA DE ESPERA DEL RECURSO
                 enviar_siguiente_proceso_a_ejecucion();	
 
                 break;
-            case 2:                                                                                            //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
-                enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch,tiempo_ya_ejecutado);
+            case 2: 
+            log_info(logger, "PID: %d hace WAIT de recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
+            respuesta_CPU_recurso(OK);                                                                                           //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
+            enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch,tiempo_ya_ejecutado);
 
                 break;
-            case -1:                                                                                                    //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
+            case -1:  
+                log_info(logger, "Finaliza el proceso PID: %d Motivo: INVALID_RESOURCE: %s", pcb_dispatch->PID, recurso_solicitado);
+                respuesta_CPU_recurso(FALLO);                                                                                                  //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
                 enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                 enviar_siguiente_proceso_a_ejecucion();	    
                 break;
@@ -141,37 +167,52 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
                 break;
             }
         break; 
+
     case DESALOJO_POR_SIGNAL:
+        recurso_solicitado = leer_de_buffer_string(buffer, &desplazamiento);
+        log_info(logger, "PID: %d solicita un SIGNAL del recurso: %s", pcb_dispatch->PID, recurso_solicitado );
+        
         switch(signal_recursos (recurso_solicitado)){
             case 1:
-            enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch,tiempo_ya_ejecutado);            //SIGNAL EXITOSO, DEVUELVO EL PROCESO A EJECUCION
-            break;
+                log_info(logger, "PID: %d hace SIGNAL a un recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
+                respuesta_CPU_recurso(OK);
+                enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch,tiempo_ya_ejecutado);            //SIGNAL EXITOSO, DEVUELVO EL PROCESO A EJECUCION
+                break;
             case -1:
+                log_info(logger, "Finaliza el proceso PID: %d Motivo: INVALID_RESOURCE: %s", pcb_dispatch->PID, recurso_solicitado);
+                respuesta_CPU_recurso(FALLO);
+                enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+                enviar_siguiente_proceso_a_ejecucion();
+                break;
+            case -2:
+            log_info(logger, "Finaliza el proceso PID: %d Motivo: RECURSO NO ASIGNADO: %s", pcb_dispatch->PID, recurso_solicitado);
+            respuesta_CPU_recurso(FALLO);
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
             enviar_siguiente_proceso_a_ejecucion();
-
         }
+    break;
 
-        break;
     case DESALOJO_POR_QUANTUM:
+            log_info(logger, "PID: %d - Desalojado por fin de Quantum", pcb_dispatch->PID);
             pcb_dispatch->quantum_ejecutado=0;                                                                  //RESETEO EL CONTADOR Y LO PONGO NUEVAMENTE EN READY
             ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY);
             sem_post(&cantidad_procesos_en_algun_ready); 
             sem_post(&cantidad_procesos_ready);
             enviar_siguiente_proceso_a_ejecucion();
         break;
+
     case DESALOJO_POR_FIN_PROCESO:
-           
+            log_info(logger, "Finaliza el proceso PID: %d Motivo: SUCCESS", pcb_dispatch->PID);
             //ENVIO PID A MEMORIA PARA QUE ELIMINE EL PROCESO
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
-
+            enviar_siguiente_proceso_a_ejecucion();
 
         break;
+        
     case DESALOJO_POR_CONSOLA:
         
         break;
     case DESALOJO_POR_IO_GEN_SLEEP:
-                              
     case DESALOJO_POR_IO_STDIN:        
     case DESALOJO_POR_IO_STDOUT:
     case DESALOJO_POR_IO_FS_CREATE:
@@ -179,21 +220,34 @@ void gestionar_dispatch (op_code motivo_desalojo , t_pcb PCB_desalojado, void* s
     case DESALOJO_POR_IO_FS_TRUNCATE:
     case DESALOJO_POR_IO_FS_WRITE:
     case DESALOJO_POR_IO_FS_READ:
-        break;        
+            char* nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
+            log_info(logger, "PID: %d envia peticion a interfaz %s", pcb_dispatch->PID, nombre_interfaz);
 
+            //hay que replantearlo con multiplexacion
+            t_paquete *paquete = crear_paquete(cod_op);
+            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
+            agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
+            enviar_paquete(paquete, socket_entradasalida_kernel);
+            eliminar_paquete(paquete);
+            //
+
+            enviar_siguiente_proceso_a_ejecucion();            
+            break;
     default:
+        log_warning(logger_debug,"Operacion desconocida para Kernel al recibir de socket CPU-Dispatch.");
         break;
     }   
 
 
     free(pcb_dispatch);	
+    free(buffer);
 	
+}
 }
 
 
-
 void enviar_siguiente_proceso_a_ejecucion ()    
-        ///   
+           
 {
 sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
     t_pcb* pcb_a_ejecutar;
@@ -269,6 +323,12 @@ pcb_a_reenviar->quantum_ejecutado+=quantum_recien_ejecutado;
 
 
 
+void respuesta_CPU_recurso(op_code respuesta)//Envia solo el op_code, si hace falta se puede pasar a conexiones.h
+{
+	void* a_enviar = malloc(sizeof(op_code)); //crea un stream
+	memcpy(a_enviar, &respuesta, sizeof(op_code)); //copia el op_code al stream
+	send(socket_kernel_cpu_dispatch, a_enviar, sizeof(op_code), 0); //envia el stream
+}
 
 
 
