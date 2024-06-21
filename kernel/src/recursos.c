@@ -136,3 +136,29 @@ int signal_recursos ( char*recurso_solicitado,uint32_t PID){
 
 }
 
+
+
+void eliminar_proceso_de_lista_recursos (uint32_t PID){
+    t_pcb* pcb_a_eliminar;
+    t_recurso* auxiliar = lista_de_recursos;
+
+    while(auxiliar!=NULL){
+        pcb_a_eliminar=buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID);
+        if(pcb_a_eliminar!=NULL){
+            if(list_remove_element(auxiliar->lista_de_espera,pcb_a_eliminar)){
+                auxiliar->instancias_solicitadas_del_recurso+=1;
+            }
+        }
+
+        auxiliar=auxiliar->siguiente_recurso;
+    }
+}
+
+
+
+
+
+
+
+
+

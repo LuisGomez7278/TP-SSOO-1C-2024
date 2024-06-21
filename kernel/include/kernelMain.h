@@ -61,7 +61,7 @@
     t_list *lista_exit;
     t_list *lista_bloqueado;
     t_list *lista_ready_prioridad;
-
+    t_list *lista_bloqueado_prioritario;
     
 
 

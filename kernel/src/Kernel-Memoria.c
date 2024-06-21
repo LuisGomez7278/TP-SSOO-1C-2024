@@ -29,7 +29,7 @@
                 log_error(logger_debug,"Error al cargar el proceso en memoria");
             break;
             case -1:
-                log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO. Terminando servidor");
+                log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO.");
                 continuarIterando=0;
                 break;
             default:
@@ -108,7 +108,7 @@ void carga_exitosa_en_memoria(){
         }
         pthread_mutex_unlock(&semaforo_new);
 
-        ingresar_en_lista(pcb_ready, lista_ready, &semaforo_ready, &cantidad_procesos_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
+        ingresar_en_lista(pcb_ready, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
 
     }
 

@@ -70,8 +70,8 @@ void iniciar_estructuras_planificacion(){
 	lista_ready_prioridad = list_create();
 	lista_exit = list_create();
 	lista_bloqueado= list_create();
-
-
+	lista_bloqueado_prioritario= list_create();
+	
 //SEMAFORO MULTIPROGRAMACION
 
     sem_init(&control_multiprogramacion, 0, grado_multiprogramacion);     
@@ -90,7 +90,9 @@ void iniciar_estructuras_planificacion(){
     pthread_mutex_init(&semaforo_new, NULL);
     pthread_mutex_init(&semaforo_ready, NULL);
 	pthread_mutex_init(&semaforo_bloqueado, NULL);
+	pthread_mutex_init(&semaforo_bloqueado_prioridad, NULL);
 	pthread_mutex_init(&semaforo_ready_prioridad, NULL);
+
 //mutex asignacion pid
 	pthread_mutex_init(&mutex_pid, NULL);
 

@@ -10,9 +10,11 @@ void atender_instruccion_validada(char* leido)
 
     }else if (strcmp(array_de_comando[0],"INICIAR_PROCESO")==0){
         iniciar_proceso(leido);        
+
     }else if (strcmp(array_de_comando[0],"FINALIZAR_PROCESO")==0){
+                              
         
-        
+                
     }else if (strcmp(array_de_comando[0],"DETENER_PLANIFICACION")==0){
        
         
@@ -20,7 +22,8 @@ void atender_instruccion_validada(char* leido)
         
         
     }else if (strcmp(array_de_comando[0],"MULTIPROGRAMACION")==0){
-        
+        int valor= atoi (array_de_comando[1]);
+        cambiar_grado_multiprogramacion(valor );   
         
     }else if (strcmp(array_de_comando[0],"PROCESO_ESTADO")==0){
         

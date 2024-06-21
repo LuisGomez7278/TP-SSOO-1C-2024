@@ -56,6 +56,7 @@ extern t_list *lista_new;
 extern t_list *lista_ready;
 extern t_list *lista_exit;
 extern t_list *lista_bloqueado;
+extern t_list *lista_bloqueado_prioritario;
 extern t_list *lista_ready_prioridad;
 
 
@@ -68,7 +69,7 @@ extern sem_t cantidad_procesos_en_algun_ready;
 extern pthread_mutex_t semaforo_new;
 extern pthread_mutex_t semaforo_ready;
 extern pthread_mutex_t semaforo_ready_prioridad;
-
+extern pthread_mutex_t semaforo_bloqueado_prioridad;
 extern pthread_mutex_t semaforo_bloqueado;
 
 extern uint32_t identificador_PID;
@@ -117,4 +118,6 @@ void construir_lista_de_recursos();
 void imprimir_recursos();
 int wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
 int signal_recursos ( char*recurso_solicitado,uint32_t PID);
+void eliminar_proceso_de_lista_recursos (uint32_t PID);
+
 #endif /*  VARIABLES_GLOBALES_H_ */
