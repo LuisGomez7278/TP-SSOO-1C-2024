@@ -13,12 +13,12 @@ extern char* ip_memoria;
 extern char* puerto_memoria;
 extern char* puerto_escucha_dispatch;
 extern char* puerto_escucha_interrupt;
-extern int32_t socket_cpu_kernel_dispatch;
-extern int32_t socket_cpu_kernel_interrupt;
-extern int32_t socket_cpu_memoria;
-extern int32_t socket_escucha;
+extern int socket_cpu_kernel_dispatch;
+extern int socket_cpu_kernel_interrupt;
+extern int socket_cpu_memoria;
+extern int socket_escucha;
 
-extern int32_t cant_entradas_TLB;
+extern int cant_entradas_TLB;
 extern char* algoritmo_TLB;
 
 extern uint32_t PID;

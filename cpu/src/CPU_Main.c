@@ -1,6 +1,6 @@
 #include "../include/CPU_Main.h"
 
-int32_t main(int32_t argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 
     iniciar_CPU();
 
@@ -69,7 +69,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     int* registro_destino;
     int* registro_origen;
     int* registro;
-    int32_t valor;
+    int valor;
 
     switch (codigo)
     {
@@ -238,10 +238,34 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case WAIT:
         log_info(logger,"PID: %d - Ejecutando: WAIT - %s", PID, ins_actual->arg1);
+        enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);
+        if (esperar_respuesta_recurso());
+        {
+            log_info(logger,"PID: %d - WAIT de recurso: %s fue exitoso", PID, ins_actual->arg1);
+            recibir_proceso();
+            contexto_interno->PC++;
+        }
+        else
+        {
+            log_info(logger,"PID: %d - WAIT de recurso: %s fallo", PID, ins_actual->arg1);
+            recibir_proceso();
+        }
         break;
 
     case SIGNAL:
         log_info(logger,"PID: %d - Ejecutando: SIGNAL - %s", PID, ins_actual->arg1);
+        enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);
+        if (esperar_respuesta_recurso());
+        {
+            log_info(logger,"PID: %d - SIGNAL de recurso: %s fue exitoso", PID, ins_actual->arg1);
+            recibir_proceso();
+            contexto_interno->PC++;
+        }
+        else
+        {
+            log_info(logger,"PID: %d - SIGNAL de recurso: %s fallo", PID, ins_actual->arg1);
+            recibir_proceso();
+        }
         break;
 
     case EXIT:

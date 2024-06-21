@@ -14,17 +14,13 @@
 #include "../../utils/include/conexiones.h"
 
 #include "extern_globales.h"
-//#include "Kernel-Memoria.h"
-//#include "servicios_kernel.h"
-//#include "planificacion.h"
+
 
 #ifndef  ATENDER_OPERACION_H
 #define ATENDER_OPERACION_H
 
-
-//void atender_instruccion_validada(char* leido);
-//void iniciar_proceso(char*leido);
-
+void imprimir_listas_de_estados(t_list* lista,char* estado);
+bool detener_planificacion=false;
 
 
 

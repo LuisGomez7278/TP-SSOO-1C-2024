@@ -43,7 +43,7 @@ void inicializarMem(){
 
     log_info(logger, "Memoria de usuario inicializada con %d frames de %d bytes cada uno", cant_frames, tam_pagina);
 
-    int32_t tam_bitarray = (cant_frames + 7) / 8; //TAMAÑO EN BYTES redondeando hacia arriba
+    int tam_bitarray = (cant_frames + 7) / 8; //TAMAÑO EN BYTES redondeando hacia arriba
     char* bitarray_mem = malloc(tam_bitarray);
     if (bitarray_mem == NULL) {
         log_error(logger, "Fallo asignacion memoria al bitarray");

@@ -8,18 +8,18 @@
 #include "extGlobales.h"
 
 typedef struct{
-    int32_t pid;
+    int pid;
     t_list* instrs;
     t_list* paginas;
 }procesoM;
 
 typedef struct{
-    int32_t marco;
+    int marco;
     bool presencia;
 }tabla_pag; //tabla de paginas en si
 
 typedef struct {
-    int32_t pid;                  
+    int pid;                  
     t_list* paginas;          // lista de tablas_pag
 }tabla_pag_proceso; //tabla de paginas de cada proceso
 
@@ -34,25 +34,25 @@ t_list* obtener_instrs(uint32_t pid);
 // tablas
 void añadirTablaALista(t_list* paginas, uint32_t PID);
 //t_list* crear_tabla_pag(uint32_t size);
-//void crear_paginas(uint32_t PID, int32_t cantidad_paginas);
+//void crear_paginas(uint32_t PID, int cantidad_paginas);
 tabla_pag_proceso* obtener_tabla_pag_proceso(uint32_t PID);
-tabla_pag* obtener_pagina_proceso(tabla_pag_proceso* tabla_proceso, int32_t numero_pagina);
-tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int32_t marco_actual);
+tabla_pag* obtener_pagina_proceso(tabla_pag_proceso* tabla_proceso, int numero_pagina);
+tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int marco_actual);
 
-int32_t asignar_marco(uint32_t PID, int32_t numero_pagina);
+int asignar_marco(uint32_t PID, int numero_pagina);
 void liberar_frames(t_list* paginas);
 uint32_t encontrar_frame(uint32_t PID, uint32_t pagina);
-int32_t obtener_marco(int32_t direccion_fisica);
-int32_t obtener_desplazamiento(int32_t direccion_fisica);
+int obtener_marco(int direccion_fisica);
+int obtener_desplazamiento(int direccion_fisica);
 
-bool resize(uint32_t PID, int32_t size);
+bool resize(uint32_t PID, int size);
 bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, uint32_t PID);
-void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int32_t num_paginas);
+void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas);
 
-bool escribir_memoria(int32_t direccion_fisica, uint32_t bytes, char* valor, uint32_t PID);
-bool escribir_uint32_t_en_memoria(int32_t direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID);
+bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_t PID);
+bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID);
 
-uint32_t leer_memoria_uint32_t(int32_t direccion_fisica, uint8_t bytes, uint32_t PID);
-char* leer_memoria(int32_t direccion_fisica, int32_t bytes, uint32_t PID);
+uint32_t leer_memoria_uint32_t(int direccion_fisica, uint8_t bytes, uint32_t PID);
+char* leer_memoria(int direccion_fisica, int bytes, uint32_t PID);
 
 #endif //TP_MEMORIA_PAGINACION_H_

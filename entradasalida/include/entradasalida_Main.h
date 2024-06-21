@@ -17,16 +17,16 @@ extern char* IP_KERNEL;
 extern char* PUERTO_KERNEL;
 extern char* IP_MEMORIA;
 extern char* PUERTO_MEMORIA;
-extern int32_t socket_entradasalida_kernel;
-extern int32_t socket_entradasalida_memoria;
+extern uint32_t socket_entradasalida_kernel;
+extern uint32_t socket_entradasalida_memoria;
  
 extern char* TIPO_INTERFAZ;
-extern int32_t TIEMPO_UNIDAD_TRABAJO;
+extern uint32_t TIEMPO_UNIDAD_TRABAJO;
  
 extern char* PATH_BASE_DIALFS;
-extern int32_t BLOCK_SIZE;
-extern int32_t BLOCK_COUNT;
-extern int32_t RETRASO_COMPACTACION;
+extern uint32_t BLOCK_SIZE;
+extern uint32_t BLOCK_COUNT;
+extern uint32_t RETRASO_COMPACTACION;
 
 char* nombre_interfaz;
 char* config_interfaz;

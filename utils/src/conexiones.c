@@ -36,7 +36,7 @@ void liberar_conexion(int32_t socket_cliente)
 
 int32_t iniciar_servidor(char* puerto_escucha, t_log* logger)
 {
-    int32_t err;
+    uint32_t err;
 
     struct addrinfo hints, *server_info;
 
@@ -53,7 +53,7 @@ int32_t iniciar_servidor(char* puerto_escucha, t_log* logger)
         exit(EXIT_FAILURE);
     }
 
-    int32_t fd_escucha = socket(server_info->ai_family,
+    uint32_t fd_escucha = socket(server_info->ai_family,
                             server_info->ai_socktype,
                             server_info->ai_protocol);
     if (fd_escucha == -1) {
@@ -86,7 +86,7 @@ int32_t iniciar_servidor(char* puerto_escucha, t_log* logger)
 int32_t esperar_cliente(int32_t socket_servidor, t_log* logger)
 {
     // Aceptamos un nuevo cliente
-    int32_t socket_cliente = accept(socket_servidor, NULL, NULL);
+    uint32_t socket_cliente = accept(socket_servidor, NULL, NULL);
     if (socket_cliente == -1) {
         perror("Error en accept");
         log_error(logger, "Error en accept: %s", strerror(errno));
@@ -102,7 +102,7 @@ int32_t esperar_cliente(int32_t socket_servidor, t_log* logger)
 
 /*----------Mensajeria----------*/
 
- void enviar_mensaje(char* mensaje, int32_t socket)
+ void enviar_mensaje(char* mensaje, uint32_t socket)
  {
  	t_paquete* paquete = crear_paquete(MENSAJE);
     uint32_t tamanio = string_length(mensaje)+1;
@@ -127,7 +127,7 @@ void crear_buffer(t_paquete* paquete)
 	paquete->buffer->stream = NULL;
 }
 
-void enviar_paquete(t_paquete* paquete, int32_t socket_cliente)
+void enviar_paquete(t_paquete* paquete, uint32_t socket_cliente)
 {
 	int32_t bytes = paquete->buffer->size + sizeof(uint32_t)+sizeof(op_code);
     //imprimir_paquete(paquete);
@@ -148,7 +148,7 @@ void imprimir_paquete(t_paquete* paquete) {
     printf("Código de operación: %d\n", paquete->codigo_operacion);
 
     void* stream = paquete->buffer->stream;
-    int32_t desplazamiento = 0;
+    uint32_t desplazamiento = 0;
 
     // Leer el primer uint32_t (valor1)
     uint32_t valor1;
@@ -180,7 +180,7 @@ void verificar_paquete(void* buffer) {
     char* str;
 
     // Desplazamiento para recorrer el buffer
-    int32_t desplazamiento = 0;
+    uint32_t desplazamiento = 0;
 
     // Leer el código de operación
   //  memcpy(&codigo_operacion, buffer + desplazamiento, sizeof(op_code));
@@ -217,7 +217,7 @@ void verificar_paquete(void* buffer) {
 
 
 
-void* serializar_paquete(t_paquete* paquete, int32_t bytes)
+void* serializar_paquete(t_paquete* paquete, uint32_t bytes)
 {
 	void * magic = malloc(bytes);
 	int32_t desplazamiento = 0;
@@ -253,7 +253,7 @@ op_code recibir_operacion(int32_t socket_cliente){
 void recibir_mensaje(int32_t socket_cliente, t_log* logger)
 {
     uint32_t size;
-    int32_t desplazamiento = 0;
+    uint32_t desplazamiento = 0;
     void* buffer = recibir_buffer(&size, socket_cliente);
 
     char* mensaje = leer_de_buffer_string(buffer, &desplazamiento);
@@ -263,7 +263,7 @@ void recibir_mensaje(int32_t socket_cliente, t_log* logger)
     free(mensaje);
 }
 
-void* recibir_buffer(uint32_t* size, int32_t socket_cliente)
+void* recibir_buffer(uint32_t* size, uint32_t socket_cliente)
 {
     void * buffer;
 
@@ -277,7 +277,7 @@ void* recibir_buffer(uint32_t* size, int32_t socket_cliente)
 
 
 /*
-void* recibir_buffer(uint32_t* size, int32_t socket_cliente) {
+void* recibir_buffer(uint32_t* size, uint32_t socket_cliente) {
     void* buffer = NULL;
 
     // Recibir el tamaño del buffer
@@ -358,7 +358,7 @@ void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string
 
 
 
-uint8_t leer_de_buffer_uint8(void* buffer, int* desplazamiento)
+uint8_t leer_de_buffer_uint8(void* buffer, uint32_t* desplazamiento)
 {
     uint8_t valor;
 
@@ -369,7 +369,7 @@ uint8_t leer_de_buffer_uint8(void* buffer, int* desplazamiento)
     return valor;
 };
 
-uint32_t leer_de_buffer_uint32(void* buffer, int* desplazamiento)
+uint32_t leer_de_buffer_uint32(void* buffer, uint32_t* desplazamiento)
 {
     uint32_t valor;
 
@@ -380,7 +380,7 @@ uint32_t leer_de_buffer_uint32(void* buffer, int* desplazamiento)
     return valor;
 };
 
-char* leer_de_buffer_string(void* buffer, int* desplazamiento)
+char* leer_de_buffer_string(void* buffer, uint32_t* desplazamiento)
 {
     uint32_t tamanio = leer_de_buffer_uint32(buffer, desplazamiento);
     char* valor = malloc(tamanio+1);
@@ -391,7 +391,7 @@ char* leer_de_buffer_string(void* buffer, int* desplazamiento)
     return valor;
 };
 
-void leer_de_buffer_CE(void* buffer, int* desplazamiento, t_contexto_ejecucion* contexto_contenedor){
+void leer_de_buffer_CE(void* buffer, uint32_t* desplazamiento, t_contexto_ejecucion* contexto_contenedor){
     contexto_contenedor->PC = leer_de_buffer_uint32(buffer, desplazamiento);
     contexto_contenedor->AX = leer_de_buffer_uint8(buffer, desplazamiento);
     contexto_contenedor->BX = leer_de_buffer_uint8(buffer, desplazamiento);
@@ -432,7 +432,7 @@ void enviar_CE(int32_t socket, uint32_t PID, t_contexto_ejecucion contexto)
 void recibir_CE(int32_t socket, uint32_t* PID_contenedor, t_contexto_ejecucion* contexto_contenedor)
 {
     uint32_t size = 0;
-    int32_t desplazamiento = 0;
+    uint32_t desplazamiento = 0;
     void* buffer;
 
     buffer = recibir_buffer(&size, socket);
@@ -450,7 +450,7 @@ void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo)
 	paquete->buffer->size += sizeof(cod_ins);    
 };
 
-cod_ins leer_de_buffer_cod_ins(void* buffer, int* desplazamiento)
+cod_ins leer_de_buffer_cod_ins(void* buffer, uint32_t* desplazamiento)
 {
     cod_ins codigo;
     memcpy(&codigo,  buffer + (*desplazamiento), sizeof(cod_ins));
@@ -465,7 +465,7 @@ void agregar_a_paquete_int_code(t_paquete* paquete, int_code codigo)
 	paquete->buffer->size += sizeof(int_code);    
 };
 
-int_code leer_de_buffer_int_code(void* buffer, int* desplazamiento)
+int_code leer_de_buffer_int_code(void* buffer, uint32_t* desplazamiento)
 {
     int_code codigo;
     memcpy(&codigo,  buffer + (*desplazamiento), sizeof(int_code));
@@ -484,7 +484,7 @@ void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PI
 
 uint32_t recibir_de_buffer_solo_PID (int32_t socket_a_recibir){      /// PARA EJECUTAR ESTA INSTRUCCION CONSIDERO QUE EL CODIGO DE OPERACION YA ESTA EXTRAIDO, SOLO QUEDA=  void*= SIZE TOTAL||PID(uint_32)
     uint32_t *sizeTotal=malloc(sizeof(uint32_t));
-    int32_t desplazamiento = 0;
+    uint32_t desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_a_recibir);
     uint32_t PID = 0; 
 

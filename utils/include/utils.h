@@ -14,8 +14,8 @@
 
 typedef struct RECURSOS {
     char* nombre_recurso;        
-    int32_t instancias_del_recurso; 
-    int32_t instancias_solicitadas_del_recurso;  
+    uint32_t instancias_del_recurso; 
+    uint32_t instancias_solicitadas_del_recurso;  
     t_list* lista_de_espera;     
     struct RECURSOS* siguiente_recurso; 
 } t_recurso;
@@ -60,6 +60,7 @@ typedef enum
     READY_PRIORITARIO,
     EXEC,
     BLOCKED,
+    BLOCKED_PRIORITARIO,
     EXITT,
     ERROR
 } t_estado;
@@ -83,7 +84,7 @@ typedef struct pcb_de_proceso
 {
    	uint32_t PID;
     t_estado estado;
-    uint32_t quantum_ejecutado;
+    int64_t quantum_ejecutado;
     t_contexto_ejecucion CE;
     
 } t_pcb;

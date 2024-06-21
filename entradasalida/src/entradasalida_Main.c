@@ -28,7 +28,7 @@ int32_t main(int32_t argc, char* argv[]) {
             uint32_t unidades_trabajo;
             uint32_t size;
             void* buffer;
-            int32_t desplazamiento = 0;
+            uint32_t desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_entradasalida_kernel);
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             interfaz_pedida = leer_de_buffer_string(buffer, &desplazamiento);
@@ -78,7 +78,7 @@ t_instruccion* recibir_instruccion_IO(uint32_t* PID)
 {
     uint32_t size;
     void* buffer;
-    int32_t desplazamiento = 0;
+    uint32_t desplazamiento = 0;
     buffer = recibir_buffer(&size, socket_entradasalida_kernel);
     *PID = leer_de_buffer_uint32(buffer, &desplazamiento);
 
@@ -102,7 +102,7 @@ void ejecutar_instruccion_IO(t_instruccion* instruccion, uint32_t PID)
     cod_ins codigo_instruccion = instruccion->ins;
 	switch(codigo_instruccion) {
 	case IO_GEN_SLEEP:
-        int32_t unidadesDeTrabajo = atoi(instruccion->arg2);
+        uint32_t unidadesDeTrabajo = atoi(instruccion->arg2);
         usleep(unidadesDeTrabajo);
         notificar_kernel(PID);
 	case IO_STDIN_READ:

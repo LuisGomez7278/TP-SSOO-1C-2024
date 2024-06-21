@@ -100,7 +100,7 @@ void cambiar_grado_multiprogramacion(int32_t nuevo_valor) {                     
 
 void gestionar_dispatch (){ 
 op_code cod_op;
-int32_t desplazamiento;
+uint32_t desplazamiento;
 uint32_t size;
 int32_t continuarIterando=1;
 char* recurso_solicitado;
@@ -129,10 +129,15 @@ while(continuarIterando){
     leer_de_buffer_CE(buffer, &desplazamiento, &pcb_dispatch->CE);
     pcb_dispatch->quantum_ejecutado=tiempo_recien_ejecutado+ backup_de_quantum_ejecutado;
     backup_de_quantum_ejecutado=0;      ////    RESETEO BACKUP DE QUANTUM   
-    tiempo_recien_ejecutado=0;          ////    RESETEO EL QUE OBTIENE EL TIEMPO DEL CONTADOR
+    tiempo_recien_ejecutado=0;          ////    RESETEO EL VALOR QUE OBTIENE EL TIEMPO DEL CONTADOR
 
-///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION ///////////////////////
+///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION  ///////////////////////
 
+       if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
+    {
+        sem_wait(&semaforo_pcp);
+    }
+    
 
     switch (cod_op){
     case MENSAJE:
@@ -291,7 +296,7 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
     }
     
     if(strcmp(algoritmo_planificacion,"VRR")==0 || strcmp(algoritmo_planificacion,"RR")==0){       //CREO HILO DE DESALOJO SI CORRESPONDIERA
-        int* quantum_ptr = malloc(sizeof(int));                                                    //LA UNICA DIFERENCIA ENTRE EL FIFO Y EL RR ES EL DESALOJO POR QUANTUM
+        int64_t* quantum_ptr = malloc(sizeof(int64_t));                                                    //LA UNICA DIFERENCIA ENTRE EL FIFO Y EL RR ES EL DESALOJO POR QUANTUM
         if (quantum_ptr == NULL) {
             perror("malloc");
             return;
@@ -307,7 +312,7 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
     }
 
     
-    log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u\n", pcb_a_ejecutar->PID);
+    log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' \n", pcb_a_ejecutar->PID,algoritmo_planificacion);
     enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);     
         
     free(pcb_a_ejecutar);
@@ -317,10 +322,10 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
 
 void interruptor_de_QUANTUM(void* quantum_de_pcb)
 {
-    int32_t quantumEjecutado = *((int*)quantum_de_pcb);
-    int32_t quantum_ejecucion=quantum-quantumEjecutado;
+    int64_t quantumEjecutado = *((int64_t*)quantum_de_pcb);
+    int64_t quantum_ejecucion=quantum - quantumEjecutado;
     
-    log_trace(logger_debug,"El tiempo de espera registrado es %u\n",quantum_ejecucion);
+    log_trace(logger_debug,"El tiempo a ejecutar registrado es %ld",quantum_ejecucion);
     
     temporizador= temporal_create();
 
@@ -338,7 +343,7 @@ void interruptor_de_QUANTUM(void* quantum_de_pcb)
 void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar){                         //ESTA FUNCION ES PARA CUANDO SE SOLICITA UN RECURSO Y PUEDE SEGUIR EJECUTANDO
 
 
-    int* quantum_ptr = malloc(sizeof(int));                                                    
+    uint32_t* quantum_ptr = malloc(sizeof(int));                                                    
     if (quantum_ptr == NULL) {
         perror("malloc");
         return;

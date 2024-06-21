@@ -3,15 +3,15 @@
 
 
 
-int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
+uint32_t* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
     
-    int32_t contador = 0;
+    uint32_t contador = 0;
     while (array_de_cadenas[contador] != NULL) {
         contador++;
     }
 
     // Aloca memoria para el array de enteros
-    int* array_de_enteros = malloc(contador * sizeof(int));
+    uint32_t* array_de_enteros = malloc(contador * sizeof(int));
 
     // Convierte cada cadena a un entero y almacénalo en el array de enteros
     for (int32_t i = 0; i < contador; i++) {
@@ -67,7 +67,7 @@ void imprimir_recursos(){
 
 
 
-int32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
+uint32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
     t_recurso* auxiliar = lista_de_recursos;
     
     while(auxiliar!=NULL){
@@ -100,7 +100,7 @@ int32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
 }
 
 
-int32_t signal_recursos ( char*recurso_solicitado,uint32_t PID){                                    
+uint32_t signal_recursos ( char*recurso_solicitado,uint32_t PID){                                    
     t_recurso* auxiliar = lista_de_recursos;
 
     
