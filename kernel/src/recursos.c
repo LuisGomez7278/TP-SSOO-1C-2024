@@ -1,31 +1,20 @@
 
 #include "../include/recursos.h"
 
-    char* recursos[] = {"Recurso1", "Recurso2", "Recurso3", NULL};
-
-    // Iterar sobre los elementos
-    for (char** ptr = recursos; *ptr != NULL; ptr++) {
-        printf("%s\n", *ptr);
-    }
 
 
-void wait_a_recurso (char*)
-
-
-
-
-int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
+uint32_t* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
     
-    int contador = 0;
+    uint32_t contador = 0;
     while (array_de_cadenas[contador] != NULL) {
         contador++;
     }
 
     // Aloca memoria para el array de enteros
-    int* array_de_enteros = malloc(contador * sizeof(int));
+    uint32_t* array_de_enteros = malloc(contador * sizeof(int));
 
     // Convierte cada cadena a un entero y almacénalo en el array de enteros
-    for (int i = 0; i < contador; i++) {
+    for (int32_t i = 0; i < contador; i++) {
         array_de_enteros[i] = atoi(array_de_cadenas[i]);
     }
     cantidadDeRecursos=contador;
@@ -34,78 +23,144 @@ int* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas) {
 
 
 
-
-
  void construir_lista_de_recursos() {
-    t_recurso* lista_de_recursos = NULL;
-    t_recurso* auxiliar = NULL;
     
-    for (int i = 0; i < cantidadDeRecursos; i++) {
-        auxiliar = malloc(sizeof(t_recurso));
+    t_recurso* auxiliar = NULL;
+    t_recurso* ultimo = NULL;
 
+    for (int32_t i = 0; i < cantidadDeRecursos; i++) {
+        auxiliar = malloc(sizeof(t_recurso));
+        
 
         auxiliar->nombre_recurso = malloc(strlen(recursos[i]) + 1);
  
         strcpy(auxiliar->nombre_recurso, recursos[i]);
 
         auxiliar->instancias_del_recurso = instancias_recursos_int[i];
-        auxiliar->instancias_utilizadas_del_recurso = 0;
-        auxiliar->lista_de_espera = NULL;
+        auxiliar->instancias_solicitadas_del_recurso = 0;
+        auxiliar->lista_de_espera = list_create();
         auxiliar->siguiente_recurso = NULL;
 
         if (lista_de_recursos == NULL) {
-            lista_de_recursos = auxiliar;  // Primer nodo de la lista
-        } 
+            lista_de_recursos = auxiliar;  
+        } else {
+            ultimo->siguiente_recurso = auxiliar;  
+        }
+        ultimo = auxiliar; 
     }
     
 }
 
 
 
+void imprimir_recursos(){
+    t_recurso* auxiliar = lista_de_recursos;
 
-
-
-}
-
-
-
-
-
-
-/*
-int obtener_cantidad_recursos(char** config_recursos){
-    int i = 0;
-    while (config_recursos[i] != NULL)
-    {
-        i++;
+    while(auxiliar!=NULL){
+        log_info(logger_debug, "El recurso '%s', tiene %d instancias, de las cuales utiliza %d",auxiliar->nombre_recurso,auxiliar->instancias_del_recurso,auxiliar->instancias_solicitadas_del_recurso);
+        auxiliar = auxiliar->siguiente_recurso;
     }
-    return i;
+
+
 }
 
-void cargar_recursos(char** recursos, char** instancias_recursos, int cant_recursos){
-    for (int i = 0; i<cant_recursos; i++)
-    {
-        t_recurso* rec = malloc(sizeof(t_recurso));
-        rec->instancias = atoi(instancias_recursos[i]); //No se si funciona, es un char**
-        rec->n_recurso = i;
-        rec->bloqueados = list_create();
 
-        dictionary_put(dict_recursos, recursos[i], rec);
-    }
-}
 
-void liberar_recursos(t_pcb* pcb, char** lista_recursos)
-{
-    for (int i = 0; i < cantidad_recursos; i++)
-    {
-        t_recurso* rec = dictionary_get(dict_recursos, lista_recursos[i]);
 
-        while (pcb->recursos_proceso[i] > 0)
-        {
-            rec->instancias += 1;
-            pcb->recursos_proceso[i] -= 1;
+uint32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
+    t_recurso* auxiliar = lista_de_recursos;
+    
+    while(auxiliar!=NULL){
+        if(strcmp(auxiliar->nombre_recurso,recurso_solicitado)==0){
+            break;
+        }else{
+            auxiliar = auxiliar->siguiente_recurso;
         }
 
-        dictionary_put(dict_recursos, lista_recursos[i], rec);
     }
-}*/
+
+    if(auxiliar==NULL){                                                                       //RECURSO NO ENCONTRADO
+        return -1;
+    }
+    if (auxiliar->instancias_del_recurso - auxiliar->instancias_solicitadas_del_recurso<=0)             //RECURSO ENCONTRADO SIN INSTANCIAS DISPONIBLES
+    {
+        log_info(logger, "PID: %d - Cambio de estado READY -> BLOQUEADO", pcb_solicitante->PID);
+        pthread_mutex_lock(&mutex_recursos);
+        list_add(auxiliar->lista_de_espera,pcb_solicitante);
+        pthread_mutex_unlock(&mutex_recursos);
+        auxiliar->instancias_solicitadas_del_recurso-=1;
+        return 1;
+        
+    }else{                                                                                                  // //RECURSO ENCONTRADO CON INSTANCIAS DISPONIBLES
+        auxiliar->instancias_solicitadas_del_recurso-=1;
+        return 2;
+    }
+    
+
+}
+
+
+uint32_t signal_recursos ( char*recurso_solicitado,uint32_t PID){                                    
+    t_recurso* auxiliar = lista_de_recursos;
+
+    
+    while(auxiliar!=NULL){
+        if(strcmp(auxiliar->nombre_recurso,recurso_solicitado)==0){
+            break;
+        }else{
+            auxiliar = auxiliar->siguiente_recurso;
+        }
+
+    }
+  
+    if(auxiliar==NULL){                                                                //RECURSO NO ENCONTRADO
+        return -1;
+    }
+    
+    if(buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID)==NULL){               //RECURSO NO ASIGNADO AL PROCESO
+        return -2;
+    }
+       
+     auxiliar->instancias_del_recurso+=1;
+    
+
+
+    if (auxiliar->instancias_del_recurso>0 && list_size(auxiliar->lista_de_espera)>0)                               //VERIFICO SI HABIA UN PROCESO ESPERANDO EL RECURSO
+    {   
+        t_pcb *pcb_liberado=list_remove(auxiliar->lista_de_espera,0);
+        ingresar_en_lista(pcb_liberado, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);
+        
+    }
+
+    return 1;                                                                                                       //SIGNAL EXITOSO
+
+}
+
+
+
+void eliminar_proceso_de_lista_recursos (uint32_t PID){
+    t_pcb* pcb_a_eliminar;
+    t_recurso* auxiliar = lista_de_recursos;
+
+    while(auxiliar!=NULL){
+        pcb_a_eliminar=buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
+        if(pcb_a_eliminar!=NULL){
+            if(list_remove_element(auxiliar->lista_de_espera,pcb_a_eliminar)){
+                auxiliar->instancias_solicitadas_del_recurso+=1;
+            }else{
+                log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista de recursos pero no se pudo eliminar.",PID);
+            }
+        }
+
+        auxiliar=auxiliar->siguiente_recurso;
+    }
+}
+
+
+
+
+
+
+
+
+

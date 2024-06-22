@@ -33,7 +33,7 @@ void escuchar_a_ENTRADASALIDA(){/*
     bool continuarIterando=1;
     t_list* lista;    
         while (continuarIterando) {
-            int cod_op = recibir_operacion(fd_entradaSalida);
+            uint32_t cod_op = recibir_operacion(fd_entradaSalida);
             switch (cod_op) {
             case HANDSHAKE:
                 recibir_mensaje(fd_entradaSalida, logger_kernel);

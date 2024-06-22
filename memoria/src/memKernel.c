@@ -9,7 +9,7 @@ void atender_conexion_KERNEL_MEMORIA(){
     // CREO HILO ESCUCHA KERNEL
     pthread_t hilo_escucha_kenel_memoria;
     pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)conexion_con_kernel,NULL);
-    pthread_join(hilo_escucha_kenel_memoria,NULL);
+    pthread_detach(hilo_escucha_kenel_memoria);
 }
 
 void conexion_con_kernel(){
@@ -26,9 +26,12 @@ void conexion_con_kernel(){
         case ELIMINAR_PROCESO:
             eliminar_proceso();
             break;
-        default:
+        case -1:
             log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
             continuarIterando = 0;
+            break;
+        default:
+            log_warning(logger_debug,"Operacion desconocida de KERNEL. No quieras meter la pata");
             break;
         }
     }
@@ -49,7 +52,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         bool creado = crear_procesoM(path_parcial, PID);
 
         if(creado){
-        enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID,socket_kernel_memoria);
+        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);
         }    
     } else {
         // Manejo de error en caso de que recibir_buffer devuelva NULL
@@ -81,16 +84,9 @@ void eliminar_proceso(){ // llega un pid
     free(buffer);
 }
 
-/*
-void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){                  ///ESTA FUNCION YA LA HICE GENERICA, "enviar_instruccion_con_PID_por_socket"
-                                                                                                //(DESPUES HABRIA QUE ELIMINARLA)
-
-    t_paquete *paquete= crear_paquete (codigo_operacion);
+void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){
+    t_paquete *paquete = crear_paquete (codigo_operacion);
     agregar_a_paquete_uint32(paquete,PID);
-    enviar_paquete(paquete,socket_kernel_memoria);              //--------------ESTA FUNCION SERIALIZA EL PAQUETE ANTES DE ENVIARLO --quedaria un void*= cod_op||SIZE TOTAL||PID(uint_32)
+    enviar_paquete(paquete,socket_kernel_memoria);          
     eliminar_paquete(paquete);
-
 }
-*/                  
-
-

@@ -8,7 +8,7 @@
 extern t_log* logger;
 extern t_config* config;
 
-extern int socket_entradasalida_kernel;
+extern uint32_t socket_entradasalida_kernel;
 
 void atender_conexion_entradasalida_KERNEL();
 

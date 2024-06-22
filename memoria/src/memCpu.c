@@ -17,7 +17,6 @@ void conexion_con_cpu(){
     bool continuarIterando = true;
     while(continuarIterando){
         op_code codigo = recibir_operacion(socket_cpu_memoria);
-
         switch (codigo){
         case MENSAJE:
             recibir_mensaje(socket_cpu_memoria,logger_debug);
@@ -48,9 +47,11 @@ void conexion_con_cpu(){
         case SOLICITUD_RESIZE:
             ins_resize(socket_cpu_memoria);
             break;
-        default:
+        case -1:
             log_error(logger_debug, "el MODULO DE CPU SE DESCONECTO. Terminando servidor");
-
+            continuarIterando = 0;
+            break;
+        default:
             break;
         }
         
@@ -58,9 +59,9 @@ void conexion_con_cpu(){
 }
 
 void fetch(int socket_cpu_memoria){ 
-    uint32_t PID=0; 
-    uint32_t PC=0;
-    recibir_fetch(socket_cpu_memoria, &PID, &PC);
+    uint32_t PID; 
+    uint32_t PC;
+    recibir_fetch(socket_cpu_memoria, PID, PC);
     log_info(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     
     t_list* lista_instrucciones = obtener_instrs(PID);
@@ -247,7 +248,7 @@ void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
     agregar_a_paquete_string(paquete, strlen(instruccion->arg4) + 1, instruccion->arg4);
     agregar_a_paquete_string(paquete, strlen(instruccion->arg5) + 1, instruccion->arg5);
 
-    enviar_paquete(paquete, socket_cpu_memoria);
+    enviar_paquete(paquete, socket);
     //log_info(logger, "Paquete enviado");
     eliminar_paquete(paquete);
 }

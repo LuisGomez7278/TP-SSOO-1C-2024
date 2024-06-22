@@ -25,7 +25,8 @@
 #include "extern_globales.h"
 
 
-
+sem_t semaforo_plp;
+sem_t semaforo_pcp;
 sem_t control_multiprogramacion;
 sem_t cantidad_procesos_new;
 sem_t cantidad_procesos_ready;
@@ -35,6 +36,7 @@ sem_t cantidad_procesos_en_algun_ready;
 pthread_mutex_t semaforo_new;
 pthread_mutex_t semaforo_ready;
 pthread_mutex_t semaforo_bloqueado;
+pthread_mutex_t semaforo_bloqueado_prioridad;
 pthread_mutex_t semaforo_ready_prioridad;
 
 

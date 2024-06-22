@@ -15,12 +15,12 @@ extern char* IP_MEMORIA;
 extern char* PUERTO_MEMORIA;
 
 extern char* TIPO_INTERFAZ;
-extern int TIEMPO_UNIDAD_TRABAJO;
+extern uint32_t TIEMPO_UNIDAD_TRABAJO;
 
 extern char* PATH_BASE_DIALFS;
-extern int BLOCK_SIZE;
-extern int BLOCK_COUNT;
-extern int RETRASO_COMPACTACION;
+extern uint32_t BLOCK_SIZE;
+extern uint32_t BLOCK_COUNT;
+extern uint32_t RETRASO_COMPACTACION;
 
 void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz);
 void iniciar_logs(char* nombre_interfaz);
