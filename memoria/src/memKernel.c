@@ -39,7 +39,7 @@ void conexion_con_kernel(){
 
 void crear_proceso(){ // llega el pid y el path de instrucciones
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 
@@ -65,7 +65,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
 
 void eliminar_proceso(){ // llega un pid
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 

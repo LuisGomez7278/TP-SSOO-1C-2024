@@ -332,7 +332,7 @@ void interruptor_de_QUANTUM(void* quantum_de_pcb)
     usleep(quantum_ejecucion*1000);
  
 
-    op_code interrupcion = INT_QUANTUM;
+    op_code interrupcion = DESALOJO_POR_QUANTUM;
     send(socket_kernel_cpu_interrupt, &interrupcion, sizeof(op_code), 0);
 
     free(quantum_de_pcb);

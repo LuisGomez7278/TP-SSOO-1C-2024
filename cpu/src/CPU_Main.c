@@ -14,45 +14,26 @@ int main(int argc, char* argv[]) {
     // //esperar conexion de kernel
     socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
     socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha, logger);
-    
-    t_instruccion* ins1;
-    ins1 = malloc(sizeof(t_instruccion));
-    ins1->ins = SET;
-    ins1->arg1 = "AX";
-    ins1->arg2 = "8";
 
-    t_instruccion* ins2;   
-    ins2 = malloc(sizeof(t_instruccion));
-    ins2->ins = IO_GEN_SLEEP;
-    ins2->arg1 = "Int1";
-    ins2->arg2 = "5";
-    
-    // t_instruccion* ins3;
-    // ins3 = malloc(sizeof(t_instruccion));
-    // ins3->ins = SUM;
-    // ins3->arg1 = "AX";
-    // ins3->arg2 = "BX";
+    pthread_create(&hilo_conexion_interrupt, NULL, (void*) gestionar_conexion_interrupt, NULL);
+    pthread_detach(hilo_conexion_interrupt);
+            
+    recibir_proceso();
 
-    log_info(logger, "I: AX: %d", contexto_interno.AX);
-    ejecutar_instruccion(PID, &contexto_interno, ins1);
-    log_info(logger, "II: AX: %d", contexto_interno.AX);
-    ejecutar_instruccion(PID, &contexto_interno, ins2);
-    log_info(logger, "III: BX: %d", contexto_interno.BX);
-    // ejecutar_instruccion(PID, &contexto_interno, ins3);    
-    // log_info(logger, "IV: AX: %d BX: %d", contexto_interno.AX, contexto_interno.BX);
-        
-    // recibir_proceso();
+    while(true){
+        t_instruccion* ins_actual = fetch(PID, contexto_interno.PC, socket_cpu_memoria);
+        ejecutar_instruccion(PID, &contexto_interno, ins_actual);
+        if (interrupcion != INT_NO) {
+            if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
+            else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
+            desalojar_proceso(motivo_desalojo);
+            recibir_proceso();
+        };
+        free(ins_actual);
+    }
 
-    // while(true){
-    //     t_instruccion* ins_actual = fetch(PID, contexto_interno.PC, socket_cpu_memoria);
-    //     ejecutar_instruccion(PID, &contexto_interno, ins_actual);
-    //     if (check_interrupt(interrupcion)) {
-    //         motivo_desalojo = DESALOJO_POR_INTERRUPCION;
-    //         desalojar_proceso(motivo_desalojo);
-    //         recibir_proceso();
-    //     };
-    //     free(ins_actual);
-    // }
+    // pthread_create(hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_memoria, NULL);
+    // pthread_join(hilo_conexion_dispatch, NULL);
 
     if (socket_cpu_kernel_dispatch) {liberar_conexion(socket_cpu_kernel_dispatch);}
     if (socket_cpu_kernel_interrupt) {liberar_conexion(socket_cpu_kernel_interrupt);}
@@ -238,12 +219,12 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case WAIT:
         log_info(logger,"PID: %d - Ejecutando: WAIT - %s", PID, ins_actual->arg1);
+        contexto_interno->PC++;
         enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);
-        if (esperar_respuesta_recurso());
+        if (esperar_respuesta_recurso())
         {
             log_info(logger,"PID: %d - WAIT de recurso: %s fue exitoso", PID, ins_actual->arg1);
             recibir_proceso();
-            contexto_interno->PC++;
         }
         else
         {
@@ -254,12 +235,12 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case SIGNAL:
         log_info(logger,"PID: %d - Ejecutando: SIGNAL - %s", PID, ins_actual->arg1);
+        contexto_interno->PC++;
         enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);
-        if (esperar_respuesta_recurso());
+        if (esperar_respuesta_recurso())
         {
             log_info(logger,"PID: %d - SIGNAL de recurso: %s fue exitoso", PID, ins_actual->arg1);
             recibir_proceso();
-            contexto_interno->PC++;
         }
         else
         {
@@ -298,8 +279,4 @@ void* direccion_registro(t_contexto_ejecucion* contexto, char* registro){
         log_error(logger, "Error en traduccion de string a registro");
         return NULL;
     }
-}
-
-bool check_interrupt(int_code interrupcion){
-    return (interrupcion != INT_NO);
 }

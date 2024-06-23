@@ -14,11 +14,9 @@ void conexion_con_es(){
         case SOLICITUD_IO_WRITE:
             write_es();
             break;
-        case -1:
+        default:
             log_error(logger_debug, "el MODULO DE ES SE DESCONECTO. Terminando servidor");
             continuarIterando = 0;
-            break;
-        default:
             break;
         }
         
@@ -27,7 +25,7 @@ void conexion_con_es(){
 
 void read_es(){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer!=NULL){
@@ -53,7 +51,7 @@ void read_es(){
 
 void write_es(){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){

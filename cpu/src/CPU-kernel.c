@@ -75,3 +75,30 @@ bool esperar_respuesta_recurso()
         break;
     }
 }
+
+void gestionar_conexion_interrupt()
+{
+    op_code operacion;
+
+    while (true)
+    {
+        operacion = recibir_operacion(socket_cpu_kernel_interrupt);
+        switch (operacion)
+        {
+        case DESALOJO_POR_CONSOLA:
+            log_info(logger, "El usuario finaliza el proceso PID: %d por consola", PID);
+            interrupcion = INT_CONSOLA;
+            break;
+
+        case DESALOJO_POR_QUANTUM:
+            log_info(logger, "El proceso PID: %d termino su quantum y es desalojado", PID);
+            interrupcion = INT_QUANTUM;
+            break;
+        
+        default:
+        log_error(logger, "Llego algo que no era interrupcion por socket interrupt");
+            break;
+        }
+    }
+    
+}

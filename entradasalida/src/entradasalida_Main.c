@@ -42,6 +42,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 usleep(unidades_trabajo);
                 log_info(logger,"Se ha ejecutado la instruccion de Kernel");
             }
+            notificar_kernel(PID);
         case DESALOJO_POR_IO_STDIN:
         case DESALOJO_POR_IO_STDOUT:
         case DESALOJO_POR_IO_FS_CREATE:

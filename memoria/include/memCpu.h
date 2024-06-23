@@ -26,5 +26,6 @@ void frame(int socket_cpu_memoria);
 void movIn(int socket_cpu_memoria);
 void movOut(int socket_cpu_memoria);
 void copiar_string(int socket_cpu_memoria);
+void ins_resize(int socket_cpu_memoria);
 
 #endif //TP_MEMORIA_CPU_H_

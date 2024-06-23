@@ -60,9 +60,7 @@ typedef enum CODIGOS_DE_OPERACIONES{
 typedef enum CODIGOS_DE_INTERRUPCIONES
 {
     INT_NO,
-    INT_EXIT,
     INT_QUANTUM,
-    INT_DESALOJO,
     INT_CONSOLA
 } int_code;
 
