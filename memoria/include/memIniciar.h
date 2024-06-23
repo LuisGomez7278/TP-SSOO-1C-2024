@@ -16,7 +16,8 @@
 #include "../../utils/include/conexiones.h"
 #include "extGlobales.h"
 
+void inciarlogs();
 void cargarConfig();
-void inicializarMem();
+void inicializarEspacioMem();
 
 #endif //TP_MEMORIA_INICIAR_H_

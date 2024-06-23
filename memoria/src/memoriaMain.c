@@ -2,79 +2,55 @@
 
 int main(int argc, char* argv[]) {
     
+    // INICIALIZO LOGs
+    inciarlogs();
+
+    // OBTENGO LOS VALORES DEL CONFIG
     cargarConfig();
-    inicializarMem();                                                           ////ACA INICIA PAGINACION
-    bool a = crear_procesoM(path_base, 1);
 
-
-    // INICIALIZO  SERVIDOR DE MEMORIA 
+    // INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
+    inicializarEspacioMem();                                                           
     
-    socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
+    // INICIO SERVIDOR MEMORIA
+    socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
-    
     // ESPERO QUE SE CONECTE CPU
-    log_trace(logger_debug,"Esperando que se conecte CPU");
+    log_trace(logger_debug, "Esperando que se conecte CPU");
     socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
+    enviar_tam_pag();
     
-
     // ESPERO QUE SE CONECTE EL KERNEL
-    log_trace(logger_debug,"Esperando que se concte KERNEL");
+    log_trace(logger_debug, "Esperando que se conecte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
-    // CREO HILO ENTRADA-SALIDA Y ADENTRO DEL HILO SOPORTO MULTIPLES CONEXIONES
+    // ESPERO QUE SE CONECTE E/S
+    log_trace(logger_debug, "Esperando que se conecte E/S");
+    socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
+
+    // CREO HILO ESCUCHA CPU
+    pthread_t hilo_cpu_memoria;
+    pthread_create(&hilo_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
+    pthread_detach(hilo_cpu_memoria);
+
+    // CREO HILO ESCUCHA KERNEL 
+    pthread_t hilo_kernel_memoria;
+    pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
+    pthread_detach(hilo_kernel_memoria); 
+    
+    // CREO HILO ESCUCHA ENTRADA-SALIDA
     pthread_t hilo_entradaSalida_memoria;
     pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
     pthread_detach(hilo_entradaSalida_memoria);
 
-    // CREO HILO KERNEL 
-    pthread_t hilo_kernel_memoria;
-    pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
-    pthread_join(hilo_kernel_memoria,NULL); 
+/* // PRUEBAS SOBRE FUNCIONAMIENTO 
 
+    bool crear = crear_procesoM(path_base, 1);
 
-//HABLARLO CON GONZALO PRUEBAS??        //////////////////////////////////
-    //------------------------------------------
-
-/*  
-     uint32_t PID = 1;
-     t_contexto_ejecucion CE;
-     CE.PC = 2;
-     CE.AX = 1;
-     CE.BX = 0;
-     CE.CX = 0;
-     CE.DX = 0;
-     CE.EAX = 32;
-     CE.EBX = 0;
-     CE.ECX = 0;
-     CE.EDX = 0;
-     CE.SI = 0;
-     CE.DI = 0;
-     log_info(logger, "CE listo para enviar, datos: PID=%d, PC=%d, AX=%d, EAX=%d, SI=%d", PID, CE.PC, CE.AX, CE.EAX, CE.SI);
-  
-     enviar_CE(socket_cpu_memoria, PID, CE);
-     log_info(logger, "CE enviado con exito");
-  
-     log_info(logger, "path de archivo: %s", path);
-    
-    ////////////////////////////////////////////////////////////////////////////
-
-    socket_escucha = iniciar_servidor(puerto_escucha, logger);
-
-    socket_cpu_memoria = esperar_cliente(socket_escucha, logger);
-
-    conexion_con_cpu(socket_cpu_memoria);
-    */
-    //------------------------------------------
-
-
-
-
-    //PRUEBAS COMENTADAS POR THIAGO SOBRE MEMORIA
-    //------------------------------------------
-/*
     resize(1, 50);
     
-    resize(1, 0);
+    resize(1, 20);
+
+    resize(1, 10);
 
     tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
 
@@ -84,19 +60,33 @@ int main(int argc, char* argv[]) {
 
     char* buffer = "Hola planeta tierra, hoy es lunes";
 
-    bool escribir_bien = escribir_memoria(10, 22, buffer, 1);
-    bool escribir_int = escribir_uint32_t_en_memoria(10, sizeof(84), 84, 1);
+    bool escribir_bien = escribir_memoria(10, 34, buffer, 1);
+    bool escribir_bien2 = escribir_memoria(10, 3, "TP", 1);
 
-    if(escribir_bien){log_info(logger_debug, "Perfecto");}
+    char *leido2 = leer_memoria(10, 34, 1);
 
-    char* leido = leer_memoria(8, 22, 1);
-    int leido_int = leer_memoria_uint32_t(10, sizeof(84), 1);
+    log_info(logger_debug, "%s", leido2);
+
+    free(leido2);
+
+    // if(escribir_bien){log_info(logger_debug, "Perfecto");}
+
+    char str[12];
+    uint32_t numero = 145;
+
+    sprintf(str, "%u", numero); //convierte uint32_t a char*
+
+    bool escrito = escribir_memoria(10, sizeof(numero), str, 1);
+
+    char* leido = leer_memoria(10, 10, 1);
     
-    log_info(logger, "%.*s", 22, buffer);
-    log_info(logger_debug, "Int Leido: %d", leido_int);
+    log_info(logger_debug, "%s", leido);
+    
+    //log_info(logger_debug, "Int Leido: %d", leido_int);
     if(leido==NULL){perror("Rompio");}
 
     free(leido);
+
 */
     //--------------------------------------------
 
@@ -224,7 +214,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case IO_FS_DELETE:
         if (string_array_size(tokens)!=3)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }
@@ -252,7 +242,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case SIGNAL:
         if (string_array_size(tokens)!=2)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }    
@@ -273,7 +263,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case EXIT: // 0 argumentos, solo EXIT
         if (string_array_size(tokens)!=1)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }
@@ -291,7 +281,7 @@ t_instruccion* parsear_instruccion(char* linea){
         instruccion->arg5 = a5;
         break;   
     default:
-        log_error(logger, "Instruccion no reconocida");
+        log_error(logger_debug, "Instruccion no reconocida");
         return (t_instruccion* ) NULL;
         break;
     }
@@ -333,4 +323,13 @@ t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     t_instruccion* instruccion = malloc(sizeof(t_instruccion*));
     instruccion =  list_get(lista_instrucciones, PC);
     return instruccion;
+}
+
+void enviar_tam_pag(){
+    uint32_t tam_pag = tam_pagina;
+    t_paquete* paquete = crear_paquete(TAM_PAG);
+    agregar_a_paquete_uint32(paquete, tam_pag);
+    enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);            
+    log_info(logger_debug, "Se envia el tamaño de pagina a CPU");
 }
