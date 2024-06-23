@@ -125,7 +125,7 @@ uint32_t signal_recursos ( char*recurso_solicitado,uint32_t PID){
     
 
 
-    if (auxiliar->instancias_del_recurso>0 && list_size(auxiliar->lista_de_espera)>0)                               //VERIFICO SI HABIA UN PROCESO ESPERANDO EL RECURSO
+    if (auxiliar->instancias_del_recurso>0 && list_size(auxiliar->lista_de_espera)>0)                               //VERIFICO SI HABIA UN PROCESO ESPERANDO EL RECURSO Y LO LIBERO
     {   
         t_pcb *pcb_liberado=list_remove(auxiliar->lista_de_espera,0);
         ingresar_en_lista(pcb_liberado, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);

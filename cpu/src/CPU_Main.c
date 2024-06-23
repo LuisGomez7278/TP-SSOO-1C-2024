@@ -2,18 +2,21 @@
 
 int main(int argc, char* argv[]) {
 
-    iniciar_CPU();
+        iniciar_CPU();
 
-    // crear conexion
-    socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
-    log_info(logger, "Conectado a MEMORIA");
-    recibir_tamanio_de_pagina();
-    // //iniciar Server de CPU
-    socket_escucha = iniciar_servidor(puerto_escucha_dispatch, logger);
+    // //INICIAR SERVIDOR CPU
+        socket_escucha = iniciar_servidor(puerto_escucha_dispatch, logger);
+    
+    //CREAR CONEXION CON MEMORIA 
+        socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
+        log_info(logger, "Conectado a MEMORIA");
+        recibir_tamanio_de_pagina();
 
-    // //esperar conexion de kernel
-    socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
-    socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha, logger);
+
+    //// ESPERAR CONEXION CON KERNEL
+        socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
+        socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha, logger);
+        log_info(logger,"CPU conectado a Kernel")
     
     t_instruccion* ins1;
     ins1 = malloc(sizeof(t_instruccion));
@@ -239,7 +242,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     case WAIT:
         log_info(logger,"PID: %d - Ejecutando: WAIT - %s", PID, ins_actual->arg1);
         enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);
-        if (esperar_respuesta_recurso());
+        if (esperar_respuesta_recurso())
         {
             log_info(logger,"PID: %d - WAIT de recurso: %s fue exitoso", PID, ins_actual->arg1);
             recibir_proceso();
@@ -255,7 +258,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     case SIGNAL:
         log_info(logger,"PID: %d - Ejecutando: SIGNAL - %s", PID, ins_actual->arg1);
         enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);
-        if (esperar_respuesta_recurso());
+        if (esperar_respuesta_recurso())
         {
             log_info(logger,"PID: %d - SIGNAL de recurso: %s fue exitoso", PID, ins_actual->arg1);
             recibir_proceso();

@@ -21,7 +21,7 @@ t_instruccion* recibir_instruccion(int socket_cpu_memoria){
 
     
     uint32_t size;
-    int desplazamiento = 0;
+    uint32_t desplazamiento = 0;
     void* buffer = recibir_buffer(&size, socket_cpu_memoria);
 
     instr->ins = leer_de_buffer_cod_ins(buffer, &desplazamiento);
@@ -46,7 +46,7 @@ void recibir_tamanio_de_pagina()
     else
     {
         uint32_t size;
-        int desplazamiento = 0;
+        uint32_t desplazamiento = 0;
         void* buffer = recibir_buffer(&size, socket_cpu_memoria);
 
         tamanio_de_pagina = leer_de_buffer_uint32(buffer, &desplazamiento);

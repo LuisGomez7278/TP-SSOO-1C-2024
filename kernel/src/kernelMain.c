@@ -13,14 +13,14 @@ int32_t main(int32_t argc, char* argv[]) {
 //CONECTO CON MEMORIA
     socket_memoria_kernel = crear_conexion(ip_memoria, puerto_memoria);
     log_info(logger_debug,"Kernel conectado a MEMORIA");
-/*
+
  //CONECTO CON CPU
     socket_kernel_cpu_dispatch = crear_conexion(ip_cpu, puerto_cpu_dispatch);
     log_info(logger_debug,"Kernel conectado a CPU dispatch");
 
      socket_kernel_cpu_interrupt = crear_conexion(ip_cpu, puerto_cpu_interrupt);
      log_info(logger_debug,"Kernel conectado a CPU interrupt");
-*/
+
 // ENTRADAS SALIDAS LAS CONECTO DENTRO DEL HILO, YA QUE PODRIA ACEPTAR UNA O MULTIPLES CONEXIONES
 
 
@@ -33,12 +33,12 @@ int32_t main(int32_t argc, char* argv[]) {
          pthread_create(&hilo_entradaSalida,NULL,(void*)atender_conexion_ENTRADASALIDA_KERNEL,NULL);
          pthread_detach(hilo_entradaSalida);
     
-    /*
+    
     // CREO HILO DE CPU DISPARCH
         pthread_t hilo_CPU_dispatch;
         pthread_create(&hilo_CPU_dispatch,NULL,(void*)atender_conexion_CPU_DISPATCH_KERNEL,NULL);
         pthread_detach(hilo_CPU_dispatch);    
-     */       
+           
 
 
     //CREO HILO de MEMORIA

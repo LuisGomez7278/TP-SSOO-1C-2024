@@ -22,7 +22,7 @@
             case MENSAJE:
                 recibir_mensaje(socket_memoria_kernel,logger_debug);
                 break;
-            case CARGA_EXITOSA_PROCESO:
+            case CARGA_EXITOSA_PROCESO:                                     /// ABRO UN HILO POR CADA PROCESO QUE SE ENCOLA EN NEW ASI PUEDO SEGUIR ESCUCHANDO PROCESOS
                 pthread_t hilo_de_Planificador_largo_plazo;                
                 pthread_create(&hilo_de_Planificador_largo_plazo, NULL,(void*) carga_exitosa_en_memoria,NULL); 
                 pthread_detach(hilo_de_Planificador_largo_plazo);
@@ -114,29 +114,28 @@ void carga_exitosa_en_memoria(){
         sem_wait(&semaforo_plp);
     }
     
-
-    t_pcb *pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID);
+    t_pcb* pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID);
 
     if(pcb_ready==NULL){
         log_error(logger_debug,"Error al buscar el proceso con PID= %u en la lista New",PID);
     }else{
-        pthread_mutex_lock(&semaforo_new);
-        if (!list_remove_element(lista_new, pcb_ready)){
+        t_pcb pcb_copia=*pcb_ready;
+        pthread_mutex_lock(&semaforo_new);        
+        if (list_remove_element(lista_new, pcb_ready)){
+        
+            ingresar_en_lista(&pcb_copia, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
+        }else{
+        
             log_error(logger_debug,"Error al eliminar el elemento PID= u% de la lista NEW",PID);
         }
         pthread_mutex_unlock(&semaforo_new);
-
-        ingresar_en_lista(pcb_ready, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
-
     }
-
 }
-
 
 
 t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
 	t_link_element* aux=lista->head;
-    t_pcb* pcb_auxiliar;
+    t_pcb* pcb_auxiliar=malloc(sizeof(t_pcb));
  
 
     while (aux!=NULL)

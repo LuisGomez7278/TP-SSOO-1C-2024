@@ -14,18 +14,16 @@ void conexion_con_es(){
         case SOLICITUD_IO_WRITE:
             write_es();
             break;
-        case -1:
+        default:
             log_error(logger_debug, "el MODULO DE ES SE DESCONECTO. Terminando servidor");
             continuarIterando = 0;
-            break;
-        default:
             break;
         }
         
     }
 }
 
-void read_es(){
+void read_es(){                                                                     ///CONTESTA EL CASE DE READ, LEE Y DEVUELVE EL VALOR LEIDO EN MEMORIA
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
     int *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
@@ -51,7 +49,7 @@ void read_es(){
     free(buffer);
 }
 
-void write_es(){
+void write_es(){                                                                   ///CONTESTA EL CASE DE WRITE, ESCRIBE Y DEVUELVE OK O ERROR
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
     int *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;

@@ -139,9 +139,14 @@ pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario,pid_a_fin
             }
         }
 
+
+
 if (!encontrado)
 {
     log_error(logger_debug,"Proceso con PID: %u que se solicito finalizar NO existe.",pid_a_finalizar);
+}
+else{
+    enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pid_a_finalizar,socket_memoria_kernel);
 }
 
 

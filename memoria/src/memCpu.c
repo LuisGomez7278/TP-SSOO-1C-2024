@@ -17,6 +17,7 @@ void conexion_con_cpu(){
     bool continuarIterando = true;
     while(continuarIterando){
         op_code codigo = recibir_operacion(socket_cpu_memoria);
+
         switch (codigo){
         case MENSAJE:
             recibir_mensaje(socket_cpu_memoria,logger_debug);
@@ -47,11 +48,9 @@ void conexion_con_cpu(){
         case SOLICITUD_RESIZE:
             ins_resize(socket_cpu_memoria);
             break;
-        case -1:
-            log_error(logger_debug, "el MODULO DE CPU SE DESCONECTO. Terminando servidor");
-            continuarIterando = 0;
-            break;
         default:
+            log_error(logger_debug, "el MODULO DE CPU SE DESCONECTO. Terminando servidor");
+
             break;
         }
         
@@ -59,9 +58,9 @@ void conexion_con_cpu(){
 }
 
 void fetch(int socket_cpu_memoria){ 
-    uint32_t PID; 
-    uint32_t PC;
-    recibir_fetch(socket_cpu_memoria, PID, PC);
+    uint32_t PID=0; 
+    uint32_t PC=0;
+    recibir_fetch(socket_cpu_memoria, &PID, &PC);
     log_info(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     
     t_list* lista_instrucciones = obtener_instrs(PID);
@@ -80,7 +79,7 @@ void fetch(int socket_cpu_memoria){
 
 void frame(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -107,7 +106,7 @@ void frame(int socket_cpu_memoria){
 
 void movIn(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -133,7 +132,7 @@ void movIn(int socket_cpu_memoria){
 
 void movOut(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -166,7 +165,7 @@ void movOut(int socket_cpu_memoria){
 
 void copiar_string(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -200,7 +199,7 @@ void copiar_string(int socket_cpu_memoria){
 
 void ins_resize(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -231,7 +230,7 @@ void ins_resize(int socket_cpu_memoria){
 
 void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC){
     uint32_t size;
-    int desplazamiento = 0;
+    uint32_t desplazamiento = 0;
     void* buffer = recibir_buffer(&size, socket_cpu_memoria);
 
     *PID = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -248,7 +247,7 @@ void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
     agregar_a_paquete_string(paquete, strlen(instruccion->arg4) + 1, instruccion->arg4);
     agregar_a_paquete_string(paquete, strlen(instruccion->arg5) + 1, instruccion->arg5);
 
-    enviar_paquete(paquete, socket);
+    enviar_paquete(paquete, socket_cpu_memoria);
     //log_info(logger, "Paquete enviado");
     eliminar_paquete(paquete);
 }
