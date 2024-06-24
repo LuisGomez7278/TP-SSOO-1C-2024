@@ -2,59 +2,76 @@
 
 void atender_conexion_ENTRADASALIDA_KERNEL(){
 
-//ESPERO QUE SE CONECTE ENTRADA-SALIDA
-    socket_entradasalida_kernel = esperar_cliente(socket_escucha, logger);
-    log_info(logger_debug,"Kernel conectado a I/O");
+    while (1)
+    {
+        IO_type* nueva_interfaz = malloc(sizeof(IO_type));
+        nueva_interfaz->socket_interfaz = esperar_cliente(socket_escucha, logger);
+        log_info(logger_debug,"Kernel conectado a  UNA I/O");
 
-//ENVIAR MENSAJE ENTRADA SALIDA
-    enviar_mensaje("kernel manda mensaje a entradasalida", socket_entradasalida_kernel);
-    log_info(logger, "Se envio el primer mensaje a entradasalida");
+    //ENVIAR MENSAJE ENTRADA SALIDA
+        enviar_mensaje("kernel manda mensaje a nueva interfaz", nueva_interfaz->socket_interfaz);
+        log_info(logger, "Se envio el primer mensaje a la nueva interfaz");
 
-//RECIBIR MENSAJE ENTRADA SALIDA
-    op_code codop2 = recibir_operacion(socket_entradasalida_kernel);    
-    if (codop2 == MENSAJE) {log_info(logger, "LLego un mensaje");}
-    else {log_info(logger, "LLego otra cosa");}
-    recibir_mensaje(socket_entradasalida_kernel, logger);
+    //RECIBIR TIPO Y NOMBRE DE INTERFAZ
+        op_code cod_operacion= recibir_operacion(nueva_interfaz->socket_interfaz);
 
-/*
+        switch (cod_operacion)
+        {
+        case NUEVA_IO:
+        crear_interfaz(nueva_interfaz);
+        
+        pthread_t hilo_escucha_ENTRADASALIDA_KERNEL;
+        pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_Nueva_Interfaz,(*void)nueva_interfaz);
+        pthread_detach(hilo_escucha_ENTRADASALIDA_KERNEL);
 
-    pthread_t hilo_escucha_ENTRADASALIDA_KERNEL;
-    pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_ENTRADASALIDA,NULL);
-    pthread_join(hilo_escucha_ENTRADASALIDA_KERNEL,NULL);
-*/
-}
-
-
-
-
-
-
-void escuchar_a_ENTRADASALIDA(){/*
-    bool continuarIterando=1;
-    t_list* lista;    
-        while (continuarIterando) {
-            uint32_t cod_op = recibir_operacion(fd_entradaSalida);
-            switch (cod_op) {
-            case HANDSHAKE:
-                recibir_mensaje(fd_entradaSalida, logger_kernel);
-                break;
-            case PAQUETE:
-                lista = recibir_paquete(fd_entradaSalida);
-                log_info(logger_kernel_db, "Me llegaron los siguientes valores:\n");
-                list_logger(lista,logger_kernel_db);
-                break;
-            case -1:
-                log_error(logger_kernel_db, "La ENTRADASALIDA SE DESCONECTO. Terminando servidor");
-                continuarIterando=0;
-                break;
-            default:
-                log_warning(logger_kernel_db,"Operacion desconocida de ENTRADASALIDA. No quieras meter la pata");
-                break;
-            }
+        default:
+            log_error(logger_debug,"Error al recibir nueva interfaz")
+            break;
         }
-*/
+
+    
+
+    }
+
+    
+}
+
+
+void crear_interfaz (IO_type* nueva_interfaz){
+        uint32_t size;
+        void* buffer=recibir_buffer(&size,nueva_interfaz->socket_interfaz);
+        uint32_t desplazamiento=0;
+        nueva_interfaz->tipo_interfaz= leer_de_buffer_tipo_interfaz(buffer,&desplazamiento);
+        nueva_interfaz->nombre_interfaz=leer_de_buffer_string(buffer,&desplazamiento);
+        
+        nueva_interfaz->cola_de_espera=list_create();
+        sem_init(&nueva_interfaz->control_envio_interfaz 0, 0)
+        pthread_mutex_lock(&semaforo_lista_interfaces);
+        list_add(lista_de_interfaces,nueva_interfaz);
+        pthread_mutex_unlock(&semaforo_lista_interfaces);
+        log_info(logger_debug,"Creada nueva interfaz: %s",nueva_interfaz->nombre_interfaz);
+        free(buffer);
+}
+
+
+    
+
+void escuchar_a_Nueva_Interfaz(){
+
+    
+
+
 
 }
+
+
+
+
+
+
+
+
+
 
 
 

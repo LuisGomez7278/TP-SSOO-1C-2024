@@ -54,7 +54,8 @@ typedef enum CODIGOS_DE_OPERACIONES{
     DESALOJO_POR_IO_FS_READ,
     FINALIZA_IO,
     OK,
-    FALLO
+    FALLO,
+    NUEVA_IO
 } op_code;
 
 typedef enum CODIGOS_DE_INTERRUPCIONES
@@ -131,7 +132,7 @@ void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 
 void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int32_t socket_a_enviar);
 uint32_t recibir_de_buffer_solo_PID(int32_t socket_a_recibir);
-
+cod_interfaz leer_de_buffer_tipo_interfaz(void* buffer, uint32_t* desplazamiento);
 
 
 /*----------Fin Serializacion----------*/

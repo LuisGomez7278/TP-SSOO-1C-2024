@@ -89,6 +89,15 @@ typedef struct pcb_de_proceso
     
 } t_pcb;
 
+ typedef struct 
+{
+    char* nombre_interfaz;
+    cod_interfaz tipo_interfaz;
+    int32_t socket_interfaz;
+    t_list* cola_de_espera;
+    sem_t control_envio_interfaz;
+} IO_type;
+
 typedef enum CODIGOS_DE_INTERFACES
 {
     GENERICA,

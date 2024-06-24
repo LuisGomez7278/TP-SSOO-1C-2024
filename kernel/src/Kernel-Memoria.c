@@ -80,6 +80,7 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
 
 void carga_exitosa_en_memoria(){  
 
+
 //RECIBO EL PROCESO QUE CARGO EN MEMORIA
 
     uint32_t *sizeTotal=malloc(sizeof(uint32_t));

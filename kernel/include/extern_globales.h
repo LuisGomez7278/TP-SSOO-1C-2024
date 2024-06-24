@@ -58,6 +58,7 @@ extern t_list *lista_exit;
 extern t_list *lista_bloqueado;
 extern t_list *lista_bloqueado_prioritario;
 extern t_list *lista_ready_prioridad;
+extern t_list *lista_de_interfaces;
 
 
 extern sem_t control_multiprogramacion;
@@ -75,6 +76,8 @@ extern pthread_mutex_t semaforo_ready_prioridad;
 extern pthread_mutex_t semaforo_bloqueado_prioridad;
 extern pthread_mutex_t semaforo_bloqueado;
 extern pthread_mutex_t mutex_recursos;
+extern pthread_mutex_t semaforo_lista_interfaces;
+
 
 extern uint32_t identificador_PID;
 extern pthread_mutex_t mutex_pid;
@@ -107,7 +110,7 @@ extern uint32_t pcb_actual_en_cpu;
 
 //Kernel-EntradaSalida.h
     void atender_conexion_ENTRADASALIDA_KERNEL();
-    void escuchar_a_ENTRADASALIDA();
+    
 
 //kernel-Memoria.h
     void atender_conexion_MEMORIA_KERNEL();

@@ -473,6 +473,15 @@ int_code leer_de_buffer_int_code(void* buffer, uint32_t* desplazamiento)
     return codigo;
 };
 
+cod_interfaz leer_de_buffer_tipo_interfaz(void* buffer, uint32_t* desplazamiento)
+{
+    cod_interfaz codigo;
+    memcpy(&codigo,  buffer + (*desplazamiento), sizeof(int_code));
+    (*desplazamiento) += sizeof(int_code);    
+    return codigo;
+};
+
+
 void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int32_t socket_a_enviar){
 
     t_paquete *paquete= crear_paquete (codigo_operacion);

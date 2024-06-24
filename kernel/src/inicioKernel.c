@@ -71,6 +71,7 @@ void iniciar_estructuras_planificacion(){
 	lista_exit = list_create();
 	lista_bloqueado= list_create();
 	lista_bloqueado_prioritario= list_create();
+	lista_de_interfaces= list_create();
 	
 //SEMAFORO MULTIPROGRAMACION
 
@@ -94,7 +95,8 @@ void iniciar_estructuras_planificacion(){
 	pthread_mutex_init(&semaforo_bloqueado_prioridad, NULL);
 	pthread_mutex_init(&semaforo_ready_prioridad, NULL);
 	pthread_mutex_init(&mutex_recursos, NULL);
-	
+	pthread_mutex_init(&semaforo_lista_interfaces, NULL);
+	;
 
 //mutex asignacion pid
 	pthread_mutex_init(&mutex_pid, NULL);

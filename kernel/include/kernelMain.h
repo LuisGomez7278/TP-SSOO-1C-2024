@@ -62,7 +62,7 @@
     t_list *lista_bloqueado;
     t_list *lista_ready_prioridad;
     t_list *lista_bloqueado_prioritario;
-    
+    t_list *lista_de_interfaces;
 
 
 
