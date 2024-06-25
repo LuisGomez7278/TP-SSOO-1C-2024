@@ -7,11 +7,12 @@ int main(int argc, char* argv[]) {
 
     // OBTENGO LOS VALORES DEL CONFIG
     cargarConfig();
-    //SERVER
-    // INICIALIZO  SERVIDOR DE MEMORIA 
-    /*
-    socket_escucha=iniciar_servidor(puerto_escucha,logger_debug);
 
+    // INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
+    inicializarEspacioMem();                                                           
+    
+    // INICIO SERVIDOR MEMORIA
+    socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
     // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug, "Esperando que se conecte CPU");
@@ -19,18 +20,29 @@ int main(int argc, char* argv[]) {
     enviar_tam_pag();
     
     // ESPERO QUE SE CONECTE EL KERNEL
-    log_trace(logger_debug,"Esperando que se concte KERNEL");
+    log_trace(logger_debug, "Esperando que se conecte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
-    // CREO HILO ENTRADA-SALIDA Y ADENTRO DEL HILO SOPORTO MULTIPLES CONEXIONES
+    // ESPERO QUE SE CONECTE E/S
+    log_trace(logger_debug, "Esperando que se conecte E/S");
+    socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
+
+    // CREO HILO ESCUCHA CPU
+    pthread_t hilo_cpu_memoria;
+    pthread_create(&hilo_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
+    pthread_detach(hilo_cpu_memoria);
+
+    // CREO HILO ESCUCHA KERNEL 
+    pthread_t hilo_kernel_memoria;
+    pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
+    pthread_detach(hilo_kernel_memoria); 
+    
+    // CREO HILO ESCUCHA ENTRADA-SALIDA
     pthread_t hilo_entradaSalida_memoria;
-    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)atender_conexion_ENTRADASALIDA_MEMORIA,NULL);
+    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
     pthread_detach(hilo_entradaSalida_memoria);
 
-    // CREO HILO KERNEL 
-    pthread_t hilo_kernel_memoria;
-    pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
-    pthread_detach(hilo_kernel_memoria); */
+/* // PRUEBAS SOBRE FUNCIONAMIENTO 
 
     bool crear = crear_procesoM(path_base, 1);
 
@@ -42,42 +54,42 @@ int main(int argc, char* argv[]) {
 
     tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
 
-    conexion_con_cpu(socket_cpu_memoria);
-    */
-    //------------------------------------------
-
-    //conexion_con_cpu(socket_cpu_memoria);
-    
-    // // PRUEBAS MEMORIA crear proceso, asignar tamaño, escribir y leer.
-    inicializarMem();
-
-    bool a = crear_procesoM(path_base, 1);
-
-    resize(1, 50);
-    
-    //resize(1, 0);
-
-    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
-
-    /*if(tpg == NULL){
+    if(tpg == NULL){
         perror("AAA");    
-    }*/
+    }
 
     char* buffer = "Hola planeta tierra, hoy es lunes";
 
-    //bool escribir_bien = escribir_memoria(10, 22, buffer, 1);
-    bool escribir_int = escribir_uint32_t_en_memoria(10, sizeof(84), 84, 1);
+    bool escribir_bien = escribir_memoria(10, 34, buffer, 1);
+    bool escribir_bien2 = escribir_memoria(10, 3, "TP", 1);
 
-    //if(escribir_bien){log_info(logger_debug, "Perfecto");}
+    char *leido2 = leer_memoria(10, 34, 1);
 
-    //char* leido = leer_memoria(8, 22, 1);
-    int leido_int = leer_memoria_uint32_t(10, sizeof(84), 1);
+    log_info(logger_debug, "%s", leido2);
+
+    free(leido2);
+
+    // if(escribir_bien){log_info(logger_debug, "Perfecto");}
+
+    char str[12];
+    uint32_t numero = 145;
+
+    sprintf(str, "%u", numero); //convierte uint32_t a char*
+
+    bool escrito = escribir_memoria(10, sizeof(numero), str, 1);
+
+    char* leido = leer_memoria(10, 10, 1);
     
-    //log_info(logger, "%.*s", 22, buffer);
-    log_info(logger_debug, "Int Leido: %d", leido_int);
-    //if(leido==NULL){perror("Rompio");}
+    log_info(logger_debug, "%s", leido);
+    
+    //log_info(logger_debug, "Int Leido: %d", leido_int);
+    if(leido==NULL){perror("Rompio");}
 
-    //free(leido);
+    free(leido);
+
+*/
+    //--------------------------------------------
+
 
     if (socket_cpu_memoria) {liberar_conexion(socket_cpu_memoria);}
     if (socket_kernel_memoria) {liberar_conexion(socket_kernel_memoria);}
@@ -86,6 +98,8 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+//-------------------------------         FUNCIONES     -----------------------------------------
 
 t_list* leer_pseudocodigo(char* path){
     FILE* archivo =  fopen(path, "r");
@@ -102,7 +116,6 @@ t_list* leer_pseudocodigo(char* path){
     while (fgets(linea, 50, archivo) != NULL)
     {
         instr = parsear_instruccion(linea);
-        // log_info(logger, "Ins: %d", instr->ins);
         if (!instr) 
         {
             log_error(logger_debug, "El archivo de pseudocodigo tiene errores/instrucciones invalidas");

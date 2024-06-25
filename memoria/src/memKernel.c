@@ -9,8 +9,8 @@ void atender_conexion_KERNEL_MEMORIA(){
     // CREO HILO ESCUCHA KERNEL
     pthread_t hilo_escucha_kenel_memoria;
     pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)conexion_con_kernel,NULL);
-    pthread_detach(hilo_escucha_kenel_memoria);
-}
+    pthread_join(hilo_escucha_kenel_memoria,NULL);
+}*/
 
 void conexion_con_kernel(){
     bool continuarIterando = true;
@@ -26,12 +26,9 @@ void conexion_con_kernel(){
         case ELIMINAR_PROCESO:
             eliminar_proceso();
             break;
-        case -1:
-            log_error(logger_debug, "el MODULO DE KERNEL SE DESCONECTO. Terminando servidor");
-            continuarIterando = 0;
-            break;
         default:
-            log_warning(logger_debug,"Operacion desconocida de KERNEL. No quieras meter la pata");
+            log_error(logger_debug, "Modulo KERNEL se desconectó. Terminando servidor");
+            continuarIterando = 0;
             break;
         }
     }
@@ -39,7 +36,7 @@ void conexion_con_kernel(){
 
 void crear_proceso(){ // llega el pid y el path de instrucciones
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(int));
+    int *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 
@@ -54,8 +51,11 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         usleep(retardo*1000);
 
         if(creado){
-        contestar_a_kernel_carga_proceso(CARGA_EXITOSA_PROCESO,  PID);
-        }    
+            enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID, socket_kernel_memoria);
+        }else{
+            enviar_instruccion_con_PID_por_socket(ERROR_AL_CARGAR_EL_PROCESO, PID, socket_kernel_memoria);
+        }  
+
     } else {
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
@@ -67,7 +67,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
 
 void eliminar_proceso(){ // llega un pid
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(int));
+    int *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 
@@ -84,11 +84,4 @@ void eliminar_proceso(){ // llega un pid
     free(sizeTotal);
     free(desplazamiento);
     free(buffer);
-}
-
-void contestar_a_kernel_carga_proceso(op_code codigo_operacion, uint32_t PID){
-    t_paquete *paquete = crear_paquete (codigo_operacion);
-    agregar_a_paquete_uint32(paquete,PID);
-    enviar_paquete(paquete,socket_kernel_memoria);          
-    eliminar_paquete(paquete);
 }
