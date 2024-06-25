@@ -2,6 +2,10 @@
 
 int main(int argc, char* argv[]) {
     
+    // INICIALIZO LOGs
+    inciarlogs();
+
+    // OBTENGO LOS VALORES DEL CONFIG
     cargarConfig();
     //SERVER
     // INICIALIZO  SERVIDOR DE MEMORIA 
@@ -10,10 +14,10 @@ int main(int argc, char* argv[]) {
 
 
     // ESPERO QUE SE CONECTE CPU
-    log_trace(logger_debug,"Esperando que se conecte CPU");
-    socket_cpu_memoria_dispatch = esperar_cliente(socket_escucha,logger_debug);
-    socket_cpu_memoria_interrupt = esperar_cliente(socket_escucha,logger_debug);
-
+    log_trace(logger_debug, "Esperando que se conecte CPU");
+    socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
+    enviar_tam_pag();
+    
     // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug,"Esperando que se concte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
@@ -28,30 +32,19 @@ int main(int argc, char* argv[]) {
     pthread_create(&hilo_kernel_memoria,NULL,(void*)atender_conexion_KERNEL_MEMORIA,NULL);
     pthread_detach(hilo_kernel_memoria); */
 
-    // uint32_t PID = 1;
-    // t_contexto_ejecucion CE;
-    // CE.PC = 2;
-    // CE.AX = 1;
-    // CE.BX = 0;
-    // CE.CX = 0;
-    // CE.DX = 0;
-    // CE.EAX = 32;
-    // CE.EBX = 0;
-    // CE.ECX = 0;
-    // CE.EDX = 0;
-    // CE.SI = 0;
-    // CE.DI = 0;
-    // log_info(logger, "CE listo para enviar, datos: PID=%d, PC=%d, AX=%d, EAX=%d, SI=%d", PID, CE.PC, CE.AX, CE.EAX, CE.SI);
-    
-    // enviar_CE(socket_cpu_memoria, PID, CE);
-    // log_info(logger, "CE enviado con exito");
-    
-    // log_info(logger, "path de archivo: %s", path);
-    
-    //iniciar Server de CPU
-    //socket_escucha = iniciar_servidor(puerto_escucha, logger);
+    bool crear = crear_procesoM(path_base, 1);
 
-    //socket_cpu_memoria = esperar_cliente(socket_escucha, logger);
+    resize(1, 50);
+    
+    resize(1, 20);
+
+    resize(1, 10);
+
+    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
+
+    conexion_con_cpu(socket_cpu_memoria);
+    */
+    //------------------------------------------
 
     //conexion_con_cpu(socket_cpu_memoria);
     
@@ -208,7 +201,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case IO_FS_DELETE:
         if (string_array_size(tokens)!=3)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }
@@ -236,7 +229,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case SIGNAL:
         if (string_array_size(tokens)!=2)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }    
@@ -257,7 +250,7 @@ t_instruccion* parsear_instruccion(char* linea){
     case EXIT: // 0 argumentos, solo EXIT
         if (string_array_size(tokens)!=1)
         {
-            log_error(logger,"Cantidad incorrecta de argumentos en instruccion");
+            log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
             return (t_instruccion* ) NULL;
             break;
         }
@@ -275,7 +268,7 @@ t_instruccion* parsear_instruccion(char* linea){
         instruccion->arg5 = a5;
         break;   
     default:
-        log_error(logger, "Instruccion no reconocida");
+        log_error(logger_debug, "Instruccion no reconocida");
         return (t_instruccion* ) NULL;
         break;
     }
@@ -319,3 +312,11 @@ t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     return instruccion;
 }
 
+void enviar_tam_pag(){
+    uint32_t tam_pag = tam_pagina;
+    t_paquete* paquete = crear_paquete(TAM_PAG);
+    agregar_a_paquete_uint32(paquete, tam_pag);
+    enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);            
+    log_info(logger_debug, "Se envia el tamaño de pagina a CPU");
+}

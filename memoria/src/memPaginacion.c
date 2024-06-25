@@ -50,6 +50,7 @@ void eliminar_procesoM(uint32_t PID){
     // Buscar y eliminar la tabla de páginas del proceso
     tabla_pag_proceso* tabla_pag_p = obtener_tabla_pag_proceso(PID);
     if (tabla_pag_p != NULL) {
+        log_info(logger, "Destrucción de Tabla de Páginas: PID: %u Tamaño: %d", PID, list_size(tabla_pag_p->paginas));
         for (int i = 0; i < list_size(tablaDePaginas); i++) {
             tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
             if (tabla->pid == PID) {
@@ -82,26 +83,29 @@ void liberar_frames(t_list* paginas){
     }
 }
 
-bool resize(uint32_t PID, int size) {
+bool resize(uint32_t PID, uint32_t size) {
     tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
     if (tabla_proceso == NULL) {
-        log_error(logger, "Proceso con PID %d no encontrado", PID);
+        log_error(logger_debug, "Proceso con PID %d no encontrado", PID);
         return false;
     }
 
     int num_paginas_actuales = list_size(tabla_proceso->paginas);
     int num_paginas_requeridas;
+    int tam_actual = num_paginas_actuales*tam_pagina;
 
-    if (size > 0) {
+    if (size > tam_actual) { // ampliacion
         // Añadir páginas
-        num_paginas_requeridas = (abs(size) + tam_pagina - 1) / tam_pagina;  // Redondea hacia arriba
+        log_info(logger,"Ampliación de Proceso: PID: %u - Tamaño Actual: %d - Tamaño a Ampliar: %u", PID, tam_actual, size);
+        num_paginas_requeridas = ((size - tam_actual) + tam_pagina - 1) / tam_pagina;  
         bool exito = añadir_pagina_a_proceso(tabla_proceso, num_paginas_requeridas, PID);
         if(!exito){
             return false;
         }
-    } else if (size < 0) {
+    } else if (size < tam_actual) { // reduccion
         // Eliminar páginas
-        num_paginas_requeridas = abs(size)/tam_pagina; // Redondea hacia abajo
+        log_info(logger,"Reducción de Proceso: PID: %u - Tamaño Actual: %d - Tamaño a Reducir: %u", PID, tam_actual, size);
+        num_paginas_requeridas = (tam_actual - size) / tam_pagina;
         eliminar_pagina_de_proceso(tabla_proceso, num_paginas_requeridas);
     }
     return true;
@@ -111,8 +115,8 @@ bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, ui
     for (int i = 0; i < num_paginas; i++) {
         tabla_pag* nueva_pagina = malloc(sizeof(tabla_pag));
         if (nueva_pagina == NULL) {
-            log_error(logger, "Error al asignar memoria para la nueva página");
-            exit(EXIT_FAILURE);
+            log_error(logger_debug, "Error al asignar memoria para la nueva página");
+            return false;
         }
         nueva_pagina->marco = -1;  // Asignar marco apropiado
         nueva_pagina->presencia = false;  // Inicialmente no presente
@@ -124,7 +128,7 @@ bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, ui
             log_error(logger, "Out Of Memory");
             return false;
         } else {
-            log_info(logger, "Página añadida y asignada al proceso %d. Total de páginas: %d", PID, list_size(tabla->paginas));
+            log_info(logger_debug, "Página añadida y asignada al proceso %d. Total de páginas: %d", PID, list_size(tabla->paginas));
         }    
     }
     return true;
@@ -141,14 +145,14 @@ void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas) {
             // Liberar el marco correspondiente si es necesario
             if (pagina_a_eliminar->presencia) {
                 bitarray_clean_bit(bitmap, pagina_a_eliminar->marco);  // Libera el marco en el bitmap
-                log_info(logger, "Liberado el marco %d del proceso %d", pagina_a_eliminar->marco, tabla->pid);
+                log_info(logger_debug, "Liberado el marco %d del proceso %d", pagina_a_eliminar->marco, tabla->pid);
             }
             free(pagina_a_eliminar);
         }
 
         // Ahora eliminar la página de la lista
         list_remove(tabla->paginas, index);
-        log_info(logger, "Página eliminada del proceso %d. Total de páginas: %d", tabla->pid, list_size(tabla->paginas));
+        log_info(logger_debug, "Página eliminada del proceso %d. Total de páginas: %d", tabla->pid, list_size(tabla->paginas));
     }
 }
 
@@ -164,7 +168,7 @@ void añadirTablaALista(t_list* paginas, uint32_t PID){
     nueva_tabla_proceso->pid = PID;
     nueva_tabla_proceso->paginas = paginas;
 
-    log_info(logger, "Creacion de tabla de paginas: PID: %d. Tamaño: %d", PID, list_size(paginas));
+    log_info(logger, "Creación de Tabla de Páginas: PID: %u Tamaño: %d", PID, list_size(paginas));
 
     list_add(tablaDePaginas, nueva_tabla_proceso);
 }
@@ -207,7 +211,7 @@ procesoM* buscar_proceso_por_pid(uint32_t pid){
             return proceso;
         }
     }
-    log_error(logger, "Proceso con PID %d no encontrado", pid);
+    log_error(logger_debug, "Proceso con PID %d no encontrado", pid);
     return NULL;
 }
 
@@ -216,20 +220,20 @@ t_list* obtener_instrs(uint32_t pid){
     if (proceso != NULL) {
         return proceso->instrs;
     }
-    log_error(logger, "No se pudo obtener la lista de instrucciones del proceso con PID %d", pid);
+    log_error(logger_debug, "No se pudo obtener la lista de instrucciones del proceso con PID %d", pid);
     return NULL;
 }
 
 int asignar_marco(uint32_t PID, int numero_pagina) {
     tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
     if (tabla_proceso == NULL) {
-        log_error(logger, "Error: no se encontró la tabla de páginas del proceso");
-        exit(EXIT_FAILURE);
+        log_error(logger_debug, "Error: no se encontró la tabla de páginas del proceso");
+        return -1;
     }
     tabla_pag* pagina = obtener_pagina_proceso(tabla_proceso, numero_pagina);
     if (pagina == NULL) {
-        log_error(logger, "Error: no se encontró la tabla de páginas del proceso");
-        exit(EXIT_FAILURE);
+        log_error(logger_debug, "Error: no se encontró la tabla de páginas del proceso");
+        return -1;
     }
 
     // Buscar un marco libre en el bitarray
@@ -264,7 +268,8 @@ int obtener_desplazamiento(int direccion_fisica) {
     return direccion_fisica % tam_pagina;
 }
 
-bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_t PID){
+bool escribir_memoria(uint32_t direccion_fisica, uint32_t bytes, char* valor, uint32_t PID){
+    bytes -= 1; // al no guardar el caracter nulo se escribe un byte menos, luego es añadido cuando se lee
     int bytes_escritos = 0;
     int direccion_actual = direccion_fisica;
     int bytes_restantes = bytes;
@@ -282,7 +287,7 @@ bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_
 
         memcpy((char*)memoria_usuario + (marco * tam_pagina) + offset, valor + bytes_escritos, bytes_a_escribir);
 
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %d - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_escribir);
+        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_escribir);
 
         bytes_escritos += bytes_a_escribir;
         bytes_restantes -= bytes_a_escribir;
@@ -307,7 +312,7 @@ bool escribir_memoria(int direccion_fisica, uint32_t bytes, char* valor, uint32_
     return true;
 }
 
-bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID) {
+/*bool escribir_uint32_t_en_memoria(uint32_t direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID) { // NO SE USA MAS, NO NECESARIA
     int bytes_escritos = 0;
     int direccion_actual = direccion_fisica;
     int bytes_restantes = bytes;
@@ -321,7 +326,7 @@ bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t
 
         memcpy((char*)memoria_usuario + (marco * tam_pagina) + offset, ((char*)&valor) + bytes_escritos, bytes_a_escribir);
 
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %d - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_escribir);
+        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_escribir);
 
         bytes_escritos += bytes_a_escribir;
         bytes_restantes -= bytes_a_escribir;
@@ -343,8 +348,9 @@ bool escribir_uint32_t_en_memoria(int direccion_fisica, uint32_t bytes, uint32_t
     }
     return true;
 }
+*/
 
-char* leer_memoria(int direccion_fisica, int size, uint32_t PID){
+char* leer_memoria(uint32_t direccion_fisica, int size, uint32_t PID){
     char* buffer = malloc(size);
     int bytes_leidos = 0;
     int direccion_actual = direccion_fisica;
@@ -358,31 +364,32 @@ char* leer_memoria(int direccion_fisica, int size, uint32_t PID){
 
         memcpy(buffer + bytes_leidos, (char*)memoria_usuario + (marco * tam_pagina) + offset, bytes_a_leer);
 
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %d - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_leer);
+        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_leer);
         bytes_leidos += bytes_a_leer;
         bytes_restantes -= bytes_a_leer;
 
         if (bytes_restantes > 0) {
             tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
             if (tabla_proceso == NULL) {
-                free(buffer);
-                return NULL;
+                buffer[bytes_leidos] = '\0';
+                return buffer;
             }
 
             tabla_pag* siguiente_pagina = buscar_siguiente_pagina(tabla_proceso, marco);
             if (siguiente_pagina == NULL || !siguiente_pagina->presencia) {
-                free(buffer);
-                return NULL;
+                buffer[bytes_leidos] = '\0';
+                return buffer;
             }
 
             direccion_actual = siguiente_pagina->marco * tam_pagina;
         }
     }
-    //log_info(logger, "%.*s", size, buffer);  
+    buffer[size] = '\0';
+    //log_info(logger_debug, "%.*s", size, buffer);  
     return buffer;
 }
 
-uint32_t leer_memoria_uint32_t(int direccion_fisica, uint8_t bytes, uint32_t PID) {
+/* uint32_t leer_memoria_uint32_t(uint32_t direccion_fisica, uint8_t bytes, uint32_t PID) { // NO SE USA MAS, NO NECESARIA
     uint32_t valor = 0;
     int bytes_leidos = 0;
     int direccion_actual = direccion_fisica;
@@ -396,20 +403,20 @@ uint32_t leer_memoria_uint32_t(int direccion_fisica, uint8_t bytes, uint32_t PID
 
         memcpy((char*)&valor + bytes_leidos, (char*)memoria_usuario + (marco * tam_pagina) + offset, bytes_a_leer);
 
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %d - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_leer);
+        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_leer);
         bytes_leidos += bytes_a_leer;
         bytes_restantes -= bytes_a_leer;
 
         if (bytes_restantes > 0) {
             tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
             if (tabla_proceso == NULL) {
-                log_error(logger, "Error al obtener la tabla de páginas para PID %d", PID);
+                log_error(logger_debug, "Error al obtener la tabla de páginas para PID %d", PID);
                 return 0; // Se puede usar un valor especial o manejar el error de otra forma
             }
 
             tabla_pag* siguiente_pagina = buscar_siguiente_pagina(tabla_proceso, marco);
             if (siguiente_pagina == NULL || !siguiente_pagina->presencia) {
-                log_error(logger, "Error al obtener la siguiente página para PID %d", PID);
+                log_error(logger_debug, "Error al obtener la siguiente página para PID %d", PID);
                 return 0; // Se puede usar un valor especial o manejar el error de otra forma
             }
 
@@ -419,3 +426,4 @@ uint32_t leer_memoria_uint32_t(int direccion_fisica, uint8_t bytes, uint32_t PID
 
     return valor;
 }
+*/

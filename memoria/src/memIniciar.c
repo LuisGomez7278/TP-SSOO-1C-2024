@@ -1,9 +1,13 @@
 #include "../include/memIniciar.h"
 
-void cargarConfig(){
+void inciarlogs(){
     //INICIALIZO LOGGER
     logger = start_logger("log_memoria.log", "LOG MEMORIA", LOG_LEVEL_INFO);
     logger_debug = start_logger("log_memoria_debug.log", "LOG MEMORIA DEBUG", LOG_LEVEL_TRACE);
+}
+
+void cargarConfig(){
+
     //INICIALIZO config
     config = start_config("./memoria.config");
 
@@ -31,7 +35,7 @@ void cargarConfig(){
     cant_frames = tam_memoria/tam_pagina;
 }
 
-void inicializarMem(){
+void inicializarEspacioMem(){
     memoria_usuario = malloc(tam_memoria);
 
     if(memoria_usuario==NULL){
@@ -46,7 +50,7 @@ void inicializarMem(){
     int tam_bitarray = (cant_frames + 7) / 8; //TAMAÑO EN BYTES redondeando hacia arriba
     char* bitarray_mem = malloc(tam_bitarray);
     if (bitarray_mem == NULL) {
-        log_error(logger, "Fallo asignacion memoria al bitarray");
+        log_error(logger_debug, "Fallo asignacion memoria al bitarray");
         exit(EXIT_FAILURE);
     }
     memset(bitarray_mem, 0, tam_bitarray);  // Inicializa el bit array a 0 (todos los marcos libres)
@@ -55,5 +59,5 @@ void inicializarMem(){
     tablaDePaginas = list_create();
     procesos = list_create();
     
-    log_info(logger, "BITMAP inicializado correctamente");
+    //log_info(logger, "BITMAP inicializado correctamente");
 }

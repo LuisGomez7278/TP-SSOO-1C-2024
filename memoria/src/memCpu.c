@@ -24,14 +24,6 @@ void conexion_con_cpu(){
         case FETCH:
             fetch(socket_cpu_memoria);
             break;
-        case TAM_PAG:
-            uint32_t tam_pag = tam_pagina;
-            t_paquete* paquete = crear_paquete(TAM_PAG);
-            agregar_a_paquete_uint32(paquete, tam_pag);
-            enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);            
-            log_info(logger_debug, "Se envia el tamaño de pagina a CPU");
-            break;
         case TLB_MISS:
             frame(socket_cpu_memoria);
             break;
@@ -71,7 +63,9 @@ void fetch(int socket_cpu_memoria){
     }
 
     t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
-    usleep(retardo);
+
+    usleep(retardo*1000);
+
     enviar_instruccion(socket_cpu_memoria, sig_ins);
     log_info(logger_debug, "instruccion enviada");
 }
@@ -85,9 +79,11 @@ void frame(int socket_cpu_memoria){
         uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
         uint32_t pagina = leer_de_buffer_uint32(buffer,desplazamiento);
 
-        log_info(logger_debug,"ACCESO A TABLA DE PAGINAS: PID = %u  Pagina = %d  ",PID,pagina);
-
         uint32_t marco = encontrar_frame(PID, pagina); 
+
+        log_info(logger,"Acceso a Tabla de Páginas: PID: %u  Pagina: %u  Marco: %u", PID, pagina, marco);
+
+        usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(TLB_MISS);
         agregar_a_paquete_uint32(paquete, marco);
@@ -113,13 +109,19 @@ void movIn(int socket_cpu_memoria){
         uint32_t dir_fisica = leer_de_buffer_uint32(buffer, desplazamiento);
         uint8_t bytes = leer_de_buffer_uint8(buffer, desplazamiento);
 
-        uint32_t leido = leer_memoria_uint32_t(dir_fisica, bytes, PID);
+        char* leido = leer_memoria(dir_fisica, bytes, PID);
+
+        uint32_t num = (uint32_t)strtoul(leido, NULL, 10); //convierte el char* leido a un uint32_t
+
+        usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
-        agregar_a_paquete_uint32(paquete, leido);
+        agregar_a_paquete_uint32(paquete, num);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);            
         log_info(logger_debug, "Mov_In completado");
+
+        free(leido);
     }else{
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
@@ -140,7 +142,13 @@ void movOut(int socket_cpu_memoria){
         uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
         uint32_t escribir = leer_de_buffer_uint32(buffer, desplazamiento);
 
-        bool escrito = escribir_uint32_t_en_memoria(dir_fisica, bytes, escribir, PID);
+        char str[12];
+
+        sprintf(str, "%u", escribir); //convierte uint32_t a char*
+
+        bool escrito = escribir_memoria(dir_fisica, bytes, str, PID);
+
+        usleep(retardo*1000);
 
         if(escrito){
             t_paquete* paquete = crear_paquete(OK);
@@ -174,7 +182,11 @@ void copiar_string(int socket_cpu_memoria){
         uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
 
         char* leido = leer_memoria(dir_fisica_leer, bytes, PID);
+        usleep(retardo*1000);
         bool escrito = escribir_memoria(dir_fisica_escribir, bytes, leido, PID);
+        usleep(retardo*1000);
+
+        free(leido);
 
         if(escrito){
             t_paquete* paquete = crear_paquete(OK);
@@ -206,6 +218,7 @@ void ins_resize(int socket_cpu_memoria){
         uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
 
         bool exito = resize(PID, bytes);
+        usleep(retardo*1000);
 
         if(exito){
             t_paquete* paquete = crear_paquete(OK);

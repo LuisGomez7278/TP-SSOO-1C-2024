@@ -15,11 +15,10 @@ void conexion_con_es(){
             write_es();
             break;
         default:
-            log_error(logger_debug, "el MODULO DE ES SE DESCONECTO. Terminando servidor");
+            log_error(logger_debug, "Modulo ENTRADA SALIDA se desconectó. Terminando servidor");
             continuarIterando = 0;
             break;
         }
-        
     }
 }
 
@@ -35,9 +34,12 @@ void read_es(){
 
         char* leido = leer_memoria(dir_fisica, bytes, PID);
 
+        usleep(retardo*1000);
+
         t_paquete* paquete = crear_paquete(SOLICITUD_IO_READ);
         agregar_a_paquete_string(paquete, strlen(leido), leido);
         enviar_paquete(paquete, socket_cpu_memoria);
+        free(leido);
         eliminar_paquete(paquete);            
         //log_info(logger_debug, "IO_READ completado");
         }else{
@@ -57,26 +59,30 @@ void write_es(){
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
         uint32_t dir_fisica = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint8(buffer, desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
         char* escribir = leer_de_buffer_string(buffer, desplazamiento);
 
         bool escrito = escribir_memoria(dir_fisica, bytes, escribir, PID);
+
+        usleep(retardo*1000);
+
+        free(escribir);
 
         if(escrito){
             t_paquete* paquete = crear_paquete(OK);
             enviar_paquete(paquete, socket_cpu_memoria);
             eliminar_paquete(paquete);            
             log_info(logger_debug, "IO_WRITE perfecto");
-            }else{
+        }else{
             t_paquete* paquete = crear_paquete(FALLO);
             enviar_paquete(paquete, socket_cpu_memoria);
             eliminar_paquete(paquete);  
             log_info(logger_debug, "IO_WRITE fallido");
-            }   
-        }else{
-            // Manejo de error en caso de que recibir_buffer devuelva NULL
-            log_error(logger_debug,"Error al recibir el buffer");
-        }
+        }   
+    }else{
+        // Manejo de error en caso de que recibir_buffer devuelva NULL
+        log_error(logger_debug,"Error al recibir el buffer");
+    }
     free(sizeTotal);
     free(desplazamiento);
     free(buffer);
