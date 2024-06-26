@@ -49,7 +49,7 @@ void iniciar_config(void){
     log_info(logger, "PUERTO INTERRUPT leido: %s", puerto_escucha_interrupt);
     
     cant_entradas_TLB = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
-    log_info(logger, "CANTIDAD ENTRADAS TLB leido: %d", cant_entradas_TLB);
+    log_info(logger, "CANTIDAD ENTRADAS TLB leido: %u", cant_entradas_TLB);
 
     algoritmo_TLB = config_get_string_value(config, "ALGORITMO_TLB");
     log_info(logger, "ALGORITMO TLB leido: %s", algoritmo_TLB);

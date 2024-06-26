@@ -3,6 +3,7 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/collections/list.h>
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
@@ -18,9 +19,11 @@ int socket_cpu_kernel_interrupt;
 int socket_cpu_memoria;
 int socket_escucha;
 
-int cant_entradas_TLB;
+uint32_t cant_entradas_TLB;
 char* algoritmo_TLB;
 uint32_t tamanio_de_pagina;
+bool usa_TLB;
+t_list* tabla_TLB;
 
 uint32_t PID;
 t_contexto_ejecucion contexto_interno;

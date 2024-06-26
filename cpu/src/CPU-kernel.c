@@ -86,12 +86,12 @@ void gestionar_conexion_interrupt()
         switch (operacion)
         {
         case DESALOJO_POR_CONSOLA:
-            log_info(logger, "El usuario finaliza el proceso PID: %d por consola", PID);
+            log_info(logger, "El usuario finaliza el proceso PID: %u por consola", PID);
             interrupcion = INT_CONSOLA;
             break;
 
         case DESALOJO_POR_QUANTUM:
-            log_info(logger, "El proceso PID: %d termino su quantum y es desalojado", PID);
+            log_info(logger, "El proceso PID: %u termino su quantum y es desalojado", PID);
             interrupcion = INT_QUANTUM;
             break;
         

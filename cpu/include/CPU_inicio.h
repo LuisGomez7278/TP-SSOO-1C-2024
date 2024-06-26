@@ -18,7 +18,7 @@ extern int socket_cpu_kernel_interrupt;
 extern int socket_cpu_memoria;
 extern int socket_escucha;
 
-extern int cant_entradas_TLB;
+extern uint32_t cant_entradas_TLB;
 extern char* algoritmo_TLB;
 
 extern uint32_t PID;

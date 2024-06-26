@@ -50,7 +50,7 @@ void recibir_tamanio_de_pagina()
         void* buffer = recibir_buffer(&size, socket_cpu_memoria);
 
         tamanio_de_pagina = leer_de_buffer_uint32(buffer, &desplazamiento);
-        log_info(logger, "Llego el tamanio de pagina: %d", tamanio_de_pagina);
+        log_info(logger, "Llego el tamanio de pagina: %u", tamanio_de_pagina);
         free(buffer);
     }
 

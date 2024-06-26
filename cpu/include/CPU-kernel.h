@@ -7,7 +7,6 @@
 #include "../../utils/include/conexiones.h"
 
 extern t_log* logger;
-extern t_config* config;
 
 extern int socket_cpu_kernel_dispatch;
 extern int socket_cpu_kernel_interrupt;

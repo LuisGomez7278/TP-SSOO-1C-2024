@@ -9,10 +9,11 @@
 #include "CPU_inicio.h"
 #include "CPU-memoria.h"
 #include "CPU-kernel.h"
-#include "CPU_test.h"
+#include "CPU-kernel.h"
+#include "CPU_mmu.h"
 
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual);
 void* direccion_registro(t_contexto_ejecucion* contexto, char* registro);
-int tam_registro(char* registro);
+bool registro_chico(char* registro);
 
 #endif //TP_CPU_MAIN_H_
