@@ -21,7 +21,7 @@
 
 #include "extern_globales.h"
 
-void crear_interfaz (IO_type* nueva_interfaz);
+void crear_nodo_interfaz (IO_type* nueva_interfaz);
 void escuchar_a_Nueva_Interfaz();
 
 

@@ -135,6 +135,7 @@ void gestionar_dispatch (){
 
         if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
         {
+            log_info(logger_debug,"Planificacion corto plazo detenida");
             sem_wait(&semaforo_pcp);
         }
         

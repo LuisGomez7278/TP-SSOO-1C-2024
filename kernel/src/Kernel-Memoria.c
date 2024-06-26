@@ -111,7 +111,7 @@ void carga_exitosa_en_memoria(){
     sem_wait(&control_multiprogramacion);           ///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    --------------------------------------------------------------
     
     if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
-    {
+    {   log_info(logger_debug,"Planificacion largo plazo detenida");
         sem_wait(&semaforo_plp);
     }
     
@@ -136,7 +136,7 @@ void carga_exitosa_en_memoria(){
 
 t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
 	t_link_element* aux=lista->head;
-    t_pcb* pcb_auxiliar=malloc(sizeof(t_pcb));
+    t_pcb* pcb_auxiliar;
  
 
     while (aux!=NULL)

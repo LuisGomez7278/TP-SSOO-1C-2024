@@ -110,6 +110,7 @@ extern uint32_t pcb_actual_en_cpu;
 
 //Kernel-EntradaSalida.h
     void atender_conexion_ENTRADASALIDA_KERNEL();
+    bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code);
     
 
 //kernel-Memoria.h

@@ -26,9 +26,14 @@ void atender_instruccion_validada(char* leido)
 
     }else if (strcmp(array_de_comando[0],"INICIAR_PLANIFICACION")==0)//---------------------------------/////////////
     {   
-        detener_planificacion=false;
+        if (detener_planificacion)
+        {
         sem_post(&semaforo_pcp);
-        sem_post(&semaforo_plp);
+        sem_post(&semaforo_plp);  
+        }
+        
+        detener_planificacion=false;
+ 
 
 
     }else if (strcmp(array_de_comando[0],"MULTIPROGRAMACION")==0)//---------------------------------/////////////
@@ -43,7 +48,8 @@ void atender_instruccion_validada(char* leido)
         imprimir_listas_de_estados(lista_ready_prioridad,"READY_PRIORITARIO");
         imprimir_listas_de_estados(lista_bloqueado,"BLOCKED");                                  //en bloqueados tambien imprimo los que estan esperando recursos
         imprimir_listas_de_estados(lista_bloqueado_prioritario,"BLOCKED_PRIORITARIO");
-
+         
+         //////////////////////////////////////////////////////////////                       ///aca falta la lista de blocked prioritario para cuando vuelven de IO
     }
 
 

@@ -89,6 +89,13 @@ typedef struct pcb_de_proceso
     
 } t_pcb;
 
+typedef enum CODIGOS_DE_INTERFACES
+{
+    GENERICA,
+    STDIN,
+    STDOUT,
+    DIALFS
+} cod_interfaz;
  typedef struct 
 {
     char* nombre_interfaz;
@@ -98,13 +105,7 @@ typedef struct pcb_de_proceso
     sem_t control_envio_interfaz;
 } IO_type;
 
-typedef enum CODIGOS_DE_INTERFACES
-{
-    GENERICA,
-    STDIN,
-    STDOUT,
-    DIALFS
-} cod_interfaz;
+
 
 
 //Funciones de Utils.
