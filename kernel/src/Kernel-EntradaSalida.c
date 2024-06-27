@@ -57,9 +57,9 @@ void crear_nodo_interfaz (IO_type* nueva_interfaz){                             
     
 
 void escuchar_a_Nueva_Interfaz(void* interfaz){
-    IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
+    //IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
     bool continuarIterando=true;
-    cod_interfaz operacion;
+    op_code operacion;
 
     while(continuarIterando){    
 
@@ -67,10 +67,10 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
    
         switch (operacion)
         {
-        case SOLICITUD_EXITOSA:
+        case SOLICITUD_EXITOSA_IO:
             //quitar proceso de la cola
             break;
-        case ERROR_SOLICITUD_IO
+        case ERROR_SOLICITUD_IO:
             //loggear el error
             break;
         default:
@@ -82,13 +82,13 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
 
 bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code operacion_solicitada){
     t_link_element *auxiliar=lista_de_interfaces->head;
-    IO_type* puntero_interfaz;
+    IO_type* puntero_interfaz=NULL;
 
     while (auxiliar!=NULL)
     {
         puntero_interfaz= (IO_type*) auxiliar->data;
         
-        if(strcmp(puntero_interfaz->nombre_interfaz==nombre_interfaz)==0){
+        if(strcmp(puntero_interfaz->nombre_interfaz,nombre_interfaz)==0){
             break;
         }else{
             auxiliar=auxiliar->next;
@@ -97,11 +97,11 @@ bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code opera
 
     if (auxiliar==NULL)
     {   
-        log_error(logger_debug,"La interfaz no existe");
+        log_error(logger_debug,"La interfaz %s no existe", nombre_interfaz);
         return false;
     }
     
-    switch (op_code)
+    switch (operacion_solicitada)
     {
         case DESALOJO_POR_IO_GEN_SLEEP:
             if (puntero_interfaz->tipo_interfaz!= GENERICA)
@@ -131,40 +131,33 @@ bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code opera
         case DESALOJO_POR_IO_FS_READ:
             if (puntero_interfaz->tipo_interfaz!=DIALFS)
             {
-                log_error(logger_debug,"La interfaz: %s no admite esta operacion",puntero_interfaz->nombre_interfaz);
+                log_error(logger_debug,"Se solicito a la interfaz: %s un operacion que no existe",nombre_interfaz);
                 return false;
             }
                 break;  
     
         default:
+                log_error(logger_debug,"La operacion solicitada a la interfaz %s no existe",puntero_interfaz->nombre_interfaz);
+                return false;
             break;
     }
 
-
-    /// Falta validar 
-
-
-
-}
-
-
-t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
-	t_link_element* aux=lista->head;
-    t_pcb* pcb_auxiliar=malloc(sizeof(t_pcb));
- 
-
-    while (aux!=NULL)
+    op_code a_enviar=VERIFICAR_CONEXION;
+    int32_t comprobar_conexion=send(puntero_interfaz->socket_interfaz,&a_enviar,sizeof(op_code),MSG_NOSIGNAL);   //// ENVIO UN MENSAJE DE COMPROBACION Y SI ESTA DESCONECTADO DEVUELVE "-1"
+   
+   
+    if (comprobar_conexion<0)
     {
-        pcb_auxiliar= (t_pcb*) aux->data; 
-
-    if (pcb_auxiliar->PID==pid_buscado){
-        return pcb_auxiliar;
-    }
-    aux=aux->next;
+        log_error(logger_debug,"La interfaz %s se encuentra desconectada",puntero_interfaz->nombre_interfaz);
+        return false;
     }
     
-	return NULL;
+    return true;
+
 }
+
+
+
 
 
 

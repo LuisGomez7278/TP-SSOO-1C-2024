@@ -237,6 +237,7 @@ void gestionar_dispatch (){
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
             eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
             sem_post(&control_multiprogramacion);
+            enviar_siguiente_proceso_a_ejecucion();
             break;
         case DESALOJO_POR_IO_GEN_SLEEP:
         case DESALOJO_POR_IO_STDIN:        
@@ -246,23 +247,27 @@ void gestionar_dispatch (){
         case DESALOJO_POR_IO_FS_TRUNCATE:
         case DESALOJO_POR_IO_FS_WRITE:
         case DESALOJO_POR_IO_FS_READ:
+
                 char* nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
                 log_info(logger, "PID: %u envia peticion a interfaz %s", pcb_dispatch->PID, nombre_interfaz);
 
-                //hay que replantearlo con multiplexacion
-                t_paquete *paquete = crear_paquete(cod_op);
-                agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
-                agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
-                enviar_paquete(paquete, socket_entradasalida_kernel);
-                eliminar_paquete(paquete);
-                //
-                if(strcmp(algoritmo_planificacion,"VRR")==0){ 
-                    ingresar_en_lista(pcb_dispatch, lista_ready_prioridad, &semaforo_ready_prioridad, &cantidad_procesos_en_algun_ready , READY_PRIORITARIO);  
-                ///esto del ingreso a la lista de todoslos procesos que soliciten IO no estoy seguro
-                }else{
-                    ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);  
+                if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op)){
+                
+                    t_paquete *paquete = crear_paquete(cod_op);
+                    agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
+                    agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
 
+                    agregar_a_cola_interfaz(paquete,pcb_dispatch->PID,cod_op);
+                    
+                    if(strcmp(algoritmo_planificacion,"VRR")==0){ 
+                        ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_ready , READY_PRIORITARIO);  
+                    ///esto del ingreso a la lista de todoslos procesos que soliciten IO no estoy seguro
+                    }else{
+                        ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);  
+
+                    }
                 }
+                eliminar_paquete(paquete);
                 enviar_siguiente_proceso_a_ejecucion();            
                 break;
         default:

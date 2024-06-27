@@ -133,7 +133,8 @@ void enviar_paquete(t_paquete* paquete, uint32_t socket_cliente)
     //imprimir_paquete(paquete);
     void* a_enviar = serializar_paquete(paquete, bytes);
     //verificar_paquete(a_enviar);
-	send(socket_cliente, a_enviar, bytes, 0);
+    send(socket_cliente, a_enviar, bytes, 0);
+
 
 	free(a_enviar);
 }

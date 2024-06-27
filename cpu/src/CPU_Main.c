@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     //// ESPERAR CONEXION CON KERNEL
         socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
         socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha, logger);
-        log_info(logger,"CPU conectado a Kernel")
+        log_info(logger,"CPU conectado a Kernel");
     
     t_instruccion* ins1;
     ins1 = malloc(sizeof(t_instruccion));
