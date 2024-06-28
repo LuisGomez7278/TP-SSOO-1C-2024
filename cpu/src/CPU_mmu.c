@@ -82,7 +82,7 @@ uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag)
     uint32_t size;
     uint32_t desplazamiento = 0;
     void* buffer = recibir_buffer(&size, socket_cpu_memoria);
-    uint32_t marco = leer_de_buffer_uint32(buffer, desplazamiento);
+    uint32_t marco = leer_de_buffer_uint32(buffer, &desplazamiento);
 
     free(buffer);
     return marco;
@@ -126,12 +126,12 @@ entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* en
     if (string_equals_ignore_case(algoritmo_TLB, "FIFO"))
     {
         //si diff>0 entonces entrada_actual esta hace mas tiempo en TLB que entrada_a_reemplazar
-        entrada = temporal_diff(entrada_actual->t_ingreso, entrada_a_reemplazar->t_ingreso) > 0 ? entrada_actual : entrada_a_reemplazar
+        entrada = temporal_diff(entrada_actual->t_ingreso, entrada_a_reemplazar->t_ingreso) > 0 ? entrada_actual : entrada_a_reemplazar;
     }
     else //(string_equals_ignore_case(algoritmo_TLB, "LRU")) 
     {
         //si diff>0 entonces entrada_actual se uso hace mas tiempo que entrada_a_reemplazar
-        entrada = temporal_diff(entrada_actual->t_ultimo_uso, entrada_a_reemplazar->t_ultimo_uso) > 0 ? entrada_actual : entrada_a_reemplazar
+        entrada = temporal_diff(entrada_actual->t_ultimo_uso, entrada_a_reemplazar->t_ultimo_uso) > 0 ? entrada_actual : entrada_a_reemplazar;
     }    
     return entrada;
 }
@@ -152,7 +152,7 @@ char* leer_string_de_memoria(uint32_t direccion_logica_READ, uint32_t bytes_a_co
     log_info(logger, "Llego la string: %s de memoria", string_leida);
     free(buffer);
 
-    return string_leida
+    return string_leida;
 }
 
 void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar)
@@ -302,4 +302,9 @@ void solicitar_MOV_OUT(uint32_t marco, uint32_t offset, uint32_t tamanio_registr
     else /*if (tamanio_registro == sizeof(uint32_t))*/ {agregar_a_paquete_uint32(paquete, valor);}
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
+}
+
+op_code recibir_respuesta_MOV_OUT()
+{
+    return recibir_operacion(socket_cpu_memoria);
 }

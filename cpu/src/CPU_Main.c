@@ -98,7 +98,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case MOV_IN:
         log_info(logger,"PID: %u - Ejecutando: MOV_IN - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
-        registro = direccion_registro(ins_actual->arg1);
+        registro = direccion_registro(contexto_interno, ins_actual->arg1);
         direccion_logica = atoi(ins_actual->arg2);
         tamanio_registro = registro_chico(ins_actual->arg1) ? sizeof(uint8_t) : sizeof(uint32_t);
 
@@ -122,7 +122,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case MOV_OUT:
         log_info(logger,"PID: %u - Ejecutando: MOV_OUT - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
-        valor = *direccion_registro(ins_actual->arg2);
+        registro = direccion_registro(contexto_interno, ins_actual->arg2);
+        valor = *registro;
         tamanio_registro = registro_chico(ins_actual->arg2) ? sizeof(uint8_t) : sizeof(uint32_t);
 
         direccion_logica = atoi(ins_actual->arg1);
@@ -154,13 +155,15 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     case RESIZE:
         log_info(logger,"PID: %u - Ejecutando: RESIZE - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
-        valor = *direccion_registro(ins_actual->arg1);
+        registro = direccion_registro(contexto_interno, ins_actual->arg1);
+        valor = *registro;
         pedir_rezise(PID, valor);
         break;
 
     case COPY_STRING:
         log_info(logger,"PID: %u - Ejecutando: COPY_STRING - %s", PID, ins_actual->arg1);
-        uint32_t bytes_a_copiar = *direccion_registro(ins_actual->arg1);
+        registro = direccion_registro(contexto_interno, ins_actual->arg1);
+        uint32_t bytes_a_copiar = *registro;
         uint32_t direccion_logica_READ = contexto_interno->SI;
         uint32_t direccion_logica_WRITE = contexto_interno->DI;
 

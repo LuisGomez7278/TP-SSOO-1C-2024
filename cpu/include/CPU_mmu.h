@@ -28,13 +28,6 @@ typedef struct
     struct entrada_TLB* siguiente_entrada;
 } entrada_TLB;
 
-typedef struct {
-    uint32_t marco;
-    uint32_t offset;
-    uint32_t bytes;
-} t_acceso
-
-
 void inicializar_TLB();
 uint32_t obtener_nro_pagina(uint32_t direccion_logica);
 uint32_t obtener_desplazamiento(uint32_t direccion_logica);
@@ -42,7 +35,7 @@ uint32_t obtener_desplazamiento(uint32_t direccion_logica);
 entrada_TLB* buscar_en_tlb(uint32_t PID, uint32_t nro_pag);
 uint32_t marco_TLB(entrada_TLB* entrada);
 uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag);
-void TLB_miss(uint32_t PID, uint32_t nro_pag);
+entrada_TLB* TLB_miss(uint32_t PID, uint32_t nro_pag);
 entrada_TLB* buscar_entrada_para_reemplazar(uint32_t PID, uint32_t nro_pag, uint32_t marco);
 entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* entrada_a_reemplazar);
 
@@ -54,5 +47,6 @@ void solicitar_MOV_IN(uint32_t marco, uint32_t offset, uint32_t tamanio_registro
 uint8_t recibir_respuesta_MOV_IN_8b();
 uint32_t recibir_respuesta_MOV_IN_32b();
 void solicitar_MOV_OUT(uint32_t marco, uint32_t offset, uint32_t tamanio_registro, int valor);
+op_code recibir_respuesta_MOV_OUT();
 
 #endif //CPU_MMU_H_

@@ -22,7 +22,6 @@ extern t_contexto_ejecucion contexto_interno;
 t_instruccion* fetch(uint32_t PID, uint32_t PC, int socket_cpu_memoria);
 t_instruccion* recibir_instruccion(int socket_cpu_memoria);
 void recibir_tamanio_de_pagina();
-
-void MOV_IN_CON_TLB(void* dir_fisica, );
+void pedir_rezise(uint32_t PID, uint32_t valor);
 
 #endif //CPU_MEMORIA_H_
