@@ -47,8 +47,12 @@ entrada_TLB* buscar_entrada_para_reemplazar(uint32_t PID, uint32_t nro_pag, uint
 entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* entrada_a_reemplazar);
 
 char* leer_string_de_memoria(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar);
-void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar)
-
+void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar);
 void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WRITE, uint32_t bytes_a_copiar);
+
+void solicitar_MOV_IN(uint32_t marco, uint32_t offset, uint32_t tamanio_registro);
+uint8_t recibir_respuesta_MOV_IN_8b();
+uint32_t recibir_respuesta_MOV_IN_32b();
+void solicitar_MOV_OUT(uint32_t marco, uint32_t offset, uint32_t tamanio_registro, int valor);
 
 #endif //CPU_MMU_H_

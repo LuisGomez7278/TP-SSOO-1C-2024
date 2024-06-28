@@ -139,7 +139,11 @@ entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* en
 char* leer_string_de_memoria(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar)
 {
     solicitar_lectura_string(direccion_logica_READ, bytes_a_copiar);
-    
+    if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_COPY_STRING_READ) 
+    {
+        log_error(logger, "Esperaba una string por SOLICITUD_COPY_STRING_READ y vino otra cosa");
+        return (char*) NULL;
+    }
     uint32_t size;
     uint32_t desplazamiento = 0;
     void* buffer = recibir_buffer(&size, socket_cpu_memoria);
@@ -240,4 +244,62 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     }
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete); 
+}
+
+
+void solicitar_MOV_IN(uint32_t marco, uint32_t offset, uint32_t tamanio_registro)
+{
+    t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
+    agregar_a_paquete_uint32(paquete, marco);
+    agregar_a_paquete_uint32(paquete, offset);
+    agregar_a_paquete_uint32(paquete, tamanio_registro);
+
+    enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);
+}
+
+uint8_t recibir_respuesta_MOV_IN_8b()
+{
+    if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_MOV_IN) 
+    {
+        log_error(logger, "Esperaba un numero por SOLICITUD_MOV_IN y vino otra cosa");
+        return (uint8_t*) NULL;
+    }
+
+    uint32_t size;
+    uint32_t desplazamiento = 0;
+    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
+
+    uint8_t valor = leer_de_buffer_uint8(buffer, &desplazamiento);
+    free(buffer);
+    return valor;
+}
+
+uint32_t recibir_respuesta_MOV_IN_32b()
+{
+    if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_MOV_IN) 
+    {
+        log_error(logger, "Esperaba un numero por SOLICITUD_MOV_IN y vino otra cosa");
+        return (uint32_t*) NULL;
+    }
+
+    uint32_t size;
+    uint32_t desplazamiento = 0;
+    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
+
+    uint32_t valor = leer_de_buffer_uint32(buffer, &desplazamiento);
+    free(buffer);
+    return valor;
+}
+
+void solicitar_MOV_OUT(uint32_t marco, uint32_t offset, uint32_t tamanio_registro, int valor)
+{
+    t_paquete* paquete = crear_paquete(SOLICITUD_MOV_OUT);
+    agregar_a_paquete_uint32(paquete, marco);
+    agregar_a_paquete_uint32(paquete, offset);
+    agregar_a_paquete_uint32(paquete, tamanio_registro);
+    if (tamanio_registro == sizeof(uint8_t)) {agregar_a_paquete_uint8(paquete, valor);}
+    else /*if (tamanio_registro == sizeof(uint32_t))*/ {agregar_a_paquete_uint32(paquete, valor);}
+    enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);
 }

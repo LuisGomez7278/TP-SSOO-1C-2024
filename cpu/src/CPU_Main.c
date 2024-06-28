@@ -114,7 +114,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             marco = pedir_marco_a_memoria(PID, nro_pag);
         }
         solicitar_MOV_IN(marco, offset, tamanio_registro);
-        valor = recibir_respuesta_MOV_IN();
+        valor = registro_chico(ins_actual->arg1) ? recibir_respuesta_MOV_IN_8b() : recibir_respuesta_MOV_IN_32b();
         *registro = valor;
         log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, *registro);
         
