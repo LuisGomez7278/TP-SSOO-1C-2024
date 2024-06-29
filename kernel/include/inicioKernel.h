@@ -32,7 +32,7 @@ sem_t cantidad_procesos_new;
 sem_t cantidad_procesos_ready;
 sem_t cantidad_procesos_ready_prioritario;
 sem_t cantidad_procesos_en_algun_ready;
-
+sem_t cantidad_procesos_bloqueados;
 
 pthread_mutex_t semaforo_new;
 pthread_mutex_t semaforo_ready;

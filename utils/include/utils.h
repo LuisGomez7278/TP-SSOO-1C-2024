@@ -96,6 +96,9 @@ typedef enum CODIGOS_DE_INTERFACES
     STDOUT,
     DIALFS
 } cod_interfaz;
+
+
+
  typedef struct 
 {
     char* nombre_interfaz;

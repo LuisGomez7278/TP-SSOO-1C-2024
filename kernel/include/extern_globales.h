@@ -66,6 +66,8 @@ extern sem_t cantidad_procesos_new;
 extern sem_t cantidad_procesos_ready;
 extern sem_t cantidad_procesos_ready_prioritario;
 extern sem_t cantidad_procesos_en_algun_ready;
+extern sem_t cantidad_procesos_bloqueados;
+
 extern sem_t semaforo_plp;
 extern sem_t semaforo_pcp;
 extern bool detener_planificacion;
@@ -111,6 +113,8 @@ extern uint32_t pcb_actual_en_cpu;
 //Kernel-EntradaSalida.h
     void atender_conexion_ENTRADASALIDA_KERNEL();
     bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code);
+    IO_type* buscar_interfaz_con_nombre(char*nombre_a_buscar);
+    void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paquete);
     
 
 //kernel-Memoria.h

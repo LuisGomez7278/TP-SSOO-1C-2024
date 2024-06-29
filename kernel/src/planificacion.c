@@ -256,18 +256,20 @@ void gestionar_dispatch (){
                     t_paquete *paquete = crear_paquete(cod_op);
                     agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
                     agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
-
-                    agregar_a_cola_interfaz(paquete,pcb_dispatch->PID,cod_op);
                     
-                    if(strcmp(algoritmo_planificacion,"VRR")==0){ 
-                        ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_ready , READY_PRIORITARIO);  
-                    ///esto del ingreso a la lista de todoslos procesos que soliciten IO no estoy seguro
-                    }else{
-                        ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);  
-
+                    agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
+                    
+                    
+                    if(strcmp(algoritmo_planificacion,"VRR")==0) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
+                    {
+                        ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);  
+                    }else
+                    {
+                        ingresar_en_lista(pcb_dispatch, lista_bloqueado, &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);  
                     }
                 }
-                eliminar_paquete(paquete);
+                
+                
                 enviar_siguiente_proceso_a_ejecucion();            
                 break;
         default:

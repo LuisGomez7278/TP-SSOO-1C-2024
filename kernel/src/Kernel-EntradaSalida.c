@@ -28,6 +28,10 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
         pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_Nueva_Interfaz,nueva_interfaz);
         pthread_detach(hilo_escucha_ENTRADASALIDA_KERNEL);
 
+        pthread_t hilo_gestion_Cola_interfaz;
+        pthread_create(&hilo_gestion_Cola_interfaz,NULL,(void*)gestionar_cola_nueva_interfaz,nueva_interfaz);
+        pthread_detach(hilo_gestion_Cola_interfaz);
+
         default:
             log_error(logger_debug,"Error al recibir nueva interfaz");
             break;
@@ -51,6 +55,9 @@ void crear_nodo_interfaz (IO_type* nueva_interfaz){                             
         pthread_mutex_unlock(&semaforo_lista_interfaces);
         log_info(logger_debug,"Creada nueva interfaz: %s",nueva_interfaz->nombre_interfaz);
         free(buffer);
+
+
+
 }
 
 
@@ -80,11 +87,15 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
     }
 }
 
+void gestionar_cola_nueva_interfaz(void* interfaz){
+
+}
+
 bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code operacion_solicitada){
     t_link_element *auxiliar=lista_de_interfaces->head;
     IO_type* puntero_interfaz=NULL;
 
-    while (auxiliar!=NULL)
+    while (auxiliar!=NULL)                                  //BUSCO LA INTERFAZ
     {
         puntero_interfaz= (IO_type*) auxiliar->data;
         
@@ -101,7 +112,7 @@ bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code opera
         return false;
     }
     
-    switch (operacion_solicitada)
+    switch (operacion_solicitada)                   //COMO SE ENCONTRO LA INTERFAZ VERIFICO SI ADMITE LA OPERACION
     {
         case DESALOJO_POR_IO_GEN_SLEEP:
             if (puntero_interfaz->tipo_interfaz!= GENERICA)
@@ -146,7 +157,7 @@ bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code opera
     int32_t comprobar_conexion=send(puntero_interfaz->socket_interfaz,&a_enviar,sizeof(op_code),MSG_NOSIGNAL);   //// ENVIO UN MENSAJE DE COMPROBACION Y SI ESTA DESCONECTADO DEVUELVE "-1"
    
    
-    if (comprobar_conexion<0)
+    if (comprobar_conexion<0)                           //COMPRUEBO QUE ESTE CONECTADA
     {
         log_error(logger_debug,"La interfaz %s se encuentra desconectada",puntero_interfaz->nombre_interfaz);
         return false;
@@ -156,10 +167,54 @@ bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code opera
 
 }
 
+void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paquete){
+    IO_type* interfaz=buscar_interfaz_con_nombre (nombre_interfaz);
+    t_pid_paq* pidConPaq=malloc(sizeof(t_pid_paq));
+    
+    if (pidConPaq == NULL) {
+    log_error(logger_debug,"Fallo el malloc de agregar cola interfaz");
+    }
+    
+    pidConPaq->paquete_cola=paquete;
+    pidConPaq->PID_cola=PID;
+
+    pthread_mutex_lock(&semaforo_lista_interfaces);
+    list_add(interfaz->cola_de_espera,pidConPaq);
+    pthread_mutex_unlock(&semaforo_lista_interfaces);
+
+    sem_post(&interfaz->control_envio_interfaz);
+
+   
+}
+
+   
 
 
+IO_type* buscar_interfaz_con_nombre(char*nombre_a_buscar){
+    t_link_element *auxiliar=lista_de_interfaces->head;
+    IO_type* puntero_interfaz=NULL;
+
+    while (auxiliar!=NULL)                                  //BUSCO LA INTERFAZ
+    {
+        puntero_interfaz= (IO_type*) auxiliar->data;
+        
+        if(strcmp(puntero_interfaz->nombre_interfaz,nombre_a_buscar)==0){
+            break;
+        }else{
+            auxiliar=auxiliar->next;
+        }
+    }
+
+    if (auxiliar==NULL)
+    {   
+        log_error(logger_debug,"Error al obtener socket con nombre de la interfaz %s. Devuelvo 0", nombre_a_buscar);
+        return NULL;
+    }
+    
+return puntero_interfaz;
 
 
+}
 
 
 

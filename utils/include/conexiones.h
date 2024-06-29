@@ -82,6 +82,14 @@ typedef struct
     t_buffer* buffer;
 } t_paquete;
 
+ typedef struct 
+{
+    uint32_t PID_cola;
+    t_paquete* paquete_cola; 
+
+} t_pid_paq;
+
+
 /*----------Fin Estructuras----------*/
 
 /*----------Cliente----------*/

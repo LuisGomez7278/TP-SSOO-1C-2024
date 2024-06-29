@@ -83,8 +83,11 @@ void iniciar_estructuras_planificacion(){
     sem_init(&cantidad_procesos_ready, 0, 0);
     sem_init(&cantidad_procesos_ready_prioritario, 0, 0);
 	sem_init(&cantidad_procesos_en_algun_ready, 0, 0);
+	sem_init(&cantidad_procesos_bloqueados, 0, 0);
 	sem_init(&semaforo_plp, 0, 0);
 	sem_init(&semaforo_pcp, 0, 0);
+
+
 
 
 //MUTEX PARA MANIPULACION SEGURA DE LISTAS 
