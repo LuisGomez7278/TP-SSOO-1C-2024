@@ -185,15 +185,13 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_STDIN;
         
-        char* direccion_r = string_new();
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        sprintf(direccion_r, "%u", *registro);
-        
-        char* tamanio_r = string_new();
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        sprintf(tamanio_r, "%u", *registro);
+        registro = direccion_registro(contexto_interno, ins_actual->arg2);
+        direccion_logica = *registro;
 
-        enviar_CE_con_3_arg(motivo_desalojo, ins_actual->arg1, direccion_r, tamanio_r);
+        registro = direccion_registro(contexto_interno, ins_actual->arg3);
+        uint32_t tamanio_a_leer = *registro;
+        
+        ejecutar_IO_STD_IN(ins_actual->arg1, direccion_logica, tamanio_a_leer);
         recibir_proceso();
         break;
 
@@ -202,15 +200,13 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_STDOUT;
 
-        char* direccion_w = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        sprintf(direccion_w, "%u", *registro);
+        direccion_logica = *registro;
         
-        char* tamanio_w = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        sprintf(tamanio_w, "%u", *registro);
+        uint32_t tamanio_a_escribir = *registro;
 
-        enviar_CE_con_3_arg(motivo_desalojo, ins_actual->arg1, direccion_w, tamanio_w);
+        ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);
         recibir_proceso();
         break;
 
@@ -235,11 +231,10 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_TRUNCATE;
 
-        char* tamanio_t = string_new();
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        sprintf(tamanio_t, "%u", *registro);
+        valor = *registro;
 
-        enviar_CE_con_3_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, tamanio_t);
+        ejecutar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, (uint32_t) valor);
         recibir_proceso();
         break;
 
@@ -358,3 +353,115 @@ bool registro_chico(char* registro)
         string_equals_ignore_case(registro, "DX")
     );
 }
+
+void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
+{
+    t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDIN);
+    agregar_a_paquete_uint32(paquete, PID);
+    serializar_CE(paquete, contexto_interno);
+    agregar_a_paquete_string(paquete, string_length(nombre_interfaz), nombre_interfaz);
+    agregar_a_paquete_uint32(paquete, tamanio_a_leer);
+
+    uint32_t bytes_restantes = tamanio_a_leer;
+    uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
+    uint32_t offset = obtener_desplazamiento(direccion_logica);
+    entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
+    uint32_t marco = marco_TLB(entrada);
+    
+    uint32_t cant_accesos = ceil((tamanio_a_leer + offset) / tamanio_de_pagina);
+    agregar_a_paquete_uint32(paquete, cant_accesos);
+
+    agregar_a_paquete_uint32(paquete, marco);
+    agregar_a_paquete_uint32(paquete, offset);
+    agregar_a_paquete_uint32(paquete, tamanio_de_pagina-offset);
+    bytes_restantes -= tamanio_de_pagina-offset;
+
+    int i = 1;
+    while (bytes_restantes>tamanio_de_pagina)
+    {
+        nro_pag = obtener_nro_pagina(direccion_logica + (tamanio_de_pagina * i));
+        entrada = buscar_en_tlb(PID, nro_pag);
+        marco = marco_TLB(entrada);
+
+        agregar_a_paquete_uint32(paquete, marco);
+        agregar_a_paquete_uint32(paquete, 0);
+        agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
+        bytes_restantes -= tamanio_de_pagina;
+        i++;
+    }
+    if (bytes_restantes>0)
+    {
+        nro_pag = obtener_nro_pagina(direccion_logica + (tamanio_de_pagina * i));
+        entrada = buscar_en_tlb(PID, nro_pag);
+        marco = marco_TLB(entrada);
+
+        agregar_a_paquete_uint32(paquete, marco);
+        agregar_a_paquete_uint32(paquete, 0);
+        agregar_a_paquete_uint32(paquete, bytes_restantes);
+        bytes_restantes -= bytes_restantes;
+    }
+    enviar_paquete(paquete, socket_cpu_kernel_dispatch);
+    eliminar_paquete(paquete);
+}
+
+void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
+{
+    t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDOUT);
+    agregar_a_paquete_uint32(paquete, PID);
+    serializar_CE(paquete, contexto_interno);
+    agregar_a_paquete_string(paquete, string_length(nombre_interfaz), nombre_interfaz);
+    agregar_a_paquete_uint32(paquete, tamanio_a_leer);
+
+    uint32_t bytes_restantes = tamanio_a_leer;
+    uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
+    uint32_t offset = obtener_desplazamiento(direccion_logica);
+    entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
+    uint32_t marco = marco_TLB(entrada);
+    
+    uint32_t cant_accesos = ceil((tamanio_a_leer + offset) / tamanio_de_pagina);
+    agregar_a_paquete_uint32(paquete, cant_accesos);
+
+    agregar_a_paquete_uint32(paquete, marco);
+    agregar_a_paquete_uint32(paquete, offset);
+    agregar_a_paquete_uint32(paquete, tamanio_de_pagina-offset);
+    bytes_restantes -= tamanio_de_pagina-offset;
+
+    int i = 1;
+    while (bytes_restantes>tamanio_de_pagina)
+    {
+        nro_pag = obtener_nro_pagina(direccion_logica + (tamanio_de_pagina * i));
+        entrada = buscar_en_tlb(PID, nro_pag);
+        marco = marco_TLB(entrada);
+
+        agregar_a_paquete_uint32(paquete, marco);
+        agregar_a_paquete_uint32(paquete, 0);
+        agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
+        bytes_restantes -= tamanio_de_pagina;
+        i++;
+    }
+    if (bytes_restantes>0)
+    {
+        nro_pag = obtener_nro_pagina(direccion_logica + (tamanio_de_pagina * i));
+        entrada = buscar_en_tlb(PID, nro_pag);
+        marco = marco_TLB(entrada);
+
+        agregar_a_paquete_uint32(paquete, marco);
+        agregar_a_paquete_uint32(paquete, 0);
+        agregar_a_paquete_uint32(paquete, bytes_restantes);
+        bytes_restantes -= bytes_restantes;
+    }
+    enviar_paquete(paquete, socket_cpu_kernel_dispatch);
+    eliminar_paquete(paquete);
+}
+
+void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint32_t tamanio)
+{
+    t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_FS_TRUNCATE);
+    agregar_a_paquete_uint32(paquete, PID);
+    serializar_CE(paquete, contexto_interno);
+    agregar_a_paquete_string(paquete, strlen(nombre_interfaz) + 1, nombre_interfaz);
+    agregar_a_paquete_string(paquete, strlen(nombre_archivo) + 1, nombre_archivo);
+    agregar_a_paquete_uint32(paquete, tamanio);
+    enviar_paquete(paquete, socket_cpu_kernel_dispatch);
+    eliminar_paquete(paquete);
+};

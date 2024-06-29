@@ -203,7 +203,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
 
 void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WRITE, uint32_t bytes_a_copiar)
 {
-    uint32_t bytes_restantes = 0;
+    uint32_t bytes_restantes = bytes_a_copiar;
     
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica_WRITE);
     uint32_t offset = obtener_desplazamiento(direccion_logica_WRITE);
@@ -263,7 +263,7 @@ uint8_t recibir_respuesta_MOV_IN_8b()
     if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_MOV_IN) 
     {
         log_error(logger, "Esperaba un numero por SOLICITUD_MOV_IN y vino otra cosa");
-        return (uint8_t*) NULL;
+        return (uint8_t) NULL;
     }
 
     uint32_t size;
@@ -280,7 +280,7 @@ uint32_t recibir_respuesta_MOV_IN_32b()
     if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_MOV_IN) 
     {
         log_error(logger, "Esperaba un numero por SOLICITUD_MOV_IN y vino otra cosa");
-        return (uint32_t*) NULL;
+        return (uint32_t) NULL;
     }
 
     uint32_t size;

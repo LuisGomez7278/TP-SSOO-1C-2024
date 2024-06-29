@@ -32,6 +32,5 @@ int_code interrupcion;
 op_code motivo_desalojo;
 
 pthread_t hilo_conexion_interrupt;
-pthread_t hilo_conexion_memoria;
 
 #endif /*  CPU_VAR_GLOBALES_H */
