@@ -1,6 +1,5 @@
 #include "../include/entradasalida_inicio.h"
 
-
 void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz)
 {
     iniciar_logs(nombre_interfaz);
