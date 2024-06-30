@@ -28,5 +28,6 @@ int32_t socket_kernel_memoria;
 int32_t socket_entradasalida_memoria;
 int32_t socket_escucha;
 
+void enviar_tam_pag();
 
 #endif //TP_MEMORIA_MAIN_H_
