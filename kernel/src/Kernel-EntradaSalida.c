@@ -14,7 +14,7 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
 
     //ENVIAR MENSAJE ENTRADA SALIDA
         enviar_mensaje("kernel manda mensaje a nueva interfaz", nueva_interfaz->socket_interfaz);
-        log_info(logger, "Se envio el primer mensaje a la nueva interfaz");
+        log_info(logger_debug, "Se envio el primer mensaje a la nueva interfaz");
 
     //RECIBIR TIPO Y NOMBRE DE INTERFAZ
         op_code cod_operacion= recibir_operacion(nueva_interfaz->socket_interfaz);
@@ -25,11 +25,11 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
         crear_nodo_interfaz(nueva_interfaz);
         
         pthread_t hilo_escucha_ENTRADASALIDA_KERNEL;
-        pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_Nueva_Interfaz,nueva_interfaz);
+        pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_Nueva_Interfaz,nueva_interfaz);    //Hilo donde escucho los mensajes que envia la interfaz recien creada
         pthread_detach(hilo_escucha_ENTRADASALIDA_KERNEL);
 
         pthread_t hilo_gestion_Cola_interfaz;
-        pthread_create(&hilo_gestion_Cola_interfaz,NULL,(void*)gestionar_cola_nueva_interfaz,nueva_interfaz);
+        pthread_create(&hilo_gestion_Cola_interfaz,NULL,(void*)gestionar_envio_cola_nueva_interfaz,nueva_interfaz);       //Hilo que envia instrucciones a medida que se desocupa la interfaz
         pthread_detach(hilo_gestion_Cola_interfaz);
 
         default:
@@ -47,49 +47,90 @@ void crear_nodo_interfaz (IO_type* nueva_interfaz){                             
         uint32_t desplazamiento=0;
         nueva_interfaz->tipo_interfaz= leer_de_buffer_tipo_interfaz(buffer,&desplazamiento);
         nueva_interfaz->nombre_interfaz=leer_de_buffer_string(buffer,&desplazamiento);
-        
-        nueva_interfaz->cola_de_espera=list_create();
-        sem_init(&nueva_interfaz->control_envio_interfaz, 0, 0);
-        pthread_mutex_lock(&semaforo_lista_interfaces);
-        list_add(lista_de_interfaces,nueva_interfaz);  //-------------------------------------         //LO AGREGO A LA LISTA DE INTERFACES
-        pthread_mutex_unlock(&semaforo_lista_interfaces);
-        log_info(logger_debug,"Creada nueva interfaz: %s",nueva_interfaz->nombre_interfaz);
         free(buffer);
 
+        IO_type* vieja_interfaz=buscar_interfaz_con_nombre(nueva_interfaz->nombre_interfaz);        //Busco en la lista de interfaces si ya existe una interfaz con ese nombre, si no existe la creo
+        if(vieja_interfaz==NULL){
+            nueva_interfaz->cola_de_espera=list_create();
+            sem_init(&nueva_interfaz->control_envio_interfaz, 0, 0);
+            sem_init(&nueva_interfaz->utilizacion_interfaz,0,0);
+            pthread_mutex_lock(&semaforo_lista_interfaces);
+            list_add(lista_de_interfaces,nueva_interfaz);  //-------------------------------------         //LO AGREGO A LA LISTA DE INTERFACES
+            pthread_mutex_unlock(&semaforo_lista_interfaces);
+            log_info(logger_debug,"Creada nueva interfaz: %s",nueva_interfaz->nombre_interfaz);
 
-
+  
+        }else{             
+            log_info(logger_debug,"Se conecto nuevamente la interfaz: %s",nueva_interfaz->nombre_interfaz);                                                                                 //si ya existe una interfaz con ese nombre solo actualizo el socket
+            vieja_interfaz->socket_interfaz= nueva_interfaz->socket_interfaz;
+            sem_init(&vieja_interfaz->utilizacion_interfaz,0,0);
+           
+            free(nueva_interfaz);
+        }
+      
 }
 
 
     
 
 void escuchar_a_Nueva_Interfaz(void* interfaz){
-    //IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
+    IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
     bool continuarIterando=true;
     op_code operacion;
-
+    t_pid_paq* elemento_lista_espera;
     while(continuarIterando){    
-
-        operacion = recibir_operacion(socket_kernel_cpu_dispatch);
-   
-        switch (operacion)
+        
+        operacion = recibir_operacion(interfaz_puntero_hilo->socket_interfaz);
+        
+        switch (operacion) 
         {
         case SOLICITUD_EXITOSA_IO:
-            //quitar proceso de la cola
+            elemento_lista_espera= (t_pid_paq*) list_remove(interfaz_puntero_hilo->cola_de_espera,0);
+            sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
+            cambiar_proceso_de_block_a_ready(elemento_lista_espera->PID_cola);
+            free(elemento_lista_espera);
+            sem_post(&interfaz_puntero_hilo->utilizacion_interfaz);
             break;
-        case ERROR_SOLICITUD_IO:
-            //loggear el error
+        case ERROR_SOLICITUD_IO:                                            //Como no solicita esta funcionalidad sigo enviando procesos y el que arrojo error queda bloqueado forever
+            elemento_lista_espera= (t_pid_paq*)list_remove(interfaz_puntero_hilo->cola_de_espera,0);
+            sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
+            log_error(logger_debug,"La interfaz: %s, no pudo realizar la operacion para el proceso PID: %u. Enviando proximo proceso.",interfaz_puntero_hilo->nombre_interfaz,elemento_lista_espera->PID_cola);
+            free(elemento_lista_espera);
+            break;
+        case FALLO:
+            log_error(logger_debug,"La interfaz %s se deconecto, cerrando socket",interfaz_puntero_hilo->nombre_interfaz);      //si falla el recv cierro el hilo
+            continuarIterando=false;
             break;
         default:
+            log_error(logger_debug,"Llegó una operacion desconocida");
             break;
         }
     
     }
 }
 
-void gestionar_cola_nueva_interfaz(void* interfaz){
 
+
+
+void gestionar_envio_cola_nueva_interfaz(void* interfaz){
+    IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
+
+    while (interfaz_puntero_hilo->socket_interfaz>0)                            //sigo iterando hasta que se cierre el socket de esa interfaz
+    {    
+    sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
+    sem_wait(&interfaz_puntero_hilo->utilizacion_interfaz);
+    pthread_mutex_lock(&semaforo_lista_interfaces);
+    t_pid_paq* a_enviar= (t_pid_paq*)list_get(interfaz_puntero_hilo->cola_de_espera,0);
+    pthread_mutex_unlock(&semaforo_lista_interfaces);
+    enviar_paquete(a_enviar->paquete_cola,interfaz_puntero_hilo->socket_interfaz);
+    free(a_enviar->paquete_cola);
+    }
+    log_error(logger_debug,"Gestor de cola de la INTERFAZ: '%s' terminado por cierre de socket",interfaz_puntero_hilo->nombre_interfaz);
+ 
 }
+
+
+
 
 bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code operacion_solicitada){
     t_link_element *auxiliar=lista_de_interfaces->head;
@@ -167,6 +208,7 @@ bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code opera
 
 }
 
+
 void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paquete){
     IO_type* interfaz=buscar_interfaz_con_nombre (nombre_interfaz);
     t_pid_paq* pidConPaq=malloc(sizeof(t_pid_paq));
@@ -187,7 +229,46 @@ void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paq
    
 }
 
-   
+
+void cambiar_proceso_de_block_a_ready(uint32_t PID){
+     t_pcb* pcb;
+
+if (list_size(lista_bloqueado_prioritario)>0)
+{
+    pthread_mutex_lock(&semaforo_bloqueado_prioridad);
+    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario ,PID);
+    list_remove_element(lista_bloqueado_prioritario,pcb);
+    pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
+}
+if (pcb==NULL && list_size(lista_bloqueado)>0)
+{
+    pthread_mutex_lock(&semaforo_bloqueado);
+    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado,PID);
+    list_remove_element(lista_bloqueado,pcb);
+    pthread_mutex_unlock(&semaforo_bloqueado);
+
+}
+
+if (pcb==NULL)
+{
+    log_error(logger_debug,"No se encontro el proceso PID: %u a desbloquear por fin de IO",PID);
+    return;
+}
+
+
+if (strcmp("VRR",algoritmo_planificacion)==0)
+{
+    ingresar_en_lista(pcb,lista_ready_prioridad,&semaforo_ready_prioridad,&cantidad_procesos_en_algun_ready,READY_PRIORITARIO);
+}else{
+    ingresar_en_lista(pcb,lista_ready,&semaforo_ready,&cantidad_procesos_en_algun_ready,READY);
+
+}
+
+
+}   
+
+
+
 
 
 IO_type* buscar_interfaz_con_nombre(char*nombre_a_buscar){

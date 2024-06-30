@@ -86,7 +86,7 @@ int32_t iniciar_servidor(char* puerto_escucha, t_log* logger)
 int32_t esperar_cliente(int32_t socket_servidor, t_log* logger)
 {
     // Aceptamos un nuevo cliente
-    uint32_t socket_cliente = accept(socket_servidor, NULL, NULL);
+    int32_t socket_cliente = accept(socket_servidor, NULL, NULL);
     if (socket_cliente == -1) {
         perror("Error en accept");
         log_error(logger, "Error en accept: %s", strerror(errno));
@@ -245,9 +245,10 @@ op_code recibir_operacion(int32_t socket_cliente){
 	if(recv(socket_cliente, &cod_op, sizeof(op_code), MSG_WAITALL) > 0)
 		return cod_op;
 	else
-	{
-		close(socket_cliente);
-		return -1;
+	{   
+        close(socket_cliente);
+        socket_cliente=-1;
+		return FALLO;
 	}
 }
 

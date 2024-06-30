@@ -37,19 +37,15 @@ extern int32_t grado_multiprogramacion;
 extern uint32_t* instancias_recursos_int;
 extern t_recurso* lista_de_recursos;
 
-extern uint32_t socket_kernel_cpu_dispatch;
-extern uint32_t socket_kernel_cpu_interrupt; //queda libre por ahora
-extern uint32_t socket_memoria_kernel;
-extern uint32_t socket_entradasalida_kernel;
-extern uint32_t socket_escucha;
+extern int32_t socket_kernel_cpu_dispatch;
+extern int32_t socket_kernel_cpu_interrupt; //queda libre por ahora
+extern int32_t socket_memoria_kernel;
+extern int32_t socket_entradasalida_kernel;
+extern int32_t socket_escucha;
 
 extern t_log* logger;
 extern t_log* logger_debug;
 extern t_config* config;
-
-extern uint32_t conexion_CPU_DISPATCH;
-extern t_log* logger;
-extern t_config *config;
 
 
 extern t_list *lista_new;

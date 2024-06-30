@@ -106,6 +106,7 @@ typedef enum CODIGOS_DE_INTERFACES
     int32_t socket_interfaz;
     t_list* cola_de_espera;
     sem_t control_envio_interfaz;
+    sem_t utilizacion_interfaz;
 } IO_type;
 
 
