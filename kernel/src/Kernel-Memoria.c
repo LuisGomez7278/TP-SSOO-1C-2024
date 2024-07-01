@@ -7,7 +7,9 @@
 //ENVIAR MENSAJE A MEMORIA
     enviar_mensaje("Kernel manda mensaje a memoria", socket_memoria_kernel);
     log_info(logger, "Se envio el primer mensaje a memoria");
-        
+    uint32_t sizeTotal;
+    void* buffer;
+
         bool continuarIterando=true;
        
 
@@ -17,31 +19,34 @@
             case MENSAJE:
                 recibir_mensaje(socket_memoria_kernel,logger_debug);
                 break;
-            case CARGA_EXITOSA_PROCESO:                                     /// ABRO UN HILO POR CADA PROCESO QUE SE ENCOLA EN NEW ASI PUEDO SEGUIR ESCUCHANDO PROCESOS
+            case CARGA_EXITOSA_PROCESO:
+                buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);                                    /// ABRO UN HILO POR CADA PROCESO QUE SE ENCOLA EN NEW ASI PUEDO SEGUIR ESCUCHANDO PROCESOS
                 pthread_t hilo_de_Planificador_largo_plazo;                
-                pthread_create(&hilo_de_Planificador_largo_plazo, NULL,(void*) carga_exitosa_en_memoria,NULL); 
+                pthread_create(&hilo_de_Planificador_largo_plazo, NULL,(void*) carga_exitosa_en_memoria,buffer); 
                 pthread_detach(hilo_de_Planificador_largo_plazo);
                 break;
             case ERROR_AL_CARGAR_EL_PROCESO:
-                    uint32_t sizeTotal;
+                    
                     uint32_t desplazamiento=0;
-                    void* buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);
+                    buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);
                     uint32_t PID = leer_de_buffer_uint32(buffer,&desplazamiento); 
                     t_pcb *pcb= buscar_pcb_por_PID_en_lista(lista_new,PID);
                     if(list_remove_element(lista_new,pcb)){
                         log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. Eliminado de NEW",PID);
+                        free(pcb);
                     }else{
                         log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. No se pudo eliminar de NEW",PID);
                     }
-                    free(pcb);
+                    free(buffer);
+                    
                 break;
             case FALLO:
                 log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO.");
                 continuarIterando=false;
                 break;
             default:
-                log_warning(logger_debug,"KERNEL recibio una operacion desconocida de Memoria.");
-                continuarIterando=false;
+                log_warning(logger_debug,"KRNELE recibio una operacion desconocida de Memoria. %d",cod_op);
+                //continuarIterando=false;
                 break;
             }
         }
@@ -75,16 +80,9 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
 
 }
 
-void carga_exitosa_en_memoria(){  
-
-
-//RECIBO EL PROCESO QUE CARGO EN MEMORIA
-
-    uint32_t sizeTotal;
+void carga_exitosa_en_memoria(void* buffer){  
     uint32_t desplazamiento=0;
-    
-    void* buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);
-    uint32_t PID = 0; 
+    uint32_t PID=0 ; 
 
     if (buffer != NULL) {
     PID = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -140,11 +138,12 @@ t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
         pcb_auxiliar= (t_pcb*) aux->data; 
 
     if (pcb_auxiliar->PID==pid_buscado){
+        log_info(logger_debug,"PCB encontrado. PID: %u",pcb_auxiliar->PID);
         return pcb_auxiliar;
     }
     aux=aux->next;
     }
-    
+    log_info(logger_debug,"PCB NO encontrado. PID: %u",pid_buscado);
 	return NULL;
 }
 

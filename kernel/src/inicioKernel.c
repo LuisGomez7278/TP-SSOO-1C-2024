@@ -17,7 +17,7 @@ void iniciar_Kernel(){
 
 void iniciar_logs()
 {	
-	logger = start_logger("log_kernel.log", "LOG KERNEL", LOG_LEVEL_INFO);
+	logger = start_logger("log_kernel.log", "LOG KERNEL", LOG_LEVEL_TRACE);
 	if(logger==NULL){
 		perror("No se pudo crear el logger");
 		exit(EXIT_FAILURE);

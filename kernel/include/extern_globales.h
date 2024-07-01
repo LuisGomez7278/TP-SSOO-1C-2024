@@ -116,7 +116,7 @@ extern uint32_t pcb_actual_en_cpu;
 //kernel-Memoria.h
     void atender_conexion_MEMORIA_KERNEL();
     void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
-    void carga_exitosa_en_memoria();
+    void carga_exitosa_en_memoria(void* buffer);
     t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado);
 
 //servicios_kernel

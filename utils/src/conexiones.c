@@ -479,8 +479,8 @@ int_code leer_de_buffer_int_code(void* buffer, uint32_t* desplazamiento)
 cod_interfaz leer_de_buffer_tipo_interfaz(void* buffer, uint32_t* desplazamiento)
 {
     cod_interfaz codigo;
-    memcpy(&codigo,  buffer + (*desplazamiento), sizeof(int_code));
-    (*desplazamiento) += sizeof(int_code);    
+    memcpy(&codigo,  buffer + (*desplazamiento), sizeof(cod_interfaz));
+    (*desplazamiento) += sizeof(cod_interfaz);    
     return codigo;
 };
 
