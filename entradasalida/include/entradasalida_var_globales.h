@@ -24,5 +24,8 @@ uint32_t BLOCK_SIZE;
 uint32_t BLOCK_COUNT;
 uint32_t RETRASO_COMPACTACION;
 
+FILE* archivo_bloques;
+FILE* bitmap_bloques;
+char* path_metadata;
 
 #endif /*  ENTRADASALIDA_INICIO_H_ */
