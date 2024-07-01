@@ -15,8 +15,8 @@ void atender_conexion_KERNEL_MEMORIA(){
 void conexion_con_kernel(){
     
 //ENVIAR MENSAJE A KERNEL
-    enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
-    log_info(logger, "Se envio el primer mensaje a kernel");
+//    enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
+//    log_info(logger, "Se envio el primer mensaje a kernel");
 
 
 
@@ -26,6 +26,8 @@ void conexion_con_kernel(){
         switch (codigo){
         case MENSAJE:
             recibir_mensaje(socket_kernel_memoria,logger_debug);
+            enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
+            log_info(logger, "Se envio el primer mensaje a kernel");
             break;
         case CREAR_PROCESO:
             crear_proceso();

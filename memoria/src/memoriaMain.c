@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     // CREO HILO ESCUCHA ENTRADA-SALIDA
     pthread_t hilo_entradaSalida_memoria;
     pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
-    pthread_detach(hilo_entradaSalida_memoria);
+    pthread_join(hilo_entradaSalida_memoria,NULL);
 
 /* // PRUEBAS SOBRE FUNCIONAMIENTO 
 

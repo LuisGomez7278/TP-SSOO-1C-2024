@@ -13,9 +13,11 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
         log_info(logger_debug,"Kernel conectado a  UNA I/O");
 
     //ENVIAR MENSAJE ENTRADA SALIDA
+        recibir_mensaje(nueva_interfaz->socket_interfaz,logger_debug);
         enviar_mensaje("kernel manda mensaje a nueva interfaz", nueva_interfaz->socket_interfaz);
         log_info(logger_debug, "Se envio el primer mensaje a la nueva interfaz");
 
+        /*
     //RECIBIR TIPO Y NOMBRE DE INTERFAZ
         op_code cod_operacion= recibir_operacion(nueva_interfaz->socket_interfaz);
 
@@ -36,7 +38,7 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
             log_error(logger_debug,"Error al recibir nueva interfaz");
             break;
         }
-
+    */
     }
 }
 
