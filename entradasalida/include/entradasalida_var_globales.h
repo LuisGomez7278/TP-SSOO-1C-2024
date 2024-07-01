@@ -13,8 +13,8 @@ char* IP_KERNEL;
 char* PUERTO_KERNEL;
 char* IP_MEMORIA;
 char* PUERTO_MEMORIA;
-uint32_t socket_entradasalida_kernel;
-uint32_t socket_entradasalida_memoria;
+int32_t socket_entradasalida_kernel;
+int32_t socket_entradasalida_memoria;
 
 char* TIPO_INTERFAZ;
 uint32_t TIEMPO_UNIDAD_TRABAJO;
