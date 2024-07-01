@@ -45,7 +45,7 @@
                 continuarIterando=false;
                 break;
             default:
-                log_warning(logger_debug,"KRNELE recibio una operacion desconocida de Memoria. %d",cod_op);
+                log_warning(logger_debug,"KERNEL recibio una operacion desconocida de Memoria. %d",cod_op);
                 //continuarIterando=false;
                 break;
             }
@@ -127,7 +127,7 @@ void carga_exitosa_en_memoria(void* buffer){
     }
 }
 
-
+/*
 t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
 	t_link_element* aux=lista->head;
     t_pcb* pcb_auxiliar;
@@ -136,7 +136,7 @@ t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
     while (aux!=NULL)
     {
         pcb_auxiliar= (t_pcb*) aux->data; 
-
+        log_trace(logger_debug,"Leyendo de lista el PCB con PID: %u",pcb_auxiliar->PID );
     if (pcb_auxiliar->PID==pid_buscado){
         log_info(logger_debug,"PCB encontrado. PID: %u",pcb_auxiliar->PID);
         return pcb_auxiliar;
@@ -145,6 +145,26 @@ t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
     }
     log_info(logger_debug,"PCB NO encontrado. PID: %u",pid_buscado);
 	return NULL;
+}
+*/
+
+t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
+	
+    t_pcb* pcb_auxiliar;
+ 
+
+    		for(int32_t i=0; i<list_size(lista); i++){
+			pcb_auxiliar = (t_pcb*)list_get(lista, i);
+			log_trace(logger_debug,"Leyendo de lista el PCB con PID: %u",pcb_auxiliar->PID );
+			
+            if (pcb_auxiliar->PID==pid_buscado){
+                log_info(logger_debug,"PCB encontrado. PID: %u",pcb_auxiliar->PID);
+                return pcb_auxiliar;
+            }
+            }
+    log_info(logger_debug,"PCB NO encontrado. PID: %u",pid_buscado);
+	return NULL;
+
 }
 
 

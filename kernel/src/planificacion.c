@@ -11,10 +11,12 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 	if (pcb->estado != estado_nuevo){
 		loggeo_de_cambio_estado(pcb->PID, pcb->estado, estado_nuevo);
 	}
-
+    log_info(logger_debug, "El pcb guardado antes de guardar en lista es PID: %u",pcb->PID);
 	pcb->estado = estado_nuevo;
-	list_add(lista, &pcb);
-	sem_post(semaforo_contador);
+	list_add(lista, pcb);
+    t_pcb* pcb2=list_get(lista,0);
+	log_info(logger_debug, "El pcb levantado de lista es PID: %u",pcb2->PID);
+    sem_post(semaforo_contador);
 
 	log_info(logger, "Proceso PID:%i ingreso en %s", pcb->PID,estado_nuevo_string );
 
