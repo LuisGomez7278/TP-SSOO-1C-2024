@@ -162,7 +162,7 @@ void añadirTablaALista(t_list* paginas, uint32_t PID){
     tabla_pag_proceso* nueva_tabla_proceso = malloc(sizeof(tabla_pag_proceso)); 
     if (nueva_tabla_proceso == NULL) {
         perror("Error al crear la tabla del proceso");
-        return 1;
+        return;
     }
 
     nueva_tabla_proceso->pid = PID;

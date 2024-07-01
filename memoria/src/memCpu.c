@@ -34,14 +34,14 @@ void conexion_con_cpu(){
         case SOLICITUD_MOV_OUT: 
             movOut(socket_cpu_memoria);
             break;
-        case SOLICITUD_COPY_STRING: 
-            copiar_string(socket_cpu_memoria);
-            break;
+        //case SOLICITUD_COPY_STRING: 
+        //    copiar_string(socket_cpu_memoria);
+        //    break;
         case SOLICITUD_RESIZE:
             ins_resize(socket_cpu_memoria);
             break;
         default:
-            log_error(logger_debug, "Modulo CPU se deconectó. Terminando servidor");
+            log_error(logger_debug, "el MODULO DE CPU SE DESCONECTO. Terminando servidor");
             continuarIterando = 0;
             break;
         }
@@ -73,7 +73,7 @@ void fetch(int socket_cpu_memoria){
 
 void frame(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -102,7 +102,7 @@ void frame(int socket_cpu_memoria){
 
 void movIn(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -134,7 +134,7 @@ void movIn(int socket_cpu_memoria){
 
 void movOut(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -173,7 +173,7 @@ void movOut(int socket_cpu_memoria){
 
 void copiar_string(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
@@ -211,7 +211,7 @@ void copiar_string(int socket_cpu_memoria){
 
 void ins_resize(int socket_cpu_memoria){
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
+    uint32_t* desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){

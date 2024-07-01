@@ -13,16 +13,16 @@ char* IP_KERNEL;
 char* PUERTO_KERNEL;
 char* IP_MEMORIA;
 char* PUERTO_MEMORIA;
-int32_t socket_entradasalida_kernel;
-int32_t socket_entradasalida_memoria;
+uint32_t socket_entradasalida_kernel;
+uint32_t socket_entradasalida_memoria;
 
 char* TIPO_INTERFAZ;
-int32_t TIEMPO_UNIDAD_TRABAJO;
+uint32_t TIEMPO_UNIDAD_TRABAJO;
 
 char* PATH_BASE_DIALFS;
-int32_t BLOCK_SIZE;
-int32_t BLOCK_COUNT;
-int32_t RETRASO_COMPACTACION;
+uint32_t BLOCK_SIZE;
+uint32_t BLOCK_COUNT;
+uint32_t RETRASO_COMPACTACION;
 
 
 #endif /*  ENTRADASALIDA_INICIO_H_ */

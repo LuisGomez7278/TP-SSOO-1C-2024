@@ -44,7 +44,8 @@
                 continuarIterando=false;
                 break;
             default:
-                log_warning(logger_debug,"KERNEL recibio una operacion desconocida.");
+                log_warning(logger_debug,"KERNEL recibio una operacion desconocida de Memoria.");
+                continuarIterando=false;
                 break;
             }
         }

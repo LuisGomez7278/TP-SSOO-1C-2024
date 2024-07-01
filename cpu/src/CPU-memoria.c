@@ -50,8 +50,16 @@ void recibir_tamanio_de_pagina()
         void* buffer = recibir_buffer(&size, socket_cpu_memoria);
 
         tamanio_de_pagina = leer_de_buffer_uint32(buffer, &desplazamiento);
-        log_info(logger, "Llego el tamanio de pagina: %d", tamanio_de_pagina);
+        log_info(logger, "Llego el tamanio de pagina: %u", tamanio_de_pagina);
         free(buffer);
     }
+}
 
+void pedir_rezise(uint32_t PID, uint32_t valor)
+{
+    t_paquete* paquete = crear_paquete(SOLICITUD_RESIZE);
+    agregar_a_paquete_uint32(paquete, PID);
+    agregar_a_paquete_uint32(paquete, (uint32_t) valor);
+    enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);
 }

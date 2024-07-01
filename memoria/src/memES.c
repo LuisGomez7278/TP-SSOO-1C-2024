@@ -8,10 +8,10 @@ void conexion_con_es(){
         case MENSAJE:
             recibir_mensaje(socket_cpu_memoria,logger_debug);
             break;
-        case SOLICITUD_IO_READ:
+        case SOLICITUD_IO_STDIN_READ:
             read_es();
             break;
-        case SOLICITUD_IO_WRITE:
+        case SOLICITUD_IO_STDOUT_WRITE:
             write_es();
             break;
         default:
@@ -36,7 +36,7 @@ void read_es(){
 
         usleep(retardo*1000);
 
-        t_paquete* paquete = crear_paquete(SOLICITUD_IO_READ);
+        t_paquete* paquete = crear_paquete(SOLICITUD_IO_STDIN_READ);
         agregar_a_paquete_string(paquete, strlen(leido), leido);
         enviar_paquete(paquete, socket_cpu_memoria);
         free(leido);

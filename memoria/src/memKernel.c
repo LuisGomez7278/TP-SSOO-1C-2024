@@ -10,9 +10,16 @@ void atender_conexion_KERNEL_MEMORIA(){
     pthread_t hilo_escucha_kenel_memoria;
     pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)conexion_con_kernel,NULL);
     pthread_join(hilo_escucha_kenel_memoria,NULL);
-}*/
-
+}
+*/
 void conexion_con_kernel(){
+    
+//ENVIAR MENSAJE A KERNEL
+    enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
+    log_info(logger, "Se envio el primer mensaje a kernel");
+
+
+
     bool continuarIterando = true;
     while (continuarIterando) {
         op_code codigo = recibir_operacion(socket_kernel_memoria);   
@@ -36,7 +43,7 @@ void conexion_con_kernel(){
 
 void crear_proceso(){ // llega el pid y el path de instrucciones
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 
@@ -67,7 +74,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
 
 void eliminar_proceso(){ // llega un pid
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    int *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(int));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 
