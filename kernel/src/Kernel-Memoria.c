@@ -33,6 +33,7 @@
                     }else{
                         log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. No se pudo eliminar de NEW",PID);
                     }
+                    free(pcb);
                 break;
             case FALLO:
                 log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO.");
@@ -79,21 +80,20 @@ void carga_exitosa_en_memoria(){
 
 //RECIBO EL PROCESO QUE CARGO EN MEMORIA
 
-    uint32_t *sizeTotal=malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento=malloc(sizeof(int));
-    *desplazamiento=0;
-    void* buffer= recibir_buffer(sizeTotal,socket_memoria_kernel);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento=0;
+    
+    void* buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);
     uint32_t PID = 0; 
 
     if (buffer != NULL) {
-    PID = leer_de_buffer_uint32(buffer, desplazamiento);
+    PID = leer_de_buffer_uint32(buffer, &desplazamiento);
  
         
         log_info(logger_debug,"CARGA EXITOSA DEL PROCESO: PID= %u ",PID);
         log_info(logger, "Se crea el proceso con PID: %u en NEW",PID);
 
-        free(sizeTotal);
-        free(desplazamiento);
+
         free(buffer);
     
     } else {

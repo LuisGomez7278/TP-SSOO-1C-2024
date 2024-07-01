@@ -102,7 +102,7 @@ void gestionar_dispatch (){
     op_code cod_op;
     uint32_t desplazamiento;
     uint32_t size;
-    int32_t continuarIterando=1;
+    bool continuarIterando=true;
     char* recurso_solicitado;
 
     while(continuarIterando){    
@@ -275,6 +275,10 @@ void gestionar_dispatch (){
                 
                 enviar_siguiente_proceso_a_ejecucion();            
                 break;
+        case FALLO:
+            log_error(logger_debug,"El modulo CPU se desconecto");
+            continuarIterando=false;
+            break;                
         default:
             log_warning(logger_debug,"Operacion desconocida para Kernel al recibir de socket CPU-Dispatch.");
             break;

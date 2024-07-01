@@ -127,7 +127,7 @@ void crear_buffer(t_paquete* paquete)
 	paquete->buffer->stream = NULL;
 }
 
-void enviar_paquete(t_paquete* paquete, uint32_t socket_cliente)
+void enviar_paquete(t_paquete* paquete, int32_t socket_cliente)
 {
 	int32_t bytes = paquete->buffer->size + sizeof(uint32_t)+sizeof(op_code);
     //imprimir_paquete(paquete);
@@ -138,6 +138,7 @@ void enviar_paquete(t_paquete* paquete, uint32_t socket_cliente)
 
 	free(a_enviar);
 }
+
 
 void imprimir_paquete(t_paquete* paquete) {
     if (paquete == NULL || paquete->buffer == NULL || paquete->buffer->stream == NULL) {
@@ -265,7 +266,7 @@ void recibir_mensaje(int32_t socket_cliente, t_log* logger)
     free(mensaje);
 }
 
-void* recibir_buffer(uint32_t* size, uint32_t socket_cliente)
+void* recibir_buffer(uint32_t* size, int32_t socket_cliente)
 {
     void * buffer;
 
