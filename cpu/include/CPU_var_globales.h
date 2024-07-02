@@ -1,6 +1,7 @@
 #ifndef CPU_VAR_GLOBALES_H_
 #define CPU_VAR_GLOBALES_H_
 
+#include <semaphore.h>
 #include <commons/log.h>
 #include <commons/config.h>
 #include <commons/collections/list.h>
@@ -29,6 +30,7 @@ t_list* tabla_TLB;
 
 uint32_t PID;
 t_contexto_ejecucion contexto_interno;
+sem_t hay_proceso_ejecutando;
 
 int_code interrupcion;
 op_code motivo_desalojo;

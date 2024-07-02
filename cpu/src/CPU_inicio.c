@@ -6,7 +6,7 @@ void iniciar_CPU(void){
 
     PID = 0;
     interrupcion = INT_NO;
-
+    
     contexto_interno.PC = 0;
     contexto_interno.AX = 0;
     contexto_interno.BX = 0;
@@ -18,7 +18,8 @@ void iniciar_CPU(void){
     contexto_interno.EDX = 0;
     contexto_interno.DI = 0;
     contexto_interno.SI = 0;
-    
+
+    sem_init(&hay_proceso_ejecutando, 0, 0);
 }
 
 void iniciar_logs(void){

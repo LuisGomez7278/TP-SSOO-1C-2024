@@ -28,21 +28,25 @@ int main(int argc, char* argv[]) {
 //ENVIO MENSAJE A KERNEL
     recibir_operacion(socket_cpu_kernel_dispatch);
     recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
-    log_info(logger, "Handshake enviado: KERNEL");
     enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
+    log_info(logger, "Handshake enviado: KERNEL");
 
+    t_instruccion* ins_actual;
     recibir_proceso();
 
     while(true){
-        t_instruccion* ins_actual = fetch(PID, contexto_interno.PC, socket_cpu_memoria);
+        sem_wait(&hay_proceso_ejecutando);
+        ins_actual = fetch(PID, contexto_interno.PC, socket_cpu_memoria);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
+        free(ins_actual);
+        
         if (interrupcion != INT_NO) {
             if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
             else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
             desalojar_proceso(motivo_desalojo);
             recibir_proceso();
         };
-        free(ins_actual);
+        sem_post(&hay_proceso_ejecutando);
     }
 
     // pthread_create(hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_memoria, NULL);
@@ -178,7 +182,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg3);
         uint32_t tamanio_a_leer = *registro;
         
-        ejecutar_IO_STD_IN(ins_actual->arg1, direccion_logica, tamanio_a_leer);
+        ejecutar_IO_STD_IN(ins_actual->arg1, direccion_logica, tamanio_a_leer);        
         recibir_proceso();
         break;
 
@@ -193,7 +197,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         uint32_t tamanio_a_escribir = *registro;
 
-        ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);
+        ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);        
         recibir_proceso();
         break;
 
@@ -209,7 +213,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: IO_FS_DELETE - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_DELETE;
-        enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);
+        enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);        
         recibir_proceso();
         break;
 
@@ -242,7 +246,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg5);
         sprintf(puntero_FS_w, "%u", *registro);
 
-        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_w, tamanio_FS_w, puntero_FS_w);
+        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_w, tamanio_FS_w, puntero_FS_w);        
         recibir_proceso();
         break;
 
@@ -263,47 +267,29 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg5);
         sprintf(puntero_FS_r, "%u", *registro);
 
-        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_r, tamanio_FS_r, puntero_FS_r);
+        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_r, tamanio_FS_r, puntero_FS_r);        
         recibir_proceso();
         break;
 
     case WAIT:
         log_info(logger,"PID: %u - Ejecutando: WAIT - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
-        enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);
-        if (esperar_respuesta_recurso())
-        {
-            log_info(logger,"PID: %u - WAIT de recurso: %s fue exitoso", PID, ins_actual->arg1);
-            recibir_proceso();
-        }
-        else
-        {
-            log_info(logger,"PID: %u - WAIT de recurso: %s fallo", PID, ins_actual->arg1);
-            recibir_proceso();
-        }
+        enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);        
+        recibir_proceso();
         break;
 
     case SIGNAL:
         log_info(logger,"PID: %u - Ejecutando: SIGNAL - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
-        enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);
-        if (esperar_respuesta_recurso())
-        {
-            log_info(logger,"PID: %u - SIGNAL de recurso: %s fue exitoso", PID, ins_actual->arg1);
-            recibir_proceso();
-        }
-        else
-        {
-            log_info(logger,"PID: %u - SIGNAL de recurso: %s fallo", PID, ins_actual->arg1);
-            recibir_proceso();
-        }
+        enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);                
+        recibir_proceso();
         break;
 
     case EXIT:
         log_info(logger,"PID: %u - Ejecutando: EXIT", PID);
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
-        desalojar_proceso(motivo_desalojo);
+        desalojar_proceso(motivo_desalojo);        
         recibir_proceso();
         break;
         

@@ -18,6 +18,7 @@ extern uint32_t tamanio_de_pagina;
 
 extern uint32_t PID;
 extern t_contexto_ejecucion contexto_interno;
+extern sem_t hay_proceso_ejecutando;
 
 t_instruccion* fetch(uint32_t PID, uint32_t PC, int socket_cpu_memoria);
 t_instruccion* recibir_instruccion(int socket_cpu_memoria);

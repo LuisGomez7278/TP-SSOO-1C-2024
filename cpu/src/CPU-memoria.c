@@ -1,6 +1,6 @@
 #include "../include/CPU-memoria.h"
 
-t_instruccion* fetch(uint32_t PID, uint32_t PC, int socket_cpu_memoria){
+t_instruccion* fetch(uint32_t PID, uint32_t PC, int socket_cpu_memoria){    
     t_paquete* p = crear_paquete(FETCH);
     agregar_a_paquete_uint32(p, PID);
     agregar_a_paquete_uint32(p, PC);

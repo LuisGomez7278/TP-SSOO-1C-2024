@@ -3,6 +3,7 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include <semaphore.h>
 #include "../../utils/include/conexiones.h"
 #include "../../utils/include/utils.h"
 
@@ -25,6 +26,7 @@ extern char* algoritmo_TLB;
 extern uint32_t PID;
 extern int_code interrupcion;
 extern t_contexto_ejecucion contexto_interno;
+extern sem_t hay_proceso_ejecutando;
 
 void iniciar_CPU(void);
 void iniciar_logs(void);

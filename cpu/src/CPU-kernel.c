@@ -1,15 +1,16 @@
 #include "../include/CPU-kernel.h"
 
 void recibir_proceso(){
-    op_code op = recibir_operacion(socket_cpu_kernel_dispatch);
-    if (op!=CONTEXTO)
-    {
-        log_warning(logger_debug, "Se esperaba un contexto de ejecucion y llego otra cosa, codigo: %d", op);
-    }
-    
-    recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
-    log_info(logger, "Llega un proceso de PID: %u", PID);
     interrupcion = INT_NO;
+    log_info(logger, "CPU esta esperando un proceso...");
+    op_code op = recibir_operacion(socket_cpu_kernel_dispatch);
+    if (op==CONTEXTO)
+    {
+        recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
+        log_info(logger, "Llega un proceso de PID: %u", PID);
+        sem_post(&hay_proceso_ejecutando);
+    }
+    else {log_warning(logger_debug, "Se esperaba un contexto de ejecucion y llego otra cosa, codigo: %d", op);}
 }
 
 void desalojar_proceso(op_code motivo_desalojo){
@@ -18,6 +19,7 @@ void desalojar_proceso(op_code motivo_desalojo){
     serializar_CE(paquete, contexto_interno);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    sem_wait(&hay_proceso_ejecutando);
 }
 
 void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
@@ -28,6 +30,7 @@ void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
     agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    sem_wait(&hay_proceso_ejecutando);
 };
 
 void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
@@ -39,6 +42,7 @@ void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
     agregar_a_paquete_string(paquete, strlen(arg2) + 1, arg2);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    sem_wait(&hay_proceso_ejecutando);
 };
 
 void enviar_CE_con_5_arg(op_code motivo_desalojo, char* arg1, char* arg2, char* arg3, char* arg4, char* arg5)
@@ -53,6 +57,7 @@ void enviar_CE_con_5_arg(op_code motivo_desalojo, char* arg1, char* arg2, char* 
     agregar_a_paquete_string(paquete, strlen(arg5) + 1, arg5);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    sem_wait(&hay_proceso_ejecutando);
 };
 
 bool esperar_respuesta_recurso()
