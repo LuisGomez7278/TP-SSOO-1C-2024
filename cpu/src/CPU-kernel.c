@@ -74,7 +74,7 @@ void gestionar_conexion_interrupt()
         switch (operacion)
         {
         case MENSAJE:
-            recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
+            recibir_mensaje(socket_cpu_kernel_interrupt,logger_debug);
             break;
         case DESALOJO_POR_CONSOLA:
             log_info(logger, "El usuario finaliza el proceso PID: %u por consola", PID);

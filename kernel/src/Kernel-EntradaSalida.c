@@ -14,8 +14,10 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
 
     //ENVIAR MENSAJE ENTRADA SALIDA
         recibir_mensaje(nueva_interfaz->socket_interfaz,logger_debug);
-        enviar_mensaje("kernel manda mensaje a nueva interfaz", nueva_interfaz->socket_interfaz);
-        log_info(logger_debug, "Se envio el primer mensaje a la nueva interfaz");
+            enviar_mensaje("CONEXION CON KERNEL OK", socket_kernel_cpu_dispatch);
+             log_info(logger, "Handshake enviado: CPU-DISPATCH");
+        enviar_mensaje("CONEXION CON KERNEL OK", nueva_interfaz->socket_interfaz);
+        log_info(logger_debug, "Handshake enviado: INTERFAZ");
 
         /*
     //RECIBIR TIPO Y NOMBRE DE INTERFAZ

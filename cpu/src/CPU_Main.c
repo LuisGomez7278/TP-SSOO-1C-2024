@@ -27,7 +27,8 @@ int main(int argc, char* argv[]) {
 
 //ENVIO MENSAJE A KERNEL
     enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
-    log_info(logger, "Handshake enviado: KERNEL");    
+    log_info(logger, "Handshake enviado: KERNEL");
+    recibir_operacion(socket_cpu_kernel_dispatch);    
     recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
 
     recibir_proceso();

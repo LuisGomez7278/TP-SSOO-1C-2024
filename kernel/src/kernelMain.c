@@ -27,12 +27,6 @@ int32_t main(int32_t argc, char* argv[]) {
 
       /////////////////////////////////////                AHORA ATENDEMOS LAS CONEXIONES                        //////////////////////////////////////////////////////
     
-    //  INICIO CONSOLA INTERACTIVA  
-
-        pthread_t hilo_consola_interactiva;
-        pthread_create(&hilo_consola_interactiva,NULL,(void*)iniciar_consola_interactiva,NULL);
-        pthread_detach(hilo_consola_interactiva);  
-
 
     // CREO HILO ENTRADA-SALIDA
         pthread_t hilo_entradaSalida;
@@ -47,12 +41,15 @@ int32_t main(int32_t argc, char* argv[]) {
            
 
     //CREO HILO de MEMORIA
-    
         pthread_t hilo_MEMORIA;
         pthread_create(&hilo_MEMORIA,NULL,(void*)atender_conexion_MEMORIA_KERNEL,NULL);
-        pthread_join(hilo_MEMORIA,NULL); 
+        pthread_detach(hilo_MEMORIA); 
+    
                   
-
+    //  INICIO CONSOLA INTERACTIVA  
+        pthread_t hilo_consola_interactiva;
+        pthread_create(&hilo_consola_interactiva,NULL,(void*)iniciar_consola_interactiva,NULL);
+        pthread_join(hilo_consola_interactiva,NULL);  
 
         
 
