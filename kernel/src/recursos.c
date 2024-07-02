@@ -85,9 +85,9 @@ uint32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
     if (auxiliar->instancias_del_recurso - auxiliar->instancias_solicitadas_del_recurso<=0)             //RECURSO ENCONTRADO SIN INSTANCIAS DISPONIBLES
     {
         log_info(logger, "PID: %d - Cambio de estado READY -> BLOQUEADO", pcb_solicitante->PID);
-        pthread_mutex_lock(&mutex_recursos);
+        pthread_mutex_lock(&semaforo_recursos);
         list_add(auxiliar->lista_de_espera,pcb_solicitante);
-        pthread_mutex_unlock(&mutex_recursos);
+        pthread_mutex_unlock(&semaforo_recursos);
         auxiliar->instancias_solicitadas_del_recurso-=1;
         return 1;
         
@@ -117,7 +117,7 @@ uint32_t signal_recursos ( char*recurso_solicitado,uint32_t PID){
         return -1;
     }
     
-    if(buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID)==NULL){               //RECURSO NO ASIGNADO AL PROCESO
+    if(buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID,&semaforo_recursos)==NULL){               //RECURSO NO ASIGNADO AL PROCESO
         return -2;
     }
        
@@ -143,7 +143,7 @@ void eliminar_proceso_de_lista_recursos (uint32_t PID){
     t_recurso* auxiliar = lista_de_recursos;
 
     while(auxiliar!=NULL){
-        pcb_a_eliminar=buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
+        pcb_a_eliminar=buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID,&semaforo_recursos);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             if(list_remove_element(auxiliar->lista_de_espera,pcb_a_eliminar)){
                 auxiliar->instancias_solicitadas_del_recurso+=1;

@@ -22,9 +22,14 @@ void iniciar_CPU(void){
 }
 
 void iniciar_logs(void){
-    logger = start_logger("log_cpu.log", "LOG CPU", LOG_LEVEL_INFO);
+    logger = start_logger("log_cpu.log", "LOG CPU", LOG_LEVEL_TRACE);
 	if(logger==NULL){
 		perror("No se pudo crear el logger");
+		exit(EXIT_FAILURE);
+	}
+    logger_debug = start_logger("log_cpu_debug.log", "LOG CPU DB", LOG_LEVEL_TRACE);
+	if(logger_debug==NULL){
+		perror("No se pudo crear el logger debug");
 		exit(EXIT_FAILURE);
 	}
 }

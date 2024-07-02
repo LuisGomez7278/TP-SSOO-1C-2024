@@ -73,6 +73,9 @@ void gestionar_conexion_interrupt()
         operacion = recibir_operacion(socket_cpu_kernel_interrupt);
         switch (operacion)
         {
+        case MENSAJE:
+            recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
+            break;
         case DESALOJO_POR_CONSOLA:
             log_info(logger, "El usuario finaliza el proceso PID: %u por consola", PID);
             interrupcion = INT_CONSOLA;
@@ -82,7 +85,9 @@ void gestionar_conexion_interrupt()
             log_info(logger, "El proceso PID: %u termino su quantum y es desalojado", PID);
             interrupcion = INT_QUANTUM;
             break;
-        
+        case FALLO:
+            log_error(logger, "Kernel desconectado, terminando servidor INTERRUPT");
+       
         default:
         log_error(logger, "Llego algo que no era interrupcion por socket interrupt");
             break;

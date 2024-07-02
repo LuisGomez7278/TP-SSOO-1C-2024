@@ -73,8 +73,8 @@ extern pthread_mutex_t semaforo_ready;
 extern pthread_mutex_t semaforo_ready_prioridad;
 extern pthread_mutex_t semaforo_bloqueado_prioridad;
 extern pthread_mutex_t semaforo_bloqueado;
-extern pthread_mutex_t mutex_recursos;
 extern pthread_mutex_t semaforo_lista_interfaces;
+extern pthread_mutex_t semaforo_recursos;
 
 
 extern uint32_t identificador_PID;
@@ -117,7 +117,7 @@ extern uint32_t pcb_actual_en_cpu;
     void atender_conexion_MEMORIA_KERNEL();
     void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido);
     void carga_exitosa_en_memoria(void* buffer);
-    t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado);
+    t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado,pthread_mutex_t* semaforo_mutex);;
 
 //servicios_kernel
     uint32_t asignar_pid();

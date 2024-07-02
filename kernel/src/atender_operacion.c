@@ -93,7 +93,7 @@ if (pid_a_finalizar==pcb_actual_en_cpu){
 }
 
 
- t_pcb* pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_new,pid_a_finalizar);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
+ t_pcb* pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_new,pid_a_finalizar,&semaforo_new);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_new,pcb_a_eliminar)){
@@ -105,7 +105,7 @@ if (pid_a_finalizar==pcb_actual_en_cpu){
 
 
 
-pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready,pid_a_finalizar);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
+pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready,pid_a_finalizar,&semaforo_ready);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_ready,pcb_a_eliminar)){
@@ -115,7 +115,7 @@ pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready,pid_a_finalizar);    //es
             }
         }
 
-pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready_prioridad,pid_a_finalizar);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
+pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready_prioridad,pid_a_finalizar,&semaforo_ready_prioridad);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_ready_prioridad,pcb_a_eliminar)){
@@ -125,7 +125,7 @@ pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready_prioridad,pid_a_finalizar
             }
         }
 
-pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado,pid_a_finalizar);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
+pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado,pid_a_finalizar,&semaforo_bloqueado);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_bloqueado,pcb_a_eliminar)){
@@ -135,7 +135,7 @@ pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado,pid_a_finalizar);    
             }
         }
 
-pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario,pid_a_finalizar);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
+pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario,pid_a_finalizar,&semaforo_bloqueado_prioridad);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_bloqueado_prioritario,pcb_a_eliminar)){

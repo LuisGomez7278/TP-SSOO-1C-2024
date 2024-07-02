@@ -45,7 +45,7 @@
 
 
     int32_t socket_kernel_cpu_dispatch;
-    int32_t socket_kernel_cpu_interrupt; //queda libre por ahora
+    int32_t socket_kernel_cpu_interrupt; 
     int32_t socket_memoria_kernel;
     int32_t socket_entradasalida_kernel;
     int32_t socket_escucha;

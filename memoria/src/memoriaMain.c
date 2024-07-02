@@ -2,42 +2,42 @@
 
 int main(int argc, char* argv[]) {
     
-    // INICIALIZO LOGs
+// INICIALIZO LOGs
     inciarlogs();
 
-    // OBTENGO LOS VALORES DEL CONFIG
+// OBTENGO LOS VALORES DEL CONFIG
     cargarConfig();
 
-    // INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
+// INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
     inicializarEspacioMem();                                                           
     
-    // INICIO SERVIDOR MEMORIA
+// INICIO SERVIDOR MEMORIA
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
-    // ESPERO QUE SE CONECTE CPU
+// ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug, "Esperando que se conecte CPU");
     socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
     enviar_tam_pag();
     
-    // ESPERO QUE SE CONECTE EL KERNEL
+// ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug, "Esperando que se conecte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
-    // ESPERO QUE SE CONECTE E/S
+// ESPERO QUE SE CONECTE E/S
     log_trace(logger_debug, "Esperando que se conecte E/S");
     socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
 
-    // CREO HILO ESCUCHA CPU
+// CREO HILO ESCUCHA CPU
     pthread_t hilo_cpu_memoria;
     pthread_create(&hilo_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
     pthread_detach(hilo_cpu_memoria);
 
-    // CREO HILO ESCUCHA KERNEL 
+// CREO HILO ESCUCHA KERNEL 
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
     pthread_detach(hilo_kernel_memoria); 
     
-    // CREO HILO ESCUCHA ENTRADA-SALIDA
+// CREO HILO ESCUCHA ENTRADA-SALIDA
     pthread_t hilo_entradaSalida_memoria;
     pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
     pthread_join(hilo_entradaSalida_memoria,NULL);

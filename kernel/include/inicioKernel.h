@@ -40,7 +40,7 @@ pthread_mutex_t semaforo_bloqueado;
 pthread_mutex_t semaforo_bloqueado_prioridad;
 pthread_mutex_t semaforo_ready_prioridad;
 pthread_mutex_t semaforo_lista_interfaces;
-
+pthread_mutex_t semaforo_recursos;
 
 
 

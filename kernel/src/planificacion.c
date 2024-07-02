@@ -11,14 +11,13 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 	if (pcb->estado != estado_nuevo){
 		loggeo_de_cambio_estado(pcb->PID, pcb->estado, estado_nuevo);
 	}
-    log_info(logger_debug, "El pcb guardado antes de guardar en lista es PID: %u",pcb->PID);
+    
 	pcb->estado = estado_nuevo;
 	list_add(lista, pcb);
-    t_pcb* pcb2=list_get(lista,0);
-	log_info(logger_debug, "El pcb levantado de lista es PID: %u",pcb2->PID);
+
     sem_post(semaforo_contador);
 
-	log_info(logger, "Proceso PID:%i ingreso en %s", pcb->PID,estado_nuevo_string );
+	log_info(logger, "Proceso PID:%u ingreso en %s", pcb->PID,estado_nuevo_string);
 
 ////////////////////////    LOGGEO OBLIGATORIO DE READY Y READY PRIORITARIO /////////////
 
@@ -36,10 +35,12 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 			}
 		}
 		string_append(&log_cola_ready, "]");
-		log_info(logger,"Lista de PID de procesos en estado READY %s : %s \n",algoritmo_planificacion, log_cola_ready);
+		log_info(logger,"Lista de PID de procesos en estado READY (%s) : %s.",algoritmo_planificacion, log_cola_ready);
 		free(log_cola_ready);
 	}
+ 
     
+
     if(strcmp(estado_nuevo_string, "READY_PRIORITARIO")==0){
 		char* log_cola_ready_prioritario = string_new();
 		string_append(&log_cola_ready_prioritario, "[");
@@ -52,13 +53,24 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 				string_append(&log_cola_ready_prioritario, ", ");
 			}
 		}
-
-
 		string_append(&log_cola_ready_prioritario, "]");
 		log_info(logger,"Lista de PID de procesos en estado READY Prioritario %s : %s",algoritmo_planificacion, log_cola_ready_prioritario);
 		free(log_cola_ready_prioritario);
 	}
 pthread_mutex_unlock(semaforo_mutex);
+
+if(strcmp(estado_nuevo_string, "READY_PRIORITARIO")==0 || strcmp(estado_nuevo_string, "READY")==0)
+{        //aca si no jhay ningun proceso ejecutando debo ejecutar
+    if ((list_size(lista_ready)+list_size(lista_ready_prioridad))==1 && pcb_actual_en_cpu==0)
+    {
+        enviar_siguiente_proceso_a_ejecucion();
+    }
+    
+
+
+}
+
+
 }
 
 
@@ -132,6 +144,7 @@ void gestionar_dispatch (){
         pcb_dispatch->quantum_ejecutado=tiempo_recien_ejecutado+ backup_de_quantum_ejecutado;
         backup_de_quantum_ejecutado=0;      ////    RESETEO BACKUP DE QUANTUM   
         tiempo_recien_ejecutado=0;          ////    RESETEO EL VALOR QUE OBTIENE EL TIEMPO DEL CONTADOR
+        pcb_actual_en_cpu=0;                ////Para indicar que actualmente no hay ningun proceso en ejecucion
 
     ///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION  ///////////////////////
 

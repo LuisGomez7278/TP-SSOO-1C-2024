@@ -1,46 +1,33 @@
 #include "../include/memKernel.h"
 
-/*
-void atender_conexion_KERNEL_MEMORIA(){
-    //ENVIAR MENSAJE A KERNEL
-    enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
-    log_info(logger, "Se envio el primer mensaje a kernel");
 
-    // CREO HILO ESCUCHA KERNEL
-    pthread_t hilo_escucha_kenel_memoria;
-    pthread_create(&hilo_escucha_kenel_memoria,NULL,(void*)conexion_con_kernel,NULL);
-    pthread_join(hilo_escucha_kenel_memoria,NULL);
-}
-*/
 void conexion_con_kernel(){
     
-//ENVIAR MENSAJE A KERNEL
-//    enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
-//    log_info(logger, "Se envio el primer mensaje a kernel");
-
-
-
-    bool continuarIterando = true;
-    while (continuarIterando) {
-        op_code codigo = recibir_operacion(socket_kernel_memoria);   
-        switch (codigo){
-        case MENSAJE:
-            recibir_mensaje(socket_kernel_memoria,logger_debug);
-            enviar_mensaje("MEMORIA manda mensaje a Kernel", socket_kernel_memoria);
-            log_info(logger, "Se envio el primer mensaje a kernel");
-            break;
-        case CREAR_PROCESO:
-            crear_proceso();
-            break;
-        case ELIMINAR_PROCESO:
-            eliminar_proceso();
-            break;
-        default:
-            log_error(logger_debug, "Modulo KERNEL se desconectó. Terminando servidor");
-            continuarIterando = 0;
-            break;
+    //ENVIAR MENSAJE A KERNEL
+        enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
+        log_info(logger, "Handshake enviado: KERNEL");
+    
+    
+    
+        bool continuarIterando = true;
+        while (continuarIterando) {
+            op_code codigo = recibir_operacion(socket_kernel_memoria);   
+            switch (codigo){
+            case MENSAJE:
+                recibir_mensaje(socket_kernel_memoria,logger_debug);
+                break;
+            case CREAR_PROCESO:
+                crear_proceso();
+                break;
+            case ELIMINAR_PROCESO:
+                eliminar_proceso();
+                break;
+            default:
+                log_error(logger_debug, "Modulo KERNEL se desconectó.Cerrando Socket de kernel");
+                continuarIterando = false;
+                break;
+            }
         }
-    }
 }
 
 void crear_proceso(){ // llega el pid y el path de instrucciones

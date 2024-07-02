@@ -7,6 +7,7 @@
 #include "../../utils/include/utils.h"
 
 extern t_log* logger;
+extern t_log* logger_debug;
 extern t_config* config;
 
 extern char* ip_memoria;

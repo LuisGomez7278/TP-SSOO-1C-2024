@@ -238,14 +238,14 @@ void cambiar_proceso_de_block_a_ready(uint32_t PID){
 if (list_size(lista_bloqueado_prioritario)>0)
 {
     pthread_mutex_lock(&semaforo_bloqueado_prioridad);
-    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario ,PID);
+    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario ,PID,&semaforo_bloqueado_prioridad);
     list_remove_element(lista_bloqueado_prioritario,pcb);
     pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
 }
 if (pcb==NULL && list_size(lista_bloqueado)>0)
 {
     pthread_mutex_lock(&semaforo_bloqueado);
-    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado,PID);
+    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado,PID,&semaforo_bloqueado);
     list_remove_element(lista_bloqueado,pcb);
     pthread_mutex_unlock(&semaforo_bloqueado);
 

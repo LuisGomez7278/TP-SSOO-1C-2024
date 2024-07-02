@@ -8,6 +8,7 @@
 #include "../../utils/include/conexiones.h"
 
 t_log* logger;
+t_log* logger_debug;
 t_config* config;
 
 char* ip_memoria;
@@ -17,7 +18,8 @@ char* puerto_escucha_interrupt;
 int socket_cpu_kernel_dispatch;
 int socket_cpu_kernel_interrupt;
 int socket_cpu_memoria;
-int socket_escucha;
+int socket_escucha_dispatch;
+int socket_escucha_interrupt;
 
 uint32_t cant_entradas_TLB;
 char* algoritmo_TLB;
