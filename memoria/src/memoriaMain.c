@@ -14,6 +14,68 @@ int main(int argc, char* argv[]) {
 // INICIO SERVIDOR MEMORIA
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
+ // PRUEBAS SOBRE FUNCIONAMIENTO 
+/*
+    bool crear = crear_procesoM(path_base, 1);
+
+    resize(1, 67);
+
+    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
+
+    if(tpg == NULL){
+        perror("AAA");    
+    }
+
+    char* buffer = "Hola planeta tierra, hoy es lunes";
+
+    bool escribir_bien = escribir_memoria(50, 14, buffer, 1);
+    bool escribir_bien2 = escribir_memoria(64, 20, "Hola", 1);
+
+    //bool escribir_bien2 = escribir_memoria(10, 3, "TP", 1);
+    char *leido2 = string_new();
+    int i=0; int n=2; 
+
+    leido2 = leer_memoria(50, 14, 1);
+    log_info(logger_debug, "%s", leido2);
+    char* leido = leer_memoria(64, 20, 1);
+    log_info(logger_debug, "%s", leido);
+
+    strcat(leido2, leido);
+
+    log_info(logger_debug, "%s", leido2);
+
+    while(i<n){
+    char* leido;
+    if(i==0){leido = leer_memoria(50, 14, 1);}
+    if(i==1){leido = leer_memoria(64, 20, 1);}
+    
+    //strcat(leido2, leido);
+    string_append(&leido2, leido);
+    //log_info(logger_debug, "%s", leido2);
+    free(leido);
+    ++i;
+    }
+    log_info(logger_debug, "%s", leido2);
+
+    // if(escribir_bien){log_info(logger_debug, "Perfecto");}
+
+    char str[12];
+    uint32_t numero = 145;
+
+    sprintf(str, "%u", numero); //convierte uint32_t a char*
+
+    bool escrito = escribir_memoria(10, sizeof(numero), str, 1);
+
+    char* leido = leer_memoria(10, 10, 1);
+    
+    log_info(logger_debug, "%s", leido);
+    
+    //log_info(logger_debug, "Int Leido: %d", leido_int);
+    if(leido==NULL){perror("Rompio");}
+
+    free(leido);
+*/
+
 // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug, "Esperando que se conecte CPU");
     socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
@@ -40,54 +102,8 @@ int main(int argc, char* argv[]) {
 // CREO HILO ESCUCHA ENTRADA-SALIDA
     pthread_t hilo_entradaSalida_memoria;
     pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
-    pthread_join(hilo_entradaSalida_memoria,NULL);
+    pthread_detach(hilo_entradaSalida_memoria);
 
-/* // PRUEBAS SOBRE FUNCIONAMIENTO 
-
-    bool crear = crear_procesoM(path_base, 1);
-
-    resize(1, 50);
-    
-    resize(1, 20);
-
-    resize(1, 10);
-
-    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
-
-    if(tpg == NULL){
-        perror("AAA");    
-    }
-
-    char* buffer = "Hola planeta tierra, hoy es lunes";
-
-    bool escribir_bien = escribir_memoria(10, 34, buffer, 1);
-    bool escribir_bien2 = escribir_memoria(10, 3, "TP", 1);
-
-    char *leido2 = leer_memoria(10, 34, 1);
-
-    log_info(logger_debug, "%s", leido2);
-
-    free(leido2);
-
-    // if(escribir_bien){log_info(logger_debug, "Perfecto");}
-
-    char str[12];
-    uint32_t numero = 145;
-
-    sprintf(str, "%u", numero); //convierte uint32_t a char*
-
-    bool escrito = escribir_memoria(10, sizeof(numero), str, 1);
-
-    char* leido = leer_memoria(10, 10, 1);
-    
-    log_info(logger_debug, "%s", leido);
-    
-    //log_info(logger_debug, "Int Leido: %d", leido_int);
-    if(leido==NULL){perror("Rompio");}
-
-    free(leido);
-
-*/
     //--------------------------------------------
 
 
@@ -311,13 +327,13 @@ cod_ins hash_ins(char* ins){
     else return -1;
 }
 
-// char* path_completo(char* path_base, char* path_parcial){
-    //char* path = string_new();
-    //string_append(&path, path_base);
-    //string_append(&path, path_parcial);
+char* path_completo(char* path_base, char* path_parcial){
+    char* path = string_new();
+    string_append(&path, path_base);
+    string_append(&path, path_parcial);
 
-    //return path;
-//}
+    return path;
+}
 
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     t_instruccion* instruccion = malloc(sizeof(t_instruccion*));

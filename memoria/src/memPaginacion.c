@@ -269,161 +269,32 @@ int obtener_desplazamiento(int direccion_fisica) {
 }
 
 bool escribir_memoria(uint32_t direccion_fisica, uint32_t bytes, char* valor, uint32_t PID){
-    bytes -= 1; // al no guardar el caracter nulo se escribe un byte menos, luego es añadido cuando se lee
-    int bytes_escritos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = bytes;
 
-    while (bytes_restantes > 0){
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
+    if (memoria_usuario == NULL || valor == NULL) {
+        log_info(logger, "Error: memoria_usuario o valor es NULL.");
+        return false;
+    }
+
+    if (direccion_fisica + bytes > tam_memoria) {
+        log_info(logger_debug, "Out of Memory");
+        return false;
+    }
+
+    memcpy((char*)memoria_usuario + direccion_fisica, valor, bytes);
     
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_escribir;
-
-        if(bytes_restantes < espacio_en_marco){
-        bytes_a_escribir = bytes_restantes; 
-        }else{bytes_a_escribir = espacio_en_marco;}
-
-        memcpy((char*)memoria_usuario + (marco * tam_pagina) + offset, valor + bytes_escritos, bytes_a_escribir);
-
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_escribir);
-
-        bytes_escritos += bytes_a_escribir;
-        bytes_restantes -= bytes_a_escribir;
-
-        if (bytes_restantes > 0) {
-            // Obtener la siguiente página
-            //log_info(logger, "Entra en if");
-            tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
-            //log_info(logger, "Obtiene pagina");
-            if (tabla_proceso == NULL) {
-                return false;
-            }
-            
-            tabla_pag* siguiente_pagina = buscar_siguiente_pagina(tabla_proceso, marco);
-            if (siguiente_pagina == NULL || !siguiente_pagina->presencia) {
-                return false;
-            }
-
-            direccion_actual = siguiente_pagina->marco * tam_pagina;  // Empezar desde el inicio del siguiente marco
-        }
-    }
-    return true;
+    log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_fisica, bytes);
 }
 
-/*bool escribir_uint32_t_en_memoria(uint32_t direccion_fisica, uint32_t bytes, uint32_t valor, uint32_t PID) { // NO SE USA MAS, NO NECESARIA
-    int bytes_escritos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = bytes;
-
-    while (bytes_restantes > 0) {
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
-
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_escribir = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
-
-        memcpy((char*)memoria_usuario + (marco * tam_pagina) + offset, ((char*)&valor) + bytes_escritos, bytes_a_escribir);
-
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_escribir);
-
-        bytes_escritos += bytes_a_escribir;
-        bytes_restantes -= bytes_a_escribir;
-
-        if (bytes_restantes > 0) {
-            // Obtener la siguiente página
-            tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
-            if (tabla_proceso == NULL) {
-                return false;
-            }
-
-            tabla_pag* siguiente_pagina = buscar_siguiente_pagina(tabla_proceso, marco);
-            if (siguiente_pagina == NULL || !siguiente_pagina->presencia) {
-                return false;
-            }
-
-            direccion_actual = siguiente_pagina->marco * tam_pagina;  // Empezar desde el inicio del siguiente marco
-        }
-    }
-    return true;
-}
-*/
 
 char* leer_memoria(uint32_t direccion_fisica, int size, uint32_t PID){
-    char* buffer = malloc(size);
-    int bytes_leidos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = size;
+    char* buffer = malloc(size+1);
+    
+    memcpy(buffer, (char*)memoria_usuario + direccion_fisica, size);
 
-    while (bytes_restantes > 0) {
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_leer = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
+    log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_fisica, size);
 
-        memcpy(buffer + bytes_leidos, (char*)memoria_usuario + (marco * tam_pagina) + offset, bytes_a_leer);
-
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_leer);
-        bytes_leidos += bytes_a_leer;
-        bytes_restantes -= bytes_a_leer;
-
-        if (bytes_restantes > 0) {
-            tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
-            if (tabla_proceso == NULL) {
-                buffer[bytes_leidos] = '\0';
-                return buffer;
-            }
-
-            tabla_pag* siguiente_pagina = buscar_siguiente_pagina(tabla_proceso, marco);
-            if (siguiente_pagina == NULL || !siguiente_pagina->presencia) {
-                buffer[bytes_leidos] = '\0';
-                return buffer;
-            }
-
-            direccion_actual = siguiente_pagina->marco * tam_pagina;
-        }
-    }
     buffer[size] = '\0';
     //log_info(logger_debug, "%.*s", size, buffer);  
     return buffer;
 }
 
-/* uint32_t leer_memoria_uint32_t(uint32_t direccion_fisica, uint8_t bytes, uint32_t PID) { // NO SE USA MAS, NO NECESARIA
-    uint32_t valor = 0;
-    int bytes_leidos = 0;
-    int direccion_actual = direccion_fisica;
-    int bytes_restantes = bytes;
-
-    while (bytes_restantes > 0) {
-        int marco = obtener_marco(direccion_actual);
-        int offset = obtener_desplazamiento(direccion_actual);
-        int espacio_en_marco = tam_pagina - offset;
-        int bytes_a_leer = (bytes_restantes < espacio_en_marco) ? bytes_restantes : espacio_en_marco;
-
-        memcpy((char*)&valor + bytes_leidos, (char*)memoria_usuario + (marco * tam_pagina) + offset, bytes_a_leer);
-
-        log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_actual, bytes_a_leer);
-        bytes_leidos += bytes_a_leer;
-        bytes_restantes -= bytes_a_leer;
-
-        if (bytes_restantes > 0) {
-            tabla_pag_proceso* tabla_proceso = obtener_tabla_pag_proceso(PID);
-            if (tabla_proceso == NULL) {
-                log_error(logger_debug, "Error al obtener la tabla de páginas para PID %d", PID);
-                return 0; // Se puede usar un valor especial o manejar el error de otra forma
-            }
-
-            tabla_pag* siguiente_pagina = buscar_siguiente_pagina(tabla_proceso, marco);
-            if (siguiente_pagina == NULL || !siguiente_pagina->presencia) {
-                log_error(logger_debug, "Error al obtener la siguiente página para PID %d", PID);
-                return 0; // Se puede usar un valor especial o manejar el error de otra forma
-            }
-
-            direccion_actual = siguiente_pagina->marco * tam_pagina;
-        }
-    }
-
-    return valor;
-}
-*/

@@ -7,8 +7,6 @@ void conexion_con_kernel(){
         enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
         log_info(logger, "Handshake enviado: KERNEL");
     
-    
-    
         bool continuarIterando = true;
         while (continuarIterando) {
             op_code codigo = recibir_operacion(socket_kernel_memoria);   
@@ -32,7 +30,7 @@ void conexion_con_kernel(){
 
 void crear_proceso(){ // llega el pid y el path de instrucciones
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(uint32_t));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 
@@ -40,9 +38,11 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
         char* path_parcial = leer_de_buffer_string(buffer,desplazamiento);
 
-        log_info(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path_parcial);
+        char* path = path_completo(path_base, path_parcial);
+
+        log_info(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);
         
-        bool creado = crear_procesoM(path_parcial, PID);
+        bool creado = crear_procesoM(path, PID);
 
         usleep(retardo*1000);
 
@@ -63,7 +63,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
 
 void eliminar_proceso(){ // llega un pid
     uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
+    uint32_t *desplazamiento = malloc(sizeof(uint32_t));
     *desplazamiento = 0;
     void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
 
