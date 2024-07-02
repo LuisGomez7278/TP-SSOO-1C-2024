@@ -2,13 +2,7 @@
 
 
 void conexion_con_kernel(){
-    
-    //ENVIAR MENSAJE A KERNEL
-        enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
-        log_info(logger, "Handshake enviado: KERNEL");
-    
-    
-    
+        
         bool continuarIterando = true;
         while (continuarIterando) {
             op_code codigo = recibir_operacion(socket_kernel_memoria);   
@@ -46,7 +40,6 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         usleep(retardo*1000);
 
         if(creado){
-            log_info(logger, "Proceso cargado con exito, PID: %u", PID);
             enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID, socket_kernel_memoria);
         }else{
             log_info(logger, "Falla al cargar un proceso, PID: %u", PID);

@@ -32,9 +32,14 @@ uint32_t PID;
 t_contexto_ejecucion contexto_interno;
 sem_t hay_proceso_ejecutando;
 
+t_instruccion* ins_actual;
+sem_t prox_instruccion;
+
 int_code interrupcion;
 op_code motivo_desalojo;
 
+pthread_t hilo_conexion_dispatch;
 pthread_t hilo_conexion_interrupt;
+pthread_t hilo_conexion_memoria;
 
 #endif /*  CPU_VAR_GLOBALES_H */

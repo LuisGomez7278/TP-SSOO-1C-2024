@@ -15,6 +15,7 @@
 
         while (continuarIterando) {
             op_code cod_op = recibir_operacion(socket_memoria_kernel);   ////se queda esperando en recv por ser bloqueante
+            log_info(logger_debug, "Llega operacion de memoria codigo: %d", cod_op);
             switch (cod_op) {
             case MENSAJE:
                 recibir_mensaje(socket_memoria_kernel,logger_debug);

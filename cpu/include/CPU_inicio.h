@@ -27,6 +27,7 @@ extern uint32_t PID;
 extern int_code interrupcion;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
+extern sem_t prox_instruccion;
 
 void iniciar_CPU(void);
 void iniciar_logs(void);

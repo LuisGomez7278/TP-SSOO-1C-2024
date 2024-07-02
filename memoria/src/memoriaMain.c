@@ -18,76 +18,37 @@ int main(int argc, char* argv[]) {
     log_trace(logger_debug, "Esperando que se conecte CPU");
     socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
     enviar_tam_pag();
+    enviar_mensaje("CONEXION CON MEMORIA OK", socket_cpu_memoria);
+    log_info(logger, "Handshake enviado: CPU");
     
 // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug, "Esperando que se conecte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
+//ENVIAR MENSAJE A KERNEL
+    enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
+    log_info(logger, "Handshake enviado: KERNEL");
+
 // ESPERO QUE SE CONECTE E/S
-    log_trace(logger_debug, "Esperando que se conecte E/S");
-    socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
+    // log_trace(logger_debug, "Esperando que se conecte E/S");
+    // socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
 
 // CREO HILO ESCUCHA CPU
     pthread_t hilo_cpu_memoria;
     pthread_create(&hilo_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
     pthread_detach(hilo_cpu_memoria);
 
+// CREO HILO ESCUCHA ENTRADA-SALIDA
+    // pthread_t hilo_entradaSalida_memoria;
+    // pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
+    // pthread_detach(hilo_entradaSalida_memoria);
+
 // CREO HILO ESCUCHA KERNEL 
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
-    pthread_detach(hilo_kernel_memoria); 
+    pthread_join(hilo_kernel_memoria, NULL); 
     
-// CREO HILO ESCUCHA ENTRADA-SALIDA
-    pthread_t hilo_entradaSalida_memoria;
-    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
-    pthread_join(hilo_entradaSalida_memoria,NULL);
 
-/* // PRUEBAS SOBRE FUNCIONAMIENTO 
-
-    bool crear = crear_procesoM(path_base, 1);
-
-    resize(1, 50);
-    
-    resize(1, 20);
-
-    resize(1, 10);
-
-    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
-
-    if(tpg == NULL){
-        perror("AAA");    
-    }
-
-    char* buffer = "Hola planeta tierra, hoy es lunes";
-
-    bool escribir_bien = escribir_memoria(10, 34, buffer, 1);
-    bool escribir_bien2 = escribir_memoria(10, 3, "TP", 1);
-
-    char *leido2 = leer_memoria(10, 34, 1);
-
-    log_info(logger_debug, "%s", leido2);
-
-    free(leido2);
-
-    // if(escribir_bien){log_info(logger_debug, "Perfecto");}
-
-    char str[12];
-    uint32_t numero = 145;
-
-    sprintf(str, "%u", numero); //convierte uint32_t a char*
-
-    bool escrito = escribir_memoria(10, sizeof(numero), str, 1);
-
-    char* leido = leer_memoria(10, 10, 1);
-    
-    log_info(logger_debug, "%s", leido);
-    
-    //log_info(logger_debug, "Int Leido: %d", leido_int);
-    if(leido==NULL){perror("Rompio");}
-
-    free(leido);
-
-*/
     //--------------------------------------------
 
 

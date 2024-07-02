@@ -7,6 +7,7 @@
 #include "../../utils/include/conexiones.h"
 
 extern t_log* logger;
+extern t_log* logger_debug;
 
 extern char* ip_memoria;
 extern char* puerto_memoria;
@@ -20,8 +21,13 @@ extern uint32_t PID;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
 
-t_instruccion* fetch(uint32_t PID, uint32_t PC, int socket_cpu_memoria);
-t_instruccion* recibir_instruccion(int socket_cpu_memoria);
+extern t_instruccion* ins_actual;
+extern sem_t prox_instruccion;
+
+void gestionar_conexion_memoria();
+
+void fetch(uint32_t PID, uint32_t PC);
+t_instruccion* recibir_instruccion();
 void recibir_tamanio_de_pagina();
 void pedir_rezise(uint32_t PID, uint32_t valor);
 

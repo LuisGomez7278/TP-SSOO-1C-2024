@@ -29,9 +29,9 @@ int32_t main(int32_t argc, char* argv[]) {
     
 
     // CREO HILO ENTRADA-SALIDA
-        pthread_t hilo_entradaSalida;
-        pthread_create(&hilo_entradaSalida,NULL,(void*)atender_conexion_ENTRADASALIDA_KERNEL,NULL);
-        pthread_detach(hilo_entradaSalida);
+        // pthread_t hilo_entradaSalida;
+        // pthread_create(&hilo_entradaSalida,NULL,(void*)atender_conexion_ENTRADASALIDA_KERNEL,NULL);
+        // pthread_detach(hilo_entradaSalida);
     
     
     // CREO HILO DE CPU DISPATCH

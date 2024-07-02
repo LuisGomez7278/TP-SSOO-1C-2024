@@ -1,19 +1,36 @@
 #include "../include/CPU-kernel.h"
 
-void recibir_proceso(){
-    interrupcion = INT_NO;
-    log_info(logger, "CPU esta esperando un proceso...");
-    op_code op = recibir_operacion(socket_cpu_kernel_dispatch);
-    if (op==CONTEXTO)
-    {
-        recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
-        log_info(logger, "Llega un proceso de PID: %u", PID);
-        sem_post(&hay_proceso_ejecutando);
+void gestionar_conexion_dispatch(){
+    op_code operacion;
+    bool continuar_iterando = true;
+
+    while (continuar_iterando)
+    {        
+        operacion = recibir_operacion(socket_cpu_kernel_dispatch);
+        switch (operacion)
+        {
+        case CONTEXTO:
+            recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
+            log_info(logger, "Llega un proceso de PID: %u", PID);
+            sem_post(&hay_proceso_ejecutando);
+            interrupcion = INT_NO;
+            break;
+        
+        case FALLO:
+            log_error(logger_debug, "Kernel desconectado, terminando servidor DISPATCH");
+            continuar_iterando = false;
+            break;
+
+        default:
+            log_warning(logger_debug, "Llego algo que no es contexto por DISPATCH, codigo: %d", operacion);
+            // continuar_iterando = false;
+            break;
+        }
     }
-    else {log_warning(logger_debug, "Se esperaba un contexto de ejecucion y llego otra cosa, codigo: %d", op);}
 }
 
 void desalojar_proceso(op_code motivo_desalojo){
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %d", PID, motivo_desalojo);
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -89,21 +106,24 @@ void gestionar_conexion_interrupt()
         case MENSAJE:
             recibir_mensaje(socket_cpu_kernel_interrupt,logger_debug);
             break;
+
         case DESALOJO_POR_CONSOLA:
             log_info(logger, "El usuario finaliza el proceso PID: %u por consola", PID);
             interrupcion = INT_CONSOLA;
             break;
 
         case DESALOJO_POR_QUANTUM:
-            log_info(logger, "El proceso PID: %u termino su quantum y es desalojado", PID);
+            log_info(logger, "El proceso PID: %u termino su quantum y debe ser desalojado", PID);
             interrupcion = INT_QUANTUM;
             break;
+
         case FALLO:
             log_error(logger, "Kernel desconectado, terminando servidor INTERRUPT");
             continuar_iterando = false;
+            break;
        
         default:
-            log_error(logger, "Llego algo que no era interrupcion por socket interrupt, op_code: %d", operacion);
+            log_warning(logger_debug, "Llego algo que no era interrupcion por socket interrupt, op_code: %d", operacion);
             continuar_iterando = false;
             break;
         }

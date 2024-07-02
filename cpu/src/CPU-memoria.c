@@ -1,24 +1,54 @@
 #include "../include/CPU-memoria.h"
 
-t_instruccion* fetch(uint32_t PID, uint32_t PC, int socket_cpu_memoria){    
+void gestionar_conexion_memoria()
+{
+    op_code operacion;
+    bool continuar_iterando = true;
+
+    while (continuar_iterando)
+    {
+        operacion = recibir_operacion(socket_cpu_memoria);
+        switch (operacion)
+        {
+        case MENSAJE:
+            recibir_mensaje(socket_cpu_memoria, logger_debug);
+            break;
+
+        case FETCH:
+            ins_actual = recibir_instruccion();
+            sem_post(&prox_instruccion);
+            log_info(logger, "CPU recibe una instruccion de memoria, codigo: %d", ins_actual->ins);
+            break;
+
+        case PROCESO_NO_CARGADO:
+            ins_actual->ins = EXIT;
+            sem_post(&prox_instruccion);
+            log_warning(logger, "CPU pidio una instruccion de un proceso que no esta cargado en memoria, PID: %u", PID);
+            break;
+
+        case FALLO:
+            log_error(logger, "Modulo MEMORIA desconectado, terminando servidor");
+            continuar_iterando = false;
+            break;
+       
+        default:
+            log_error(logger, "Llego algo desconocido por socket memoria, op_code: %d", operacion);
+            continuar_iterando = false;
+            break;
+        }
+    }
+}
+
+void fetch(uint32_t PID, uint32_t PC){    
     t_paquete* p = crear_paquete(FETCH);
     agregar_a_paquete_uint32(p, PID);
     agregar_a_paquete_uint32(p, PC);
     enviar_paquete(p, socket_cpu_memoria);
     eliminar_paquete(p);
-
-    return recibir_instruccion(socket_cpu_memoria);
 }
 
-t_instruccion* recibir_instruccion(int socket_cpu_memoria){
-    op_code op = recibir_operacion(socket_cpu_memoria);
+t_instruccion* recibir_instruccion(){
     t_instruccion* instr = malloc(sizeof(t_instruccion));
-    if (op != FETCH){
-        log_error(logger, "Llego otra cosa en lugar de una instruccion, codigo:%d", op);
-        instr->ins = EXIT;
-        return instr;
-    }
-
     
     uint32_t size;
     uint32_t desplazamiento = 0;

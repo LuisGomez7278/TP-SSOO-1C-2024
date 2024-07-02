@@ -15,6 +15,11 @@ int main(int argc, char* argv[]) {
     recibir_tamanio_de_pagina();
     inicializar_TLB();
 
+//ENVIO MENSAJE A MEMORIA
+    recibir_operacion(socket_cpu_memoria);
+    recibir_mensaje(socket_cpu_memoria, logger_debug);
+    enviar_mensaje("CONEXION CON CPU OK", socket_cpu_memoria);
+    log_info(logger, "Handshake enviado: MEMORIA");
  
 // ESPERAR CONEXION CON KERNEL
     socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha_dispatch, logger_debug);
@@ -22,31 +27,38 @@ int main(int argc, char* argv[]) {
     socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha_interrupt, logger_debug);
     log_info(logger_debug, "Conectado a KERNEL interrupt");
 
-    pthread_create(&hilo_conexion_interrupt, NULL, (void*) gestionar_conexion_interrupt, NULL);
-    pthread_detach(hilo_conexion_interrupt);
-
 //ENVIO MENSAJE A KERNEL
     recibir_operacion(socket_cpu_kernel_dispatch);
     recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
-    enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
-    log_info(logger, "Handshake enviado: KERNEL");
+    // enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
+    // log_info(logger, "Handshake enviado: KERNEL");
 
-    t_instruccion* ins_actual;
-    recibir_proceso();
+// CREACION DE HILOS
+    pthread_create(&hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_dispatch, NULL);
+    pthread_detach(hilo_conexion_dispatch);
 
+    pthread_create(&hilo_conexion_interrupt, NULL, (void*) gestionar_conexion_interrupt, NULL);
+    pthread_detach(hilo_conexion_interrupt);
+
+    pthread_create(&hilo_conexion_memoria, NULL, (void*) gestionar_conexion_memoria, NULL);
+    pthread_detach(hilo_conexion_memoria);
+        
     while(true){
         sem_wait(&hay_proceso_ejecutando);
-        ins_actual = fetch(PID, contexto_interno.PC, socket_cpu_memoria);
+
+        fetch(PID, contexto_interno.PC);
+        sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
         free(ins_actual);
         
-        if (interrupcion != INT_NO) {
-            if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
-            else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
-            desalojar_proceso(motivo_desalojo);
-            recibir_proceso();
-        };
+        // if (interrupcion != INT_NO) {
+        //     log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
+        //     if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
+        //     else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
+        //     desalojar_proceso(motivo_desalojo);
+        // };
         sem_post(&hay_proceso_ejecutando);
+
     }
 
     // pthread_create(hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_memoria, NULL);
@@ -90,6 +102,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         valor = *registro_destino + *registro_origen;
 
         *registro_destino = valor;
+        contexto_interno->PC++;
         break;
 
     case SUB:
@@ -99,12 +112,14 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         valor = *registro_destino - *registro_origen;
 
         *registro_destino = valor;
+        contexto_interno->PC++;
         break;
         
     case JNZ:
         log_info(logger,"PID: %u - Ejecutando: JNZ - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        if (*registro != 0) {contexto_interno->PC = atoi(ins_actual->arg2);}
+        valor = *registro;
+        if (valor != 0) {contexto_interno->PC = atoi(ins_actual->arg2);}
         else {contexto_interno->PC++;}
         break;
 
@@ -119,7 +134,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         valor = registro_chico(ins_actual->arg1) ? recibir_respuesta_MOV_IN_8b() : recibir_respuesta_MOV_IN_32b();
         *registro_destino = valor;
         log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valor);
-        
+        contexto_interno->PC++;        
         break;
 
     case MOV_OUT:
@@ -137,10 +152,10 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             log_info(logger,"PID: %u, No pudo realizar el MOV_OUT y va al EXIT", PID);
             motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
             desalojar_proceso(motivo_desalojo);
-            recibir_proceso();
         }
         else
         {log_info(logger,"PID: %u, Valor escrito con MOV_OUT: %u", PID, valor);}
+        contexto_interno->PC++;
         break;
 
     case RESIZE:
@@ -161,6 +176,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         char* string_leida = leer_string_de_memoria(direccion_logica_READ, bytes_a_copiar);
         escribir_en_memoria_string(string_leida, direccion_logica_WRITE, bytes_a_copiar);
         // recibir_respuesta_COPY_STRING();
+        contexto_interno->PC++;
         break;
         
     case IO_GEN_SLEEP:
@@ -168,7 +184,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_GEN_SLEEP;
         enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);
-        recibir_proceso();
         break;
 
     case IO_STDIN_READ:
@@ -182,8 +197,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg3);
         uint32_t tamanio_a_leer = *registro;
         
-        ejecutar_IO_STD_IN(ins_actual->arg1, direccion_logica, tamanio_a_leer);        
-        recibir_proceso();
+        ejecutar_IO_STD_IN(ins_actual->arg1, direccion_logica, tamanio_a_leer);
         break;
 
     case IO_STDOUT_WRITE:
@@ -197,8 +211,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         uint32_t tamanio_a_escribir = *registro;
 
-        ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);        
-        recibir_proceso();
+        ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);
         break;
 
     case IO_FS_CREATE:
@@ -206,15 +219,13 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_CREATE;
         enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);
-        recibir_proceso();
         break;
 
     case IO_FS_DELETE:
         log_info(logger,"PID: %u - Ejecutando: IO_FS_DELETE - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_DELETE;
-        enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);        
-        recibir_proceso();
+        enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);
         break;
 
     case IO_FS_TRUNCATE:
@@ -226,7 +237,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         valor = *registro;
 
         //ejecutar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, (uint32_t) valor);
-        //recibir_proceso();
         //break;
 
     case IO_FS_WRITE:
@@ -246,8 +256,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg5);
         sprintf(puntero_FS_w, "%u", *registro);
 
-        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_w, tamanio_FS_w, puntero_FS_w);        
-        recibir_proceso();
+        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_w, tamanio_FS_w, puntero_FS_w);
         break;
 
     case IO_FS_READ:
@@ -267,30 +276,26 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg5);
         sprintf(puntero_FS_r, "%u", *registro);
 
-        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_r, tamanio_FS_r, puntero_FS_r);        
-        recibir_proceso();
+        enviar_CE_con_5_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_FS_r, tamanio_FS_r, puntero_FS_r);
         break;
 
     case WAIT:
         log_info(logger,"PID: %u - Ejecutando: WAIT - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
-        enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);        
-        recibir_proceso();
+        enviar_CE_con_1_arg(DESALOJO_POR_WAIT, ins_actual->arg1);
         break;
 
     case SIGNAL:
         log_info(logger,"PID: %u - Ejecutando: SIGNAL - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
-        enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);                
-        recibir_proceso();
+        enviar_CE_con_1_arg(DESALOJO_POR_SIGNAL, ins_actual->arg1);
         break;
 
     case EXIT:
         log_info(logger,"PID: %u - Ejecutando: EXIT", PID);
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
-        desalojar_proceso(motivo_desalojo);        
-        recibir_proceso();
+        desalojar_proceso(motivo_desalojo);
         break;
         
     default:

@@ -248,6 +248,7 @@ void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC){
 
     *PID = leer_de_buffer_uint32(buffer, &desplazamiento);
     *PC = leer_de_buffer_uint32(buffer, &desplazamiento);
+    free(buffer);
 }
 
 void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){

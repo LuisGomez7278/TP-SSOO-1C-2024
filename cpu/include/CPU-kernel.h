@@ -18,7 +18,7 @@ extern sem_t hay_proceso_ejecutando;
 extern int_code interrupcion;
 extern op_code tipo_interrupcion;
 
-void recibir_proceso(void);
+void gestionar_conexion_dispatch(void);
 void desalojar_proceso(op_code motivo_desalojo);
 void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1);
 void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2);
