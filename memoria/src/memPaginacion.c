@@ -27,7 +27,6 @@ void eliminar_procesoM(uint32_t PID){
     procesoM* proceso = buscar_proceso_por_pid(PID);
     if (proceso == NULL) {
         log_error(logger_debug, "Proceso con PID %d no encontrado para finalizar", PID);
-        return;
     }
 
     // Liberar los frames del proceso

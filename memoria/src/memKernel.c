@@ -54,13 +54,12 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
 }
 
 void eliminar_proceso(){ // llega un pid
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(int));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
 
     if(buffer!=NULL){
-        uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         log_info(logger_debug,"Llego un proceso para eliminar: PID: %u",PID);
 
         eliminar_procesoM(PID);
@@ -69,8 +68,6 @@ void eliminar_proceso(){ // llega un pid
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }
 
