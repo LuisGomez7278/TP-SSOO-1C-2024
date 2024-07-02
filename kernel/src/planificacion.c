@@ -175,20 +175,20 @@ void gestionar_dispatch (){
 
                 case 1:
                     log_info(logger, "PID: %u - Bloqueado por recurso: %s", pcb_dispatch->PID, recurso_solicitado);
-                    respuesta_CPU_recurso(FALLO);                                                                                             //PCB QUEDO EN COLA DE ESPERA DEL RECURSO
+                    // respuesta_CPU_recurso(FALLO);                                                                                             //PCB QUEDO EN COLA DE ESPERA DEL RECURSO
                     enviar_siguiente_proceso_a_ejecucion();	
 
                     break;
                 case 2: 
                     log_info(logger, "PID: %u hace WAIT de recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
-                    respuesta_CPU_recurso(OK);                                                                                           //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
+                    // respuesta_CPU_recurso(OK);                                                                                           //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
                     enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch);
 
                     break;
                 case -1:  
                     log_info(logger, "Finaliza el proceso PID: %u Motivo: INVALID_RESOURCE: %s", pcb_dispatch->PID, recurso_solicitado);
                     log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
-                    respuesta_CPU_recurso(FALLO);                                                                                                  //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
+                    // respuesta_CPU_recurso(FALLO);                                                                                                  //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);               
@@ -207,13 +207,13 @@ void gestionar_dispatch (){
             switch(signal_recursos (recurso_solicitado,pcb_dispatch->PID)){
                 case 1:
                     log_info(logger, "PID: %u hace SIGNAL a un recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
-                    respuesta_CPU_recurso(OK);
+                    // respuesta_CPU_recurso(OK);
                     enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch);            //SIGNAL EXITOSO, DEVUELVO EL PROCESO A EJECUCION
                     break;
                 case -1:
                     log_info(logger, "Finaliza el proceso PID: %u Motivo: INVALID_RESOURCE: %s", pcb_dispatch->PID, recurso_solicitado);
                     log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
-                    respuesta_CPU_recurso(FALLO);
+                    // respuesta_CPU_recurso(FALLO);
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
@@ -222,7 +222,7 @@ void gestionar_dispatch (){
                 case -2:
                     log_info(logger, "Finaliza el proceso PID: %u Motivo: RECURSO NO ASIGNADO: %s", pcb_dispatch->PID, recurso_solicitado);
                     log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
-                    respuesta_CPU_recurso(FALLO);
+                    // respuesta_CPU_recurso(FALLO);
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
