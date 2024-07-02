@@ -351,10 +351,13 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
         }
     
     }
-
+    else
+    {
+        pcb_actual_en_cpu = pcb_a_ejecutar->PID;
+        enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID, pcb_a_ejecutar->CE);  
+        log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' \n", pcb_a_ejecutar->PID,algoritmo_planificacion);
+    }
     
-   
-        
     free(pcb_a_ejecutar);
 }
 
