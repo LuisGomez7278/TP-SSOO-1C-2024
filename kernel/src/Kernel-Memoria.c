@@ -5,8 +5,8 @@
 
     
 //ENVIAR MENSAJE A MEMORIA
-    enviar_mensaje("Kernel manda mensaje a memoria", socket_memoria_kernel);
-    log_info(logger, "Se envio el primer mensaje a memoria");
+    enviar_mensaje("CONEXION CON KERNEL OK", socket_memoria_kernel);
+    log_info(logger, "Handshake enviado: MEMORIA");
     uint32_t sizeTotal;
     void* buffer;
 
@@ -30,7 +30,7 @@
                     uint32_t desplazamiento=0;
                     buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);
                     uint32_t PID = leer_de_buffer_uint32(buffer,&desplazamiento); 
-                    t_pcb *pcb= buscar_pcb_por_PID_en_lista(lista_new,PID);
+                    t_pcb *pcb= buscar_pcb_por_PID_en_lista(lista_new,PID,&semaforo_new);
                     if(list_remove_element(lista_new,pcb)){
                         log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. Eliminado de NEW",PID);
                         free(pcb);
@@ -109,16 +109,15 @@ void carga_exitosa_en_memoria(void* buffer){
         sem_wait(&semaforo_plp);
     }
     
-    t_pcb* pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID);
+    t_pcb* pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID,&semaforo_new);
 
     if(pcb_ready==NULL){
         log_error(logger_debug,"Error al buscar el proceso con PID= %u en la lista New",PID);
     }else{
-        t_pcb pcb_copia=*pcb_ready;
         pthread_mutex_lock(&semaforo_new);        
         if (list_remove_element(lista_new, pcb_ready)){
         
-            ingresar_en_lista(&pcb_copia, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
+            ingresar_en_lista(pcb_ready, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
         }else{
         
             log_error(logger_debug,"Error al eliminar el elemento PID= u% de la lista NEW",PID);
@@ -126,7 +125,7 @@ void carga_exitosa_en_memoria(void* buffer){
         pthread_mutex_unlock(&semaforo_new);
     }
 }
-
+//funcion buscar pcb por PID en lista pero con punteros
 /*
 t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
 	t_link_element* aux=lista->head;
@@ -148,20 +147,23 @@ t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
 }
 */
 
-t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado){
+
+t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado,pthread_mutex_t* semaforo_mutex){
 	
     t_pcb* pcb_auxiliar;
  
-
+            pthread_mutex_lock(semaforo_mutex);
     		for(int32_t i=0; i<list_size(lista); i++){
 			pcb_auxiliar = (t_pcb*)list_get(lista, i);
-			log_trace(logger_debug,"Leyendo de lista el PCB con PID: %u",pcb_auxiliar->PID );
+			//log_trace(logger_debug,"Leyendo de lista el PCB con PID: %u",pcb_auxiliar->PID );
 			
-            if (pcb_auxiliar->PID==pid_buscado){
+            if (pcb_auxiliar->PID == pid_buscado){
                 log_info(logger_debug,"PCB encontrado. PID: %u",pcb_auxiliar->PID);
+                pthread_mutex_unlock(semaforo_mutex);
                 return pcb_auxiliar;
             }
             }
+    pthread_mutex_unlock(semaforo_mutex);        
     log_info(logger_debug,"PCB NO encontrado. PID: %u",pid_buscado);
 	return NULL;
 

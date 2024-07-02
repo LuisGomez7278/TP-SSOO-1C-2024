@@ -14,8 +14,10 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
 
     //ENVIAR MENSAJE ENTRADA SALIDA
         recibir_mensaje(nueva_interfaz->socket_interfaz,logger_debug);
-        enviar_mensaje("kernel manda mensaje a nueva interfaz", nueva_interfaz->socket_interfaz);
-        log_info(logger_debug, "Se envio el primer mensaje a la nueva interfaz");
+            enviar_mensaje("CONEXION CON KERNEL OK", socket_kernel_cpu_dispatch);
+             log_info(logger, "Handshake enviado: CPU-DISPATCH");
+        enviar_mensaje("CONEXION CON KERNEL OK", nueva_interfaz->socket_interfaz);
+        log_info(logger_debug, "Handshake enviado: INTERFAZ");
 
         /*
     //RECIBIR TIPO Y NOMBRE DE INTERFAZ
@@ -238,14 +240,14 @@ void cambiar_proceso_de_block_a_ready(uint32_t PID){
 if (list_size(lista_bloqueado_prioritario)>0)
 {
     pthread_mutex_lock(&semaforo_bloqueado_prioridad);
-    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario ,PID);
+    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario ,PID,&semaforo_bloqueado_prioridad);
     list_remove_element(lista_bloqueado_prioritario,pcb);
     pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
 }
 if (pcb==NULL && list_size(lista_bloqueado)>0)
 {
     pthread_mutex_lock(&semaforo_bloqueado);
-    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado,PID);
+    pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado,PID,&semaforo_bloqueado);
     list_remove_element(lista_bloqueado,pcb);
     pthread_mutex_unlock(&semaforo_bloqueado);
 

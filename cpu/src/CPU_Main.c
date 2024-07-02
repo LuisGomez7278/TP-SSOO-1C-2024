@@ -2,24 +2,35 @@
 
 int main(int argc, char* argv[]) {
 
-        iniciar_CPU();
+//INICIO DE CPU
+    iniciar_CPU();
 
-    // crear conexion
+// INICIAR SERVIDOR
+    socket_escucha_dispatch = iniciar_servidor(puerto_escucha_dispatch, logger_debug);
+    socket_escucha_interrupt = iniciar_servidor(puerto_escucha_interrupt, logger_debug);
+
+//CREAR CONEXION CON MEMORIA
     socket_cpu_memoria = crear_conexion(ip_memoria, puerto_memoria);
     log_info(logger, "Conectado a MEMORIA");
     recibir_tamanio_de_pagina();
     inicializar_TLB();
 
-    // //iniciar Server de CPU
-    socket_escucha = iniciar_servidor(puerto_escucha_dispatch, logger);
-
-    // //esperar conexion de kernel
-    socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha, logger);
-    socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha, logger);
+ 
+// ESPERAR CONEXION CON KERNEL
+    socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha_dispatch, logger_debug);
+    log_info(logger_debug, "Conectado a KERNEL dispatch");
+    socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha_interrupt, logger_debug);
+    log_info(logger_debug, "Conectado a KERNEL interrupt");
 
     pthread_create(&hilo_conexion_interrupt, NULL, (void*) gestionar_conexion_interrupt, NULL);
     pthread_detach(hilo_conexion_interrupt);
-            
+
+//ENVIO MENSAJE A KERNEL
+    recibir_operacion(socket_cpu_kernel_dispatch);
+    recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
+    log_info(logger, "Handshake enviado: KERNEL");
+    enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
+
     recibir_proceso();
 
     while(true){

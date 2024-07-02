@@ -28,7 +28,7 @@
 
 t_recurso* lista_de_recursos;
 int32_t cantidadDeRecursos;
-pthread_mutex_t mutex_recursos;
+
 
 
 

@@ -78,7 +78,7 @@ int32_t iniciar_servidor(char* puerto_escucha, t_log* logger)
     }
 
     freeaddrinfo(server_info);
-    log_info(logger, "Listo para escuchar a mi cliente   %d", err);
+    log_info(logger, "SERVIDOR PREPARADO.");
 
     return fd_escucha;
 }
@@ -261,7 +261,7 @@ void recibir_mensaje(int32_t socket_cliente, t_log* logger)
 
     char* mensaje = leer_de_buffer_string(buffer, &desplazamiento);
 
-    log_info(logger, "Me llego el mensaje %s", mensaje);
+    log_info(logger, "%s", mensaje);
     free(buffer);
     free(mensaje);
 }
