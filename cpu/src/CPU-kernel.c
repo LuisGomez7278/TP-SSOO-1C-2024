@@ -4,7 +4,7 @@ void recibir_proceso(){
     op_code op = recibir_operacion(socket_cpu_kernel_dispatch);
     if (op!=CONTEXTO)
     {
-        log_warning(log_debug, "Se esperaba un contexto de ejecucion y llego otra cosa, codigo: %d", op);
+        log_warning(logger_debug, "Se esperaba un contexto de ejecucion y llego otra cosa, codigo: %d", op);
     }
     
     recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);

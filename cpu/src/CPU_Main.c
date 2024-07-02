@@ -67,9 +67,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     uint32_t tamanio_registro;
     uint32_t direccion_logica;
-    uint32_t nro_pag;
-    uint32_t offset;
-    uint32_t marco;
 
     switch (codigo)
     {
@@ -109,52 +106,31 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case MOV_IN:
         log_info(logger,"PID: %u - Ejecutando: MOV_IN - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        direccion_logica = atoi(ins_actual->arg2);
+        registro_destino = direccion_registro(contexto_interno, ins_actual->arg1); //puntero donde se guarda el dato
+        registro_origen = direccion_registro(contexto_interno ,ins_actual->arg2); //puntero que contiene la direccion logica de memoria 
+        direccion_logica = *registro_origen; // valor de la direccion logica
         tamanio_registro = registro_chico(ins_actual->arg1) ? sizeof(uint8_t) : sizeof(uint32_t);
 
-        nro_pag = obtener_nro_pagina(direccion_logica);
-        offset = obtener_desplazamiento(direccion_logica);
-        if(usa_TLB)
-        {
-            entrada_TLB* entrada_tlb = buscar_en_tlb(PID, nro_pag);
-            marco = marco_TLB(entrada_tlb);
-        }
-        else
-        {
-            marco = pedir_marco_a_memoria(PID, nro_pag);
-        }
-        solicitar_MOV_IN(marco, offset, tamanio_registro);
+        solicitar_MOV_IN(direccion_logica, tamanio_registro);
         valor = registro_chico(ins_actual->arg1) ? recibir_respuesta_MOV_IN_8b() : recibir_respuesta_MOV_IN_32b();
-        *registro = valor;
-        log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, *registro);
+        *registro_destino = valor;
+        log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valor);
         
         break;
 
     case MOV_OUT:
         log_info(logger,"PID: %u - Ejecutando: MOV_OUT - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
-        registro = direccion_registro(contexto_interno, ins_actual->arg2);
-        valor = *registro;
+        registro_origen = direccion_registro(contexto_interno, ins_actual->arg2); //puntero donde esta almacenado el valor a escribir
+        valor = *registro_origen;//valor a escribir
         tamanio_registro = registro_chico(ins_actual->arg2) ? sizeof(uint8_t) : sizeof(uint32_t);
 
-        direccion_logica = atoi(ins_actual->arg1);
-        nro_pag = obtener_nro_pagina(direccion_logica);
-        offset = obtener_desplazamiento(direccion_logica);
+        registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);//puntero que contiene la direccion logica de memoria 
+        direccion_logica = *registro_destino;//valor de la direccion logica
 
-        if(usa_TLB)
-        {
-            entrada_TLB* entrada_tlb = buscar_en_tlb(PID, nro_pag);
-            marco = marco_TLB(entrada_tlb);
-        }
-        else
-        {
-            marco = pedir_marco_a_memoria(PID, nro_pag);
-        }
-
-        solicitar_MOV_OUT(marco, offset, tamanio_registro, valor);
+        solicitar_MOV_OUT(direccion_logica, tamanio_registro, valor);
         if (recibir_respuesta_MOV_OUT() != OK)
         {
-            log_info(logger,"PID: %u, No pudo realizar el MOV_OUT y va al EXIT (Segmentation fault)", PID);
+            log_info(logger,"PID: %u, No pudo realizar el MOV_OUT y va al EXIT", PID);
             motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
             desalojar_proceso(motivo_desalojo);
             recibir_proceso();
