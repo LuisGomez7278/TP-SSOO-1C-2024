@@ -51,30 +51,13 @@ int32_t main(int32_t argc, char* argv[]) {
         pthread_create(&hilo_consola_interactiva,NULL,(void*)iniciar_consola_interactiva,NULL);
         pthread_join(hilo_consola_interactiva,NULL);  
 
-        
 
-
-
- 
-   
-
-   
-
-
-
-
-
-
-
+    if (socket_escucha) {liberar_conexion(socket_escucha);}
     if (socket_kernel_cpu_dispatch) {liberar_conexion(socket_kernel_cpu_dispatch);}
     if (socket_kernel_cpu_interrupt) {liberar_conexion(socket_kernel_cpu_interrupt);}
     if (socket_memoria_kernel) {liberar_conexion(socket_memoria_kernel);}
     if (socket_entradasalida_kernel) {liberar_conexion(socket_entradasalida_kernel);}
-    if (socket_escucha) {liberar_conexion(socket_escucha);}
 
-    
-   
-   
     log_destroy(logger_debug);
     end_program(logger, config);
 
