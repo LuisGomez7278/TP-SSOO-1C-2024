@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
 // ESPERAR CONEXION CON KERNEL
     socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha_dispatch, logger_debug);
     log_info(logger_debug, "Conectado a KERNEL dispatch");
+
     socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha_interrupt, logger_debug);
     log_info(logger_debug, "Conectado a KERNEL interrupt");
 
@@ -39,12 +40,12 @@ int main(int argc, char* argv[]) {
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
         free(ins_actual);
         
-        // if (interrupcion != INT_NO) {
-        //     log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
-        //     if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
-        //     else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
-        //     desalojar_proceso(motivo_desalojo);
-        // };
+        if (interrupcion != INT_NO) {
+            log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
+            if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
+            else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
+            desalojar_proceso(motivo_desalojo);
+        };
         sem_post(&hay_proceso_ejecutando);
 
     }

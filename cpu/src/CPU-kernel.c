@@ -4,15 +4,18 @@ void gestionar_conexion_dispatch(){
     //ENVIO MENSAJE A KERNEL
     enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
     log_info(logger, "Handshake enviado: KERNEL");
-    
     op_code operacion;
     bool continuar_iterando = true;
 
     while (continuar_iterando)
-    {        
+    {
+        log_trace(logger, "CPU esta esperando un proceso...");
         operacion = recibir_operacion(socket_cpu_kernel_dispatch);
         switch (operacion)
         {
+        case MENSAJE:
+            recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
+            break;
         case CONTEXTO:
             recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
             log_info(logger, "Llega un proceso de PID: %u", PID);
@@ -27,7 +30,6 @@ void gestionar_conexion_dispatch(){
 
         default:
             log_warning(logger_debug, "Llego algo que no es contexto por DISPATCH, codigo: %d", operacion);
-            // continuar_iterando = false;
             break;
         }
     }
@@ -128,7 +130,6 @@ void gestionar_conexion_interrupt()
        
         default:
             log_warning(logger_debug, "Llego algo que no era interrupcion por socket interrupt, op_code: %d", operacion);
-            continuar_iterando = false;
             break;
         }
     }

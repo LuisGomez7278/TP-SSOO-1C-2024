@@ -117,8 +117,8 @@ int main(int argc, char* argv[]) {
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
 // ESPERO QUE SE CONECTE E/S
-    log_trace(logger_debug, "Esperando que se conecte E/S");
-    socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
+    // log_trace(logger_debug, "Esperando que se conecte E/S");
+    // socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
 
 // CREO HILO ESCUCHA CPU
     pthread_t hilo_cpu_memoria;
