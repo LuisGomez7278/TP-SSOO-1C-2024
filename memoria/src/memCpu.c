@@ -81,8 +81,8 @@ void frame(int socket_cpu_memoria){
     uint32_t desplazamiento = 0;
     void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     if(buffer != NULL){
-        uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
-        uint32_t pagina = leer_de_buffer_uint32(buffer,desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer,&desplazamiento);
+        uint32_t pagina = leer_de_buffer_uint32(buffer,&desplazamiento);
 
         uint32_t marco = encontrar_frame(PID, pagina); 
 
@@ -110,12 +110,12 @@ void movIn(int socket_cpu_memoria){
     char* leido = string_new();
     
     if(buffer != NULL){
-        uint32_t n = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n){
-        uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         char* leido2 = leer_memoria(dir_fisica_leer, bytes, PID);
         string_append(&leido, leido2);
@@ -149,13 +149,13 @@ void movOut(int socket_cpu_memoria){
     bool escrito = true;
     
     if(buffer != NULL){
-        uint32_t n = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n && escrito){
-        uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
-        char* escribir = leer_de_buffer_string(buffer, desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
+        char* escribir = leer_de_buffer_string(buffer, &desplazamiento);
 
         escrito = escribir_memoria(dir_fisica, bytes, escribir, PID);
         free(escribir);
@@ -190,12 +190,12 @@ void copiar_string_read(int socket_cpu_memoria){
     char* leido = string_new();
     
     if(buffer != NULL){
-        uint32_t n = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n){
-        uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         char* leido2 = leer_memoria(dir_fisica_leer, bytes, PID);
         string_append(&leido, leido2);
@@ -227,13 +227,13 @@ void copiar_string_write(int socket_cpu_memoria){
     bool escrito = true;
     
     if(buffer != NULL){
-        uint32_t n = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n && escrito){
-        uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
-        char* escribir = leer_de_buffer_string(buffer, desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
+        char* escribir = leer_de_buffer_string(buffer, &desplazamiento);
 
         escrito = escribir_memoria(dir_fisica, bytes, escribir, PID);
         free(escribir);
@@ -265,8 +265,8 @@ void ins_resize(int socket_cpu_memoria){
     uint32_t desplazamiento = 0;
     void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     if(buffer != NULL){
-        uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         bool exito = resize(PID, bytes);
         usleep(retardo*1000);

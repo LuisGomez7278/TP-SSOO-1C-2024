@@ -32,12 +32,12 @@ void read_es(){
     char* leido = string_new();
     
     if(buffer != NULL){
-        uint32_t n = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n){
-        uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         char* leido2 = leer_memoria(dir_fisica_leer, bytes, PID);
         string_append(&leido, leido2);
@@ -68,13 +68,13 @@ void write_es(){
     bool escrito = true;
     
     if(buffer != NULL){
-        uint32_t n = leer_de_buffer_uint32(buffer, desplazamiento);
+        uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n && escrito){
-        uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
-        char* escribir = leer_de_buffer_string(buffer, desplazamiento);
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
+        char* escribir = leer_de_buffer_string(buffer, &desplazamiento);
 
         escrito = escribir_memoria(dir_fisica, bytes, escribir, PID);
         free(escribir);
