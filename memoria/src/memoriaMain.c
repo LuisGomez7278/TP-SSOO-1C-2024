@@ -14,40 +14,126 @@ int main(int argc, char* argv[]) {
 // INICIO SERVIDOR MEMORIA
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
+ // PRUEBAS SOBRE FUNCIONAMIENTO 
+ /*
+    uint32_t n = 2; int i=0; char* leido = string_new(); 
+    bool crear = crear_procesoM(path_base, 1);
+    bool a = resize(1,69); bool escrito = true;
+
+    while((i<n) && (escrito)){
+        if(i==0)escrito = escribir_memoria(62, 2, "20", 1);
+
+        if(i==1)escrito = escribir_memoria(64, 2, "24", 1);
+        ++i;
+    }
+   
+    i=0;
+    while(i<n){
+        char* leido2;
+        if(i==0) {
+        leido2 = leer_memoria(62, 2, 1); log_info(logger_debug, "Leido2: %s", leido2);
+        }
+        if(i==1) {
+        leido2 = leer_memoria(64, 2, 1); log_info(logger_debug, "Leido2: %s", leido2);
+        }
+        string_append(&leido, leido2);
+        free(leido2);
+        ++i;
+    } 
+    char* leer = leer_memoria(62, 2, 1);
+    log_info(logger_debug, "leer: %s", leer);
+    uint32_t num = (uint32_t)strtoul(leido, NULL, 10); //convierte el char* leido a un uint32_t
+    log_info(logger_debug, "Uint: %u", num);
+
+    bool crear2 = crear_procesoM(path_base, 10);
+    eliminar_procesoM(10);
+
+
+    resize(1, 67);
+
+    tabla_pag_proceso* tpg = obtener_tabla_pag_proceso(1);
+
+    if(tpg == NULL){
+        perror("AAA");    
+    }
+
+    char* buffer = "Hola planeta tierra, hoy es lunes";
+
+    bool escribir_bien = escribir_memoria(50, 14, buffer, 1);
+    bool escribir_bien2 = escribir_memoria(64, 20, "Hola", 1);
+
+    //bool escribir_bien2 = escribir_memoria(10, 3, "TP", 1);
+    char *leido2 = string_new();
+    int i=0; int n=2; 
+
+    leido2 = leer_memoria(50, 14, 1);
+    log_info(logger_debug, "%s", leido2);
+    char* leido = leer_memoria(64, 20, 1);
+    log_info(logger_debug, "%s", leido);
+
+    strcat(leido2, leido);
+
+    log_info(logger_debug, "%s", leido2);
+
+    while(i<n){
+    char* leido;
+    if(i==0){leido = leer_memoria(50, 14, 1);}
+    if(i==1){leido = leer_memoria(64, 20, 1);}
+    
+    //strcat(leido2, leido);
+    string_append(&leido2, leido);
+    //log_info(logger_debug, "%s", leido2);
+    free(leido);
+    ++i;
+    }
+    log_info(logger_debug, "%s", leido2);
+
+    // if(escribir_bien){log_info(logger_debug, "Perfecto");}
+
+    char str[12];
+    uint32_t numero = 145;
+
+    sprintf(str, "%u", numero); //convierte uint32_t a char*
+
+    bool escrito = escribir_memoria(10, sizeof(numero), str, 1);
+
+    char* leido = leer_memoria(10, 10, 1);
+    
+    log_info(logger_debug, "%s", leido);
+    
+    //log_info(logger_debug, "Int Leido: %d", leido_int);
+    if(leido==NULL){perror("Rompio");}
+
+    free(leido);
+*/
+
 // ESPERO QUE SE CONECTE CPU
     log_trace(logger_debug, "Esperando que se conecte CPU");
     socket_cpu_memoria = esperar_cliente(socket_escucha,logger_debug);
     enviar_tam_pag();
-    enviar_mensaje("CONEXION CON MEMORIA OK", socket_cpu_memoria);
-    log_info(logger, "Handshake enviado: CPU");
     
 // ESPERO QUE SE CONECTE EL KERNEL
     log_trace(logger_debug, "Esperando que se conecte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
-//ENVIAR MENSAJE A KERNEL
-    enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
-    log_info(logger, "Handshake enviado: KERNEL");
-
 // ESPERO QUE SE CONECTE E/S
-    // log_trace(logger_debug, "Esperando que se conecte E/S");
-    // socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
+    log_trace(logger_debug, "Esperando que se conecte E/S");
+    socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
 
 // CREO HILO ESCUCHA CPU
     pthread_t hilo_cpu_memoria;
     pthread_create(&hilo_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
     pthread_detach(hilo_cpu_memoria);
 
-// CREO HILO ESCUCHA ENTRADA-SALIDA
-    // pthread_t hilo_entradaSalida_memoria;
-    // pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
-    // pthread_detach(hilo_entradaSalida_memoria);
-
 // CREO HILO ESCUCHA KERNEL 
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
-    pthread_join(hilo_kernel_memoria, NULL); 
+    pthread_detach(hilo_kernel_memoria); 
     
+// CREO HILO ESCUCHA ENTRADA-SALIDA
+    pthread_t hilo_entradaSalida_memoria;
+    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
+    pthread_detach(hilo_entradaSalida_memoria);
 
     //--------------------------------------------
 
@@ -272,13 +358,13 @@ cod_ins hash_ins(char* ins){
     else return -1;
 }
 
-// char* path_completo(char* path_base, char* path_parcial){
-    //char* path = string_new();
-    //string_append(&path, path_base);
-    //string_append(&path, path_parcial);
+char* path_completo(char* path_base, char* path_parcial){
+    char* path = string_new();
+    string_append(&path, path_base);
+    string_append(&path, path_parcial);
 
-    //return path;
-//}
+    return path;
+}
 
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     t_instruccion* instruccion = malloc(sizeof(t_instruccion*));
