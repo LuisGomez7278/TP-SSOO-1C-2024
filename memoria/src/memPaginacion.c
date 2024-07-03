@@ -33,39 +33,39 @@ void eliminar_procesoM(uint32_t PID){
     // Liberar los frames del proceso
     liberar_frames(proceso->paginas);
 
+    // Buscar y eliminar la tabla de páginas del proceso
+    tabla_pag_proceso* tabla_pag_p = obtener_tabla_pag_proceso(PID);
+    if (tabla_pag_p != NULL) {
+        log_info(logger, "Destrucción de Tabla de Páginas: PID: %u Tamaño: %d", PID, list_size(tabla_pag_p->paginas));
+
+        for (int i = 0; i < list_size(tablaDePaginas); i++) {
+            tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
+            if (tabla->pid == PID) {
+                // Liberar la memoria asociada a la tabla de páginas del proceso
+                list_destroy_and_destroy_elements(tabla->paginas, free);
+                list_remove_and_destroy_element(tablaDePaginas, i, free);
+                break;
+            }
+        }
+    }
+
     // Eliminar el proceso de la lista de procesos
     for (int i = 0; i < list_size(procesos); i++) {
         procesoM* p = list_get(procesos, i);
         if (p->pid == PID) {
-            list_remove_and_destroy_element(procesos, i, free);
+            list_remove(procesos, i);
             break;
         }
     }
 
     // Liberar la memoria asociada al proceso
-    list_destroy_and_destroy_elements(proceso->instrs, free);
-    list_destroy_and_destroy_elements(proceso->paginas, free);
+    list_destroy(proceso->instrs);
+    //list_destroy(proceso->paginas); (ya esta liberada ya que es la misma lista que en su tabla)
     free(proceso);
-
-    // Buscar y eliminar la tabla de páginas del proceso
-    tabla_pag_proceso* tabla_pag_p = obtener_tabla_pag_proceso(PID);
-    if (tabla_pag_p != NULL) {
-        log_info(logger, "Destrucción de Tabla de Páginas: PID: %u Tamaño: %d", PID, list_size(tabla_pag_p->paginas));
-        for (int i = 0; i < list_size(tablaDePaginas); i++) {
-            tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
-            if (tabla->pid == PID) {
-                list_remove_and_destroy_element(tablaDePaginas, i, free);
-                break;
-            }
-        }
-
-        // Liberar la memoria asociada a la tabla de páginas del proceso
-        list_destroy_and_destroy_elements(tabla_pag_p->paginas, free);
-        free(tabla_pag_p);
-    }
 
     log_info(logger_debug, "Proceso con PID %d finalizado y eliminado", PID);
 }
+
 
 uint32_t encontrar_frame(uint32_t PID, uint32_t pagina){
     tabla_pag_proceso* tabla_pid = obtener_tabla_pag_proceso(PID);

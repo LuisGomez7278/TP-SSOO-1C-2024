@@ -15,8 +15,16 @@ int main(int argc, char* argv[]) {
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
  // PRUEBAS SOBRE FUNCIONAMIENTO 
-/*
+
     bool crear = crear_procesoM(path_base, 1);
+
+    bool a = resize(1,32);
+    
+    eliminar_procesoM(1);
+
+    bool crear2 = crear_procesoM(path_base, 10);
+    eliminar_procesoM(10);
+/*
 
     resize(1, 67);
 
