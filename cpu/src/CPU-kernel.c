@@ -1,9 +1,11 @@
 #include "../include/CPU-kernel.h"
 
-void gestionar_conexion_dispatch(){
+void gestionar_conexion_dispatch()
+{
     //ENVIO MENSAJE A KERNEL
     enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
     log_info(logger, "Handshake enviado: KERNEL");
+    
     op_code operacion;
     bool continuar_iterando = true;
 

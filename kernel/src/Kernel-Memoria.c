@@ -1,61 +1,58 @@
 #include "../include/Kernel-Memoria.h"
 
 
-    void atender_conexion_MEMORIA_KERNEL(){
-
-    
-//ENVIAR MENSAJE A MEMORIA
+void atender_conexion_MEMORIA_KERNEL()
+{    
+    //ENVIAR MENSAJE A MEMORIA
     enviar_mensaje("CONEXION CON KERNEL OK", socket_memoria_kernel);
     log_info(logger, "Handshake enviado: MEMORIA");
+
     uint32_t sizeTotal;
     void* buffer;
+    op_code cod_op
 
-        bool continuarIterando=true;
-       
+    bool continuarIterando=true;
+    
+    while (continuarIterando) {
+        cod_op = recibir_operacion(socket_memoria_kernel);   ////se queda esperando en recv por ser bloqueante
+        switch (cod_op) {
+        case MENSAJE:
+            recibir_mensaje(socket_memoria_kernel,logger_debug);
+            break;
+        case CARGA_EXITOSA_PROCESO:
+            buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);                                    /// ABRO UN HILO POR CADA PROCESO QUE SE ENCOLA EN NEW ASI PUEDO SEGUIR ESCUCHANDO PROCESOS
+            pthread_t hilo_de_Planificador_largo_plazo;                
+            pthread_create(&hilo_de_Planificador_largo_plazo, NULL,(void*) carga_exitosa_en_memoria,buffer); 
+            pthread_detach(hilo_de_Planificador_largo_plazo);
+            break;
 
-        while (continuarIterando) {
-            op_code cod_op = recibir_operacion(socket_memoria_kernel);   ////se queda esperando en recv por ser bloqueante
-            switch (cod_op) {
-            case MENSAJE:
-                recibir_mensaje(socket_memoria_kernel,logger_debug);
-                break;
-            case CARGA_EXITOSA_PROCESO:
-                buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);                                    /// ABRO UN HILO POR CADA PROCESO QUE SE ENCOLA EN NEW ASI PUEDO SEGUIR ESCUCHANDO PROCESOS
-                pthread_t hilo_de_Planificador_largo_plazo;                
-                pthread_create(&hilo_de_Planificador_largo_plazo, NULL,(void*) carga_exitosa_en_memoria,buffer); 
-                pthread_detach(hilo_de_Planificador_largo_plazo);
-                break;
-            case ERROR_AL_CARGAR_EL_PROCESO:
-                    
-                    uint32_t desplazamiento=0;
-                    buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);
-                    uint32_t PID = leer_de_buffer_uint32(buffer,&desplazamiento); 
-                    t_pcb *pcb= buscar_pcb_por_PID_en_lista(lista_new,PID,&semaforo_new);
-                    if(list_remove_element(lista_new,pcb)){
-                        log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. Eliminado de NEW",PID);
-                        free(pcb);
-                    }else{
-                        log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. No se pudo eliminar de NEW",PID);
-                    }
-                    free(buffer);
-                    
-                break;
-            case FALLO:
-                log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO.");
-                continuarIterando=false;
-                break;
-            default:
-                log_warning(logger_debug,"KERNEL recibio una operacion desconocida de Memoria. %d",cod_op);
-                //continuarIterando=false;
-                break;
+        case ERROR_AL_CARGAR_EL_PROCESO:                
+            uint32_t desplazamiento=0;
+            buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);
+            uint32_t PID = leer_de_buffer_uint32(buffer,&desplazamiento); 
+            t_pcb *pcb= buscar_pcb_por_PID_en_lista(lista_new,PID,&semaforo_new);
+            if(list_remove_element(lista_new,pcb)){
+                log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. Eliminado de NEW",PID);
+                free(pcb);
+            }else{
+                log_error(logger_debug,"Error al cargar el proceso PID: %u en memoria. No se pudo eliminar de NEW",PID);
+            }
+            free(buffer);                
+            break;
+
+        case FALLO:
+            log_error(logger_debug, "el MODULO DE MEMORIA SE DESCONECTO.");
+            continuarIterando=false;
+            break;
+
+        default:
+            log_warning(logger_debug,"KERNEL recibio una operacion desconocida de Memoria. %d",cod_op);
+            //continuarIterando=false;
+            break;
+            
             }
         }
-
-
-    
-     
-    
-    }
+}
 
 void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
 
