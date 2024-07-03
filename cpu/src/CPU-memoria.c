@@ -2,6 +2,10 @@
 
 void gestionar_conexion_memoria()
 {
+    //ENVIO MENSAJE A MEMORIA
+    enviar_mensaje("CONEXION CON CPU OK", socket_cpu_memoria);
+    log_info(logger, "Handshake enviado: MEMORIA");
+    
     op_code operacion;
     bool continuar_iterando = true;
 

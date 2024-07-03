@@ -128,12 +128,12 @@ int main(int argc, char* argv[]) {
 // CREO HILO ESCUCHA KERNEL 
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
-    pthread_detach(hilo_kernel_memoria); 
+    pthread_join(hilo_kernel_memoria, NULL); 
     
 // CREO HILO ESCUCHA ENTRADA-SALIDA
-    pthread_t hilo_entradaSalida_memoria;
-    pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
-    pthread_detach(hilo_entradaSalida_memoria);
+    // pthread_t hilo_entradaSalida_memoria;
+    // pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
+    // pthread_detach(hilo_entradaSalida_memoria);
 
     //--------------------------------------------
 

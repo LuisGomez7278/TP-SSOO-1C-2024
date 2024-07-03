@@ -14,24 +14,12 @@ int main(int argc, char* argv[]) {
     log_info(logger, "Conectado a MEMORIA");
     recibir_tamanio_de_pagina();
     inicializar_TLB();
-
-//ENVIO MENSAJE A MEMORIA
-    recibir_operacion(socket_cpu_memoria);
-    recibir_mensaje(socket_cpu_memoria, logger_debug);
-    enviar_mensaje("CONEXION CON CPU OK", socket_cpu_memoria);
-    log_info(logger, "Handshake enviado: MEMORIA");
  
 // ESPERAR CONEXION CON KERNEL
     socket_cpu_kernel_dispatch = esperar_cliente(socket_escucha_dispatch, logger_debug);
     log_info(logger_debug, "Conectado a KERNEL dispatch");
     socket_cpu_kernel_interrupt = esperar_cliente(socket_escucha_interrupt, logger_debug);
     log_info(logger_debug, "Conectado a KERNEL interrupt");
-
-//ENVIO MENSAJE A KERNEL
-    recibir_operacion(socket_cpu_kernel_dispatch);
-    recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
-    // enviar_mensaje("CONEXION CON CPU-DISPATCH OK", socket_cpu_kernel_dispatch);
-    // log_info(logger, "Handshake enviado: KERNEL");
 
 // CREACION DE HILOS
     pthread_create(&hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_dispatch, NULL);
