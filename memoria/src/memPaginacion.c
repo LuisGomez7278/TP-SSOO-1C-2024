@@ -283,6 +283,8 @@ bool escribir_memoria(uint32_t direccion_fisica, uint32_t bytes, char* valor, ui
     memcpy((char*)memoria_usuario + direccion_fisica, valor, bytes);
     
     log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_fisica, bytes);
+
+    return true;
 }
 
 

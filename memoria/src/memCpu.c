@@ -46,7 +46,7 @@ void conexion_con_cpu(){
             ins_resize(socket_cpu_memoria);
             break;
         default:
-            log_error(logger_debug, "el MODULO DE CPU SE DESCONECTO. Terminando servidor");
+            log_error(logger_debug, "Modulo CPU se desconectó. Terminando servidor");
             continuarIterando = 0;
             break;
         }
@@ -77,10 +77,9 @@ void fetch(int socket_cpu_memoria){
 }
 
 void frame(int socket_cpu_memoria){
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
         uint32_t pagina = leer_de_buffer_uint32(buffer,desplazamiento);
@@ -100,16 +99,13 @@ void frame(int socket_cpu_memoria){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }
 
 void movIn(int socket_cpu_memoria){
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     int i=0;
     char* leido = string_new();
     
@@ -141,17 +137,14 @@ void movIn(int socket_cpu_memoria){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
     free(leido);
 }
 
 void movOut(int socket_cpu_memoria){
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     int i=0;
     bool escrito = true;
     
@@ -186,16 +179,13 @@ void movOut(int socket_cpu_memoria){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }
 
 void copiar_string_read(int socket_cpu_memoria){
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     int i=0;
     char* leido = string_new();
     
@@ -225,17 +215,14 @@ void copiar_string_read(int socket_cpu_memoria){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
     free(leido);
 }
 
 void copiar_string_write(int socket_cpu_memoria){
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     int i=0;
     bool escrito = true;
     
@@ -270,16 +257,13 @@ void copiar_string_write(int socket_cpu_memoria){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }
 
 void ins_resize(int socket_cpu_memoria){
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t* desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, desplazamiento);
         uint32_t bytes = leer_de_buffer_uint32(buffer, desplazamiento);
@@ -302,8 +286,6 @@ void ins_resize(int socket_cpu_memoria){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }
 

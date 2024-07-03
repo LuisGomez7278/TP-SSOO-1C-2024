@@ -25,10 +25,9 @@ void conexion_con_es(){
 }
 
 void read_es(){                                                                     
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     int i=0;
     char* leido = string_new();
     
@@ -57,17 +56,14 @@ void read_es(){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
         }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
     free(leido);
 }
 
 void write_es(){                                                                   
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal, socket_cpu_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
     int i=0;
     bool escrito = true;
     
@@ -102,7 +98,5 @@ void write_es(){
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }

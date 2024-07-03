@@ -29,10 +29,9 @@ void conexion_con_kernel(){
 }
 
 void crear_proceso(){ // llega el pid y el path de instrucciones
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
 
     if (buffer != NULL) {
         uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
@@ -49,6 +48,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         if(creado){
             enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID, socket_kernel_memoria);
         }else{
+            log_info(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
             enviar_instruccion_con_PID_por_socket(ERROR_AL_CARGAR_EL_PROCESO, PID, socket_kernel_memoria);
         }  
 
@@ -56,16 +56,13 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }
 
 void eliminar_proceso(){ // llega un pid
-    uint32_t *sizeTotal = malloc(sizeof(uint32_t));
-    uint32_t *desplazamiento = malloc(sizeof(uint32_t));
-    *desplazamiento = 0;
-    void* buffer= recibir_buffer(sizeTotal,socket_kernel_memoria);
+    uint32_t sizeTotal;
+    uint32_t desplazamiento = 0;
+    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
 
     if(buffer!=NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer,desplazamiento);
@@ -77,8 +74,6 @@ void eliminar_proceso(){ // llega un pid
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
-    free(sizeTotal);
-    free(desplazamiento);
     free(buffer);
 }
 

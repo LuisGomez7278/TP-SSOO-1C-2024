@@ -15,16 +15,39 @@ int main(int argc, char* argv[]) {
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
  // PRUEBAS SOBRE FUNCIONAMIENTO 
-
+ /*
+    uint32_t n = 2; int i=0; char* leido = string_new(); 
     bool crear = crear_procesoM(path_base, 1);
+    bool a = resize(1,69); bool escrito = true;
 
-    bool a = resize(1,32);
-    
-    eliminar_procesoM(1);
+    while((i<n) && (escrito)){
+        if(i==0)escrito = escribir_memoria(62, 2, "20", 1);
+
+        if(i==1)escrito = escribir_memoria(64, 2, "24", 1);
+        ++i;
+    }
+   
+    i=0;
+    while(i<n){
+        char* leido2;
+        if(i==0) {
+        leido2 = leer_memoria(62, 2, 1); log_info(logger_debug, "Leido2: %s", leido2);
+        }
+        if(i==1) {
+        leido2 = leer_memoria(64, 2, 1); log_info(logger_debug, "Leido2: %s", leido2);
+        }
+        string_append(&leido, leido2);
+        free(leido2);
+        ++i;
+    } 
+    char* leer = leer_memoria(62, 2, 1);
+    log_info(logger_debug, "leer: %s", leer);
+    uint32_t num = (uint32_t)strtoul(leido, NULL, 10); //convierte el char* leido a un uint32_t
+    log_info(logger_debug, "Uint: %u", num);
 
     bool crear2 = crear_procesoM(path_base, 10);
     eliminar_procesoM(10);
-/*
+
 
     resize(1, 67);
 
