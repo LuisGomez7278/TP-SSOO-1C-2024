@@ -14,29 +14,17 @@ void inicializar_TLB()
         tabla_TLB = list_create();
 
         entrada_TLB* aux = malloc(sizeof(entrada_TLB));
-        int i = 0;
-        do
+        for (int i = 0; i < cant_entradas_TLB; i++)
         {
+            
             aux->libre = true;
             aux->PID = 0;
             aux->nro_pag = 0;
             aux->marco = 0;
             aux->t_ingreso = temporal_create();
             aux->t_ultimo_uso = temporal_create();
-            if (i<cant_entradas_TLB-1)
-            {
-                aux->siguiente_entrada = malloc(sizeof(entrada_TLB));
-                list_add(tabla_TLB, aux);
-                aux = aux->siguiente_entrada;
-            }
-            else
-            {
-                aux->siguiente_entrada = (entrada_TLB*) NULL;
-                list_add(tabla_TLB, aux);
-            }
-            i++;
-
-        } while (i<cant_entradas_TLB);
+            list_add(tabla_TLB, aux);
+        }
     }    
 }
 
@@ -52,11 +40,11 @@ uint32_t obtener_desplazamiento(uint32_t direccion_logica)
 
 entrada_TLB* buscar_en_tlb(uint32_t PID, uint32_t nro_pag)
 {
-    entrada_TLB* entrada = list_get(tabla_TLB, 0);
+    entrada_TLB* entrada;
     for (int i = 0; i < cant_entradas_TLB; i++)
     {
+        entrada = list_get(tabla_TLB, i);
         if (entrada->PID == PID && entrada->nro_pag == nro_pag) {return entrada;}
-        else {entrada = entrada->siguiente_entrada;}
     }
     return TLB_miss(PID, nro_pag);
 }
@@ -167,6 +155,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     uint32_t cant_accesos = ceil((bytes_a_copiar + offset) / tamanio_de_pagina);
 
     t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
+    agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
     if (usa_TLB)
@@ -225,6 +214,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     uint32_t cant_accesos = ceil((bytes_a_copiar + offset) / tamanio_de_pagina);
 
     t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_WRITE);
+    agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
     
     if (usa_TLB)
@@ -282,6 +272,7 @@ void solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
     uint32_t dir_fisica;
 
     t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
+    agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
     agregar_a_paquete_uint32(paquete, tamanio_registro);
 
@@ -358,7 +349,8 @@ void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int
     uint32_t marco;
     uint32_t dir_fisica;
 
-    t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
+    t_paquete* paquete = crear_paquete(SOLICITUD_MOV_OUT);
+    agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
     if (usa_TLB)

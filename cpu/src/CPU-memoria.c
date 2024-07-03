@@ -89,7 +89,7 @@ void pedir_rezise(uint32_t PID, uint32_t valor)
 {
     t_paquete* paquete = crear_paquete(SOLICITUD_RESIZE);
     agregar_a_paquete_uint32(paquete, PID);
-    agregar_a_paquete_uint32(paquete, (uint32_t) valor);
+    agregar_a_paquete_uint32(paquete, valor);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
 }

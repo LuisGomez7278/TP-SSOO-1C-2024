@@ -25,7 +25,6 @@ typedef struct
     uint32_t marco;
     t_temporal* t_ingreso;
     t_temporal* t_ultimo_uso;
-    struct entrada_TLB* siguiente_entrada;
 } entrada_TLB;
 
 void inicializar_TLB();

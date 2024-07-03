@@ -163,7 +163,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         valor = *registro;
-        pedir_rezise(PID, valor);
+        uint32_t nuevo_size = valor;//por las dudas
+        pedir_rezise(PID, nuevo_size);
         break;
 
     case COPY_STRING:
