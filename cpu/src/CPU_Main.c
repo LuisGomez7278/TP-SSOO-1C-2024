@@ -85,13 +85,13 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         if(registro_chico(ins_actual->arg1))
         {
-            valorchico1 = atoi(ins_actual->arg2); 
-            *registro = valorchico1;
+            valorchico1 = atoi(ins_actual->arg2);
+            memcpy(registro, &valorchico1, sizeof(uint8_t));
         }
         else
         {
             valorgrande1 = atoi(ins_actual->arg2); 
-            *registro = valorgrande1;
+            memcpy(registro, &valorgrande1, sizeof(uint32_t));
         }
         contexto_interno->PC++;
         break;
@@ -104,13 +104,15 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         {
             valorchico1 = *registro_destino;
             valorchico2 = *registro_origen;
-            *registro_destino = valorchico1+valorchico2;
+            valorchico1 = valorchico1+valorchico2;
+            memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
         }
         else
         {
             valorgrande1 = *registro_destino;
             valorgrande2 = *registro_origen;
-            *registro_destino = valorgrande1+valorgrande2;
+            valorgrande2 = valorgrande1+valorgrande2;
+            memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
         }
         contexto_interno->PC++;
         break;
@@ -130,7 +132,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             }
             else{valorchico1 = valorchico1 - valorchico2;}
             
-            *registro_destino = valorchico1;
+            memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
         }
         else
         {
@@ -143,7 +145,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             }
             else{valorgrande1 = valorgrande1 - valorgrande2;}
             
-            *registro_destino = valorgrande1;
+            memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
         }
         contexto_interno->PC++;
         break;
@@ -152,7 +154,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: JNZ - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         valorgrande1 = *registro;
-        if (valorgrande1 != 0) {contexto_interno->PC = atoi(ins_actual->arg2);}
+        if (valorgrande1 != 0) {memcpy(&contexto_interno->PC, &valorgrande1, sizeof(uint32_t));}
         else {contexto_interno->PC++;}
         break;
 
@@ -166,14 +168,14 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         {
             solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
             valorchico1 = recibir_respuesta_MOV_IN_8b();
-            *registro_destino = valorchico1;
+            memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
             log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorchico1);
         }
         else
         {
             solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
             valorgrande1 = recibir_respuesta_MOV_IN_32b();
-            *registro_destino = valorgrande1;
+            memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
             log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorgrande1);
         }
 
