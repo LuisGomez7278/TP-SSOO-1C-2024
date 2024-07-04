@@ -367,7 +367,7 @@ char* path_completo(char* path_base, char* path_parcial){
 }
 
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
-    t_instruccion* instruccion = malloc(sizeof(t_instruccion*));
+    t_instruccion* instruccion = malloc(sizeof(t_instruccion));
     instruccion =  list_get(lista_instrucciones, PC);
     return instruccion;
 }
