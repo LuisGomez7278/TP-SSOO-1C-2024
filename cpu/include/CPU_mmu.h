@@ -9,7 +9,7 @@
 extern t_log* logger;
 
 extern uint32_t PID;
-extern int socket_cpu_memoria;
+extern int32_t socket_cpu_memoria;
 
 extern uint32_t cant_entradas_TLB;
 extern char* algoritmo_TLB;

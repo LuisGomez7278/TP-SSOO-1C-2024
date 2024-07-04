@@ -11,7 +11,7 @@ extern t_log* logger_debug;
 
 extern char* ip_memoria;
 extern char* puerto_memoria;
-extern int socket_cpu_memoria;
+extern int32_t socket_cpu_memoria;
 
 extern uint32_t cant_entradas_TLB;
 extern char* algoritmo_TLB;
