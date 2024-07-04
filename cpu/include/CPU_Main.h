@@ -18,5 +18,7 @@ bool registro_chico(char* registro);
 void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer);
 void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer);
 void ejecutar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint32_t tamanio);
+
+void loggear_valores();
  
 #endif //TP_CPU_MAIN_H_

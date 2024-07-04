@@ -116,6 +116,7 @@ void gestionar_dispatch (){
     op_code cod_op;
     uint32_t desplazamiento;
     uint32_t size;
+
     bool continuarIterando=true;
     char* recurso_solicitado;
 
@@ -134,9 +135,9 @@ void gestionar_dispatch (){
 
     ////////////////////////////////   EXTRAIGO DEL SOCKET LO COMUN A TODOS LOS PROCESOS //////////////////
         
+        t_pcb *pcb_dispatch=malloc(sizeof(t_pcb));
         void* buffer = recibir_buffer(&size, socket_kernel_cpu_dispatch);
 
-        t_pcb *pcb_dispatch=malloc(sizeof(t_pcb));        
         desplazamiento = 0;
         
         pcb_dispatch->PID = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -157,7 +158,8 @@ void gestionar_dispatch (){
 
         switch (cod_op){
         case MENSAJE:
-            recibir_mensaje(socket_memoria_kernel,logger_debug);
+            char* mensaje = leer_de_buffer_string(buffer, &desplazamiento);
+            log_info(logger_debug, "%s", mensaje);
             break;
         case OUT_OF_MEMORY:
             log_info(logger, "Finaliza el proceso PID: %u Motivo: OUT_OF_MEMORY ", pcb_dispatch->PID);

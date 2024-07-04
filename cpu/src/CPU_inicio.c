@@ -33,6 +33,11 @@ void iniciar_logs(void){
 		perror("No se pudo crear el logger debug");
 		exit(EXIT_FAILURE);
 	}
+    logger_valores = start_logger("log_valores.log", "LOG valores de registros", LOG_LEVEL_TRACE);
+	if(logger_debug==NULL){
+		perror("No se pudo crear el logger de valores");
+		exit(EXIT_FAILURE);
+	}
 }
 
 void iniciar_config(void){

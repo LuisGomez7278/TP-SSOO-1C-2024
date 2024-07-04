@@ -39,7 +39,8 @@ int main(int argc, char* argv[]) {
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
         free(ins_actual);
-        
+        loggear_valores();
+
         if (interrupcion != INT_NO) {
             log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
             if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
@@ -65,12 +66,12 @@ int main(int argc, char* argv[]) {
 
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual){
     cod_ins codigo = ins_actual->ins;
-    int* registro_destino;
-    int* registro_origen;
-    int* registro;
-    int valor;
+    unsigned int* registro_destino;
+    unsigned int* registro_origen;
+    unsigned int* registro;
+    uint8_t valor8;
+    uint32_t valor32;
 
-    uint32_t tamanio_registro;
     uint32_t direccion_logica;
 
     switch (codigo)
@@ -78,9 +79,16 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     case SET:
         log_info(logger,"PID: %u - Ejecutando: SET - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valor = atoi(ins_actual->arg2);
-
-        *registro = valor;
+        if(registro_chico(ins_actual->arg1))
+        {
+            valor8 = atoi(ins_actual->arg2); 
+            *registro = valor8;
+        }
+        else
+        {
+            valor32 = atoi(ins_actual->arg2); 
+            *registro = valor32;
+        }
         contexto_interno->PC++;
         break;
 
@@ -88,9 +96,16 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: SUM - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
-        valor = *registro_destino + *registro_origen;
-
-        *registro_destino = valor;
+        if(registro_chico(ins_actual->arg1))
+        {
+            valor8 = *registro_destino + *registro_origen; 
+            *registro_destino = valor8;
+        }
+        else
+        {
+            valor32 = *registro_destino + *registro_origen; 
+            *registro_destino = valor32;
+        }
         contexto_interno->PC++;
         break;
 
@@ -98,17 +113,36 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: SUB - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
-        valor = *registro_destino - *registro_origen;
-
-        *registro_destino = valor;
+        if(registro_chico(ins_actual->arg1))
+        {
+            if (*registro_origen > *registro_destino)
+            {
+                log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
+                valor8 = 0;
+            }
+            else{valor8 = *registro_destino - *registro_origen;}
+            
+            *registro_destino = valor8;
+        }
+        else
+        {
+            if (*registro_origen > *registro_destino)
+            {
+                log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
+                valor32 = 0;
+            }
+            else{valor32 = *registro_destino - *registro_origen;}
+            
+            *registro_destino = valor32;
+        }
         contexto_interno->PC++;
         break;
         
     case JNZ:
         log_info(logger,"PID: %u - Ejecutando: JNZ - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valor = *registro;
-        if (valor != 0) {contexto_interno->PC = atoi(ins_actual->arg2);}
+        valor32 = *registro;
+        if (valor32 != 0) {contexto_interno->PC = atoi(ins_actual->arg2);}
         else {contexto_interno->PC++;}
         break;
 
@@ -117,25 +151,42 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1); //puntero donde se guarda el dato
         registro_origen = direccion_registro(contexto_interno ,ins_actual->arg2); //puntero que contiene la direccion logica de memoria 
         direccion_logica = *registro_origen; // valor de la direccion logica
-        tamanio_registro = registro_chico(ins_actual->arg1) ? sizeof(uint8_t) : sizeof(uint32_t);
 
-        solicitar_MOV_IN(direccion_logica, tamanio_registro);
-        valor = registro_chico(ins_actual->arg1) ? recibir_respuesta_MOV_IN_8b() : recibir_respuesta_MOV_IN_32b();
-        *registro_destino = valor;
-        log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valor);
+        if (registro_chico(ins_actual->arg1))
+        {
+            solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
+            valor8 = recibir_respuesta_MOV_IN_8b();
+            *registro_destino = valor8;
+            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valor8);
+        }
+        else
+        {
+            solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
+            valor32 = recibir_respuesta_MOV_IN_32b();
+            *registro_destino = valor32;
+            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valor32);
+        }
+
         contexto_interno->PC++;        
         break;
 
     case MOV_OUT:
         log_info(logger,"PID: %u - Ejecutando: MOV_OUT - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2); //puntero donde esta almacenado el valor a escribir
-        valor = *registro_origen;//valor a escribir
-        tamanio_registro = registro_chico(ins_actual->arg2) ? sizeof(uint8_t) : sizeof(uint32_t);
-
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);//puntero que contiene la direccion logica de memoria 
         direccion_logica = *registro_destino;//valor de la direccion logica
 
-        solicitar_MOV_OUT(direccion_logica, tamanio_registro, valor);
+        if (registro_chico(ins_actual->arg2))
+        {
+            valor8 = *registro_origen;
+            solicitar_MOV_OUT(direccion_logica, sizeof(uint8_t), valor8);
+        }
+        else
+        {
+            valor32 = *registro_origen;
+            solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valor32);
+        }
+
         if (recibir_respuesta_MOV_OUT() != OK)
         {
             log_info(logger,"PID: %u, No pudo realizar el MOV_OUT y va al EXIT", PID);
@@ -143,7 +194,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             desalojar_proceso(motivo_desalojo);
         }
         else
-        {log_info(logger,"PID: %u, Valor escrito con MOV_OUT: %u", PID, valor);}
+        {log_info(logger,"PID: %u, realiza MOV_OUT con exito", PID);}
         contexto_interno->PC++;
         break;
 
@@ -151,9 +202,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: RESIZE - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valor = *registro;
-        uint32_t nuevo_size = valor;//por las dudas
-        pedir_rezise(PID, nuevo_size);
+        valor32 = *registro;
+        pedir_rezise(PID, valor32);
         break;
 
     case COPY_STRING:
@@ -224,9 +274,9 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         motivo_desalojo = DESALOJO_POR_IO_FS_TRUNCATE;
 
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valor = *registro;
+        valor32 = *registro;
 
-        //ejecutar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, (uint32_t) valor);
+        //ejecutar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, valor32);
         //break;
 
     case IO_FS_WRITE:
@@ -433,3 +483,12 @@ void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint3
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
 };
+
+void loggear_valores()
+{
+    log_info(logger_valores, "PC: %u, AX: %u, BX: %u, CX: %u, DX: %u, EAX: %u, EBX: %u, ECX: %u, EDX: %u, SI: %u, DI: %u",
+    contexto_interno.PC,
+    contexto_interno.AX, contexto_interno.BX, contexto_interno.CX, contexto_interno.DX,
+    contexto_interno.EAX, contexto_interno.EBX, contexto_interno.ECX, contexto_interno.EDX,
+    contexto_interno.SI, contexto_interno.DI);
+}
