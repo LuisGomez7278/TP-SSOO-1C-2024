@@ -57,7 +57,8 @@ int main(int argc, char* argv[]) {
     if (socket_cpu_kernel_dispatch) {liberar_conexion(socket_cpu_kernel_dispatch);}
     if (socket_cpu_kernel_interrupt) {liberar_conexion(socket_cpu_kernel_interrupt);}
     if (socket_cpu_memoria) {liberar_conexion(socket_cpu_memoria);}
-    if (socket_escucha) {liberar_conexion(socket_escucha);}
+    if (socket_escucha_dispatch) {liberar_conexion(socket_escucha_dispatch);}
+    if (socket_escucha_interrupt) {liberar_conexion(socket_escucha_interrupt);}
 
     end_program(logger, config);
 
@@ -66,11 +67,14 @@ int main(int argc, char* argv[]) {
 
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual){
     cod_ins codigo = ins_actual->ins;
-    unsigned int* registro_destino;
-    unsigned int* registro_origen;
-    unsigned int* registro;
-    uint8_t valor8;
-    uint32_t valor32;
+    int* registro_destino;
+    int* registro_origen;
+    int* registro;
+
+    uint8_t valorchico1;
+    uint8_t valorchico2;
+    uint32_t valorgrande1;
+    uint32_t valorgrande2;
 
     uint32_t direccion_logica;
 
@@ -81,13 +85,13 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         if(registro_chico(ins_actual->arg1))
         {
-            valor8 = atoi(ins_actual->arg2); 
-            *registro = valor8;
+            valorchico1 = atoi(ins_actual->arg2); 
+            *registro = valorchico1;
         }
         else
         {
-            valor32 = atoi(ins_actual->arg2); 
-            *registro = valor32;
+            valorgrande1 = atoi(ins_actual->arg2); 
+            *registro = valorgrande1;
         }
         contexto_interno->PC++;
         break;
@@ -98,13 +102,15 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
         if(registro_chico(ins_actual->arg1))
         {
-            valor8 = *registro_destino + *registro_origen; 
-            *registro_destino = valor8;
+            valorchico1 = *registro_destino;
+            valorchico2 = *registro_origen;
+            *registro_destino = valorchico1+valorchico2;
         }
         else
         {
-            valor32 = *registro_destino + *registro_origen; 
-            *registro_destino = valor32;
+            valorgrande1 = *registro_destino;
+            valorgrande2 = *registro_origen;
+            *registro_destino = valorgrande1+valorgrande2;
         }
         contexto_interno->PC++;
         break;
@@ -115,25 +121,29 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
         if(registro_chico(ins_actual->arg1))
         {
-            if (*registro_origen > *registro_destino)
+            valorchico1 = *registro_destino;
+            valorchico2 = *registro_origen;
+            if (valorchico2 > valorchico1)
             {
                 log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
-                valor8 = 0;
+                valorchico1 = 0;
             }
-            else{valor8 = *registro_destino - *registro_origen;}
+            else{valorchico1 = valorchico1 - valorchico2;}
             
-            *registro_destino = valor8;
+            *registro_destino = valorchico1;
         }
         else
         {
-            if (*registro_origen > *registro_destino)
+            valorgrande1 = *registro_destino;
+            valorgrande2 = *registro_origen;
+            if (valorgrande2 > valorgrande1)
             {
                 log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
-                valor32 = 0;
+                valorgrande1 = 0;
             }
-            else{valor32 = *registro_destino - *registro_origen;}
+            else{valorgrande1 = valorgrande1 - valorgrande2;}
             
-            *registro_destino = valor32;
+            *registro_destino = valorgrande1;
         }
         contexto_interno->PC++;
         break;
@@ -141,8 +151,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     case JNZ:
         log_info(logger,"PID: %u - Ejecutando: JNZ - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valor32 = *registro;
-        if (valor32 != 0) {contexto_interno->PC = atoi(ins_actual->arg2);}
+        valorgrande1 = *registro;
+        if (valorgrande1 != 0) {contexto_interno->PC = atoi(ins_actual->arg2);}
         else {contexto_interno->PC++;}
         break;
 
@@ -155,16 +165,16 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         if (registro_chico(ins_actual->arg1))
         {
             solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
-            valor8 = recibir_respuesta_MOV_IN_8b();
-            *registro_destino = valor8;
-            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valor8);
+            valorchico1 = recibir_respuesta_MOV_IN_8b();
+            *registro_destino = valorchico1;
+            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorchico1);
         }
         else
         {
             solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
-            valor32 = recibir_respuesta_MOV_IN_32b();
-            *registro_destino = valor32;
-            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valor32);
+            valorgrande1 = recibir_respuesta_MOV_IN_32b();
+            *registro_destino = valorgrande1;
+            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorgrande1);
         }
 
         contexto_interno->PC++;        
@@ -178,13 +188,13 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
         if (registro_chico(ins_actual->arg2))
         {
-            valor8 = *registro_origen;
-            solicitar_MOV_OUT(direccion_logica, sizeof(uint8_t), valor8);
+            valorchico1 = *registro_origen;
+            solicitar_MOV_OUT(direccion_logica, sizeof(uint8_t), valorchico1);
         }
         else
         {
-            valor32 = *registro_origen;
-            solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valor32);
+            valorgrande1 = *registro_origen;
+            solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valorgrande1);
         }
 
         if (recibir_respuesta_MOV_OUT() != OK)
@@ -202,8 +212,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: RESIZE - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valor32 = *registro;
-        pedir_rezise(PID, valor32);
+        valorgrande1 = *registro;
+        pedir_rezise(PID, valorgrande1);
         break;
 
     case COPY_STRING:
@@ -274,9 +284,9 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         motivo_desalojo = DESALOJO_POR_IO_FS_TRUNCATE;
 
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valor32 = *registro;
+        valorgrande1 = *registro;
 
-        //ejecutar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, valor32);
+        //ejecutar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, valorgrande1);
         //break;
 
     case IO_FS_WRITE:
@@ -344,9 +354,10 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     }
 }
 
-void* direccion_registro(t_contexto_ejecucion* contexto, char* registro){
-
-    if (string_equals_ignore_case(registro, "AX"))  {return &(contexto->AX);}
+void* direccion_registro(t_contexto_ejecucion* contexto, char* registro)
+{
+    if (string_equals_ignore_case(registro, "PC"))  {return &(contexto->PC);}
+    else if (string_equals_ignore_case(registro, "AX"))  {return &(contexto->AX);}
     else if (string_equals_ignore_case(registro, "BX"))  {return &(contexto->BX);}
     else if (string_equals_ignore_case(registro, "CX"))  {return &(contexto->CX);}
     else if (string_equals_ignore_case(registro, "DX"))  {return &(contexto->DX);}
