@@ -1,14 +1,14 @@
 #include "../include/memES.h"
 
 void conexion_con_es(){
-    enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
+    enviar_mensaje("CONEXION CON MEMORIA OK", socket_entradasalida_memoria);
     log_info(logger, "Handshake enviado: IO");
     bool continuarIterando = true;
     while(continuarIterando){
-        op_code codigo = recibir_operacion(socket_cpu_memoria);
+        op_code codigo = recibir_operacion(socket_entradasalida_memoria);
         switch (codigo){
         case MENSAJE:
-            recibir_mensaje(socket_cpu_memoria,logger_debug);
+            recibir_mensaje(socket_entradasalida_memoria,logger_debug);
             break;
         case SOLICITUD_IO_STDIN_READ:
             read_es();
@@ -27,7 +27,7 @@ void conexion_con_es(){
 void read_es(){                                                                     
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_entradasalida_memoria);
     int i=0;
     char* leido = string_new();
     
@@ -49,7 +49,7 @@ void read_es(){
 
         t_paquete* paquete = crear_paquete(SOLICITUD_IO_STDIN_READ);
         agregar_a_paquete_string(paquete, strlen(leido), leido);
-        enviar_paquete(paquete, socket_cpu_memoria);
+        enviar_paquete(paquete, socket_entradasalida_memoria);
         eliminar_paquete(paquete);            
         //log_info(logger_debug, "IO_READ completado");
         }else{
@@ -63,7 +63,7 @@ void read_es(){
 void write_es(){                                                                   
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_entradasalida_memoria);
     int i=0;
     bool escrito = true;
     
@@ -85,12 +85,12 @@ void write_es(){
 
         if(escrito){
             t_paquete* paquete = crear_paquete(OK);
-            enviar_paquete(paquete, socket_cpu_memoria);
+            enviar_paquete(paquete, socket_entradasalida_memoria);
             eliminar_paquete(paquete);            
             log_info(logger_debug, "IO_WRITE perfecto");
         }else{
             t_paquete* paquete = crear_paquete(FALLO);
-            enviar_paquete(paquete, socket_cpu_memoria);
+            enviar_paquete(paquete, socket_entradasalida_memoria);
             eliminar_paquete(paquete);  
             log_info(logger_debug, "IO_WRITE fallido");
         }   

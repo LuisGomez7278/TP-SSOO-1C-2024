@@ -106,7 +106,7 @@ void frame(int socket_cpu_memoria){
 void movIn(int socket_cpu_memoria){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     int i=0;
     char* leido = string_new();
     
@@ -145,7 +145,7 @@ void movIn(int socket_cpu_memoria){
 void movOut(int socket_cpu_memoria){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     int i=0;
     bool escrito = true;
     
@@ -186,7 +186,7 @@ void movOut(int socket_cpu_memoria){
 void copiar_string_read(int socket_cpu_memoria){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     int i=0;
     char* leido = string_new();
     
@@ -223,7 +223,7 @@ void copiar_string_read(int socket_cpu_memoria){
 void copiar_string_write(int socket_cpu_memoria){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     int i=0;
     bool escrito = true;
     
@@ -264,7 +264,7 @@ void copiar_string_write(int socket_cpu_memoria){
 void ins_resize(int socket_cpu_memoria){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
