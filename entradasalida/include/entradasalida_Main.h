@@ -9,6 +9,7 @@
 #include "../../utils/include/conexiones.h"
 #include "entradasalida_var_globales.h"
 #include "entradasalida_inicio.h"
+#include "entradasalida_FS.h"
 #include "entradasalida-memoria.h"
 #include "entradasalida-kernel.h"
 

@@ -3,6 +3,7 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/bitarray.h>
 #include "../../utils/include/conexiones.h"
 #include "../../utils/include/utils.h"
 
@@ -25,9 +26,9 @@ uint32_t BLOCK_COUNT;
 uint32_t RETRASO_COMPACTACION;
 
 char* path_bloques;
-FILE* archivo_bloques;
+// FILE* archivo_bloques;
 char* path_bitmap;
-FILE* bitmap_bloques;
+t_bitarray* bitmap_bloques;
 char* path_metadata;
 
 #endif /*  ENTRADASALIDA_INICIO_H_ */

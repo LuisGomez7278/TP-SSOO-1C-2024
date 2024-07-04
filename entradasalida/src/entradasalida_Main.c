@@ -18,6 +18,12 @@ int32_t main(int32_t argc, char* argv[]) {
     socket_entradasalida_kernel = crear_conexion(IP_KERNEL, PUERTO_KERNEL);
     log_info(logger, "Se creo la conexion entre IO y Kernel");
 
+    if (string_equals_ignore_case(TIPO_INTERFAZ, "DIALFS"))
+    {
+        inicializar_FS();
+    }
+    
+
     bool continuarIterando = true;
     while (continuarIterando) {
         uint32_t PID;
