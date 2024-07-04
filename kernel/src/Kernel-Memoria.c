@@ -9,7 +9,7 @@ void atender_conexion_MEMORIA_KERNEL()
 
     uint32_t sizeTotal;
     void* buffer;
-    op_code cod_op
+    op_code cod_op;
 
     bool continuarIterando=true;
     
@@ -23,7 +23,7 @@ void atender_conexion_MEMORIA_KERNEL()
             buffer= recibir_buffer(&sizeTotal,socket_memoria_kernel);                                    /// ABRO UN HILO POR CADA PROCESO QUE SE ENCOLA EN NEW ASI PUEDO SEGUIR ESCUCHANDO PROCESOS
             pthread_t hilo_de_Planificador_largo_plazo;                
             pthread_create(&hilo_de_Planificador_largo_plazo, NULL,(void*) carga_exitosa_en_memoria,buffer); 
-            pthread_detach(hilo_de_Planificador_largo_plazo);
+            pthread_detach(hilo_de_Planificador_largo_plazo);            
             break;
 
         case ERROR_AL_CARGAR_EL_PROCESO:                

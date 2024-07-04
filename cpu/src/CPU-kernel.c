@@ -11,7 +11,6 @@ void gestionar_conexion_dispatch()
 
     while (continuar_iterando)
     {
-        log_trace(logger, "CPU esta esperando un proceso...");
         operacion = recibir_operacion(socket_cpu_kernel_dispatch);
         switch (operacion)
         {
@@ -38,12 +37,12 @@ void gestionar_conexion_dispatch()
 }
 
 void desalojar_proceso(op_code motivo_desalojo){
-    log_info(logger, "El proceso PID: %u es desalojado, motivo: %d", PID, motivo_desalojo);
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %d", PID, motivo_desalojo);
     sem_wait(&hay_proceso_ejecutando);
 }
 

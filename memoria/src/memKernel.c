@@ -6,10 +6,12 @@ void conexion_con_kernel(){
     //ENVIAR MENSAJE A KERNEL
     enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
     log_info(logger, "Handshake enviado: KERNEL");
+    
+    op_code codigo;
 
     bool continuarIterando = true;
     while (continuarIterando) {
-        op_code codigo = recibir_operacion(socket_kernel_memoria);   
+        codigo = recibir_operacion(socket_kernel_memoria);   
         switch (codigo){
         case MENSAJE:
             recibir_mensaje(socket_kernel_memoria,logger_debug);

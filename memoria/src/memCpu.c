@@ -14,8 +14,9 @@ void atender_conexion_CPU_MEMORIA(){
 */
 
 void conexion_con_cpu(){
-    enviar_mensaje("CONEXION CON MEMORIA OK", socket_kernel_memoria);
+    enviar_mensaje("CONEXION CON MEMORIA OK", socket_cpu_memoria);
     log_info(logger, "Handshake enviado: CPU");
+    
     bool continuarIterando = true;
     while(continuarIterando){
         op_code codigo = recibir_operacion(socket_cpu_memoria);
