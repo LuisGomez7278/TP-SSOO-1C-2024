@@ -36,8 +36,7 @@ void gestionar_conexion_memoria()
             break;
        
         default:
-            log_error(logger, "Llego algo desconocido por socket memoria, op_code: %d", operacion);
-            continuar_iterando = false;
+            log_error(logger, "Llego una operacion desconocida por socket memoria, op_code: %d", operacion);
             break;
         }
     }

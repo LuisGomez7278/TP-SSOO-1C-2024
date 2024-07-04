@@ -84,22 +84,6 @@ void enviar_CE_con_5_arg(op_code motivo_desalojo, char* arg1, char* arg2, char* 
     sem_wait(&hay_proceso_ejecutando);
 };
 
-bool esperar_respuesta_recurso()
-{
-    op_code cod_op = recibir_operacion(socket_cpu_kernel_dispatch);
-    switch (cod_op)
-    {
-    case OK:
-    case FALLO:
-        return (cod_op == OK);
-        break;
-    default:
-        log_error(logger, "Se esperaba una respuesta a WAIT/SIGNAL de recurso, llego otra cosa");
-        return false;
-        break;
-    }
-}
-
 void gestionar_conexion_interrupt()
 {
     op_code operacion;

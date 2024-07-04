@@ -405,14 +405,3 @@ void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar){              
     
 }
 
-
-
-
-void respuesta_CPU_recurso(op_code respuesta)//Envia solo el op_code, si hace falta se puede pasar a conexiones.h
-{
-    op_code a_enviar = respuesta;
-    send(socket_kernel_cpu_interrupt, &a_enviar, sizeof(op_code), 0);
-}
-
-
-
