@@ -67,12 +67,10 @@ int32_t main(int32_t argc, char* argv[]) {
             uint32_t acumulador = 0;
             for (int i = 0; i < cant_accesos; i++)
             {
-                uint32_t marco = leer_de_buffer_uint32(buffer, &desplazamiento);
-                uint32_t offset = leer_de_buffer_uint32(buffer, &desplazamiento);
+                uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                 uint32_t tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
                 
-                agregar_a_paquete_uint32(paquete, marco);
-                agregar_a_paquete_uint32(paquete, offset);
+                agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
                 agregar_a_paquete_string(paquete, tamanio_a_leer, string_leida+acumulador);
                 acumulador+=tamanio_a_leer;
@@ -81,7 +79,7 @@ int32_t main(int32_t argc, char* argv[]) {
 
             enviar_paquete(paquete, socket_entradasalida_memoria);
             eliminar_paquete(paquete);
-            notificar_kernel(PID);
+            // notificar_kernel(PID);
             break;
 
         case DESALOJO_POR_IO_STDOUT:
@@ -97,19 +95,17 @@ int32_t main(int32_t argc, char* argv[]) {
             
             for (int i = 0; i < cant_accesos; i++)
             {
-                uint32_t marco = leer_de_buffer_uint32(buffer, &desplazamiento);
-                uint32_t offset = leer_de_buffer_uint32(buffer, &desplazamiento);
+                uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                 uint32_t tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
                 
-                agregar_a_paquete_uint32(paquete, marco);
-                agregar_a_paquete_uint32(paquete, offset);
+                agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
             }
             free(buffer);
 
             enviar_paquete(paquete, socket_entradasalida_memoria);
             eliminar_paquete(paquete);
-            notificar_kernel(PID);
+            // notificar_kernel(PID);
             break;
 
         case DESALOJO_POR_IO_FS_CREATE:
@@ -140,6 +136,7 @@ void validar_argumentos(char* nombre_interfaz, char* config_interfaz)
         log_error(logger,"Agregar argumentos 'nombre_interfaz' y 'config_interfaz'");
         exit(EXIT_FAILURE);
     }
+    //Verificar si puede venir otro nombre en las pruebas
     if(strcmp(nombre_interfaz,"GENERICA") != 0 && strcmp(nombre_interfaz,"STDOUT") != 0 && strcmp(nombre_interfaz,"STDIN") !=0){
         log_error(logger,"Utilizar 'GENERICA', 'STDOUT' o 'STDIN' como nombre de interfaz");
         exit(EXIT_FAILURE);
