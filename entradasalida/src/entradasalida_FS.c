@@ -91,7 +91,7 @@ void crear_archivo(char* nombre_archivo)
     }
     else
     {
-        log_error(log_error, "No hay espacio disponible para crear el archivo: %s", nombre_archivo);
+        log_error(logger_debug, "No hay espacio disponible para crear el archivo: %s", nombre_archivo);
     }
 }
 
@@ -107,9 +107,8 @@ int32_t buscar_bloque_libre()
             break;
         }
     }
-    if (bloque_libre == -1) {
-        return -1; // No hay bloques libres
-    }
+    
+    return bloque_libre; // No hay bloques libres
 }
 
 void crear_metadata(int32_t bloque, char* nombre_archivo)
@@ -118,11 +117,11 @@ void crear_metadata(int32_t bloque, char* nombre_archivo)
     string_append(&path_archivo_metadata, nombre_archivo);
 
     t_config* metadata = config_create(path_archivo_metadata);
-    char* bloque_inicial;
-    sprintf(bloque_inicial, "%d", bloque);
+    char* bloque_inicial = string_itoa(bloque);
     config_set_value(metadata, "BLOQUE_INICIAL", bloque_inicial);
     config_set_value(metadata, "TAMANIO_ARCHIVO", "0");
     free(bloque_inicial);
 
     config_save_in_file(metadata, path_archivo_metadata);
+    config_destroy(metadata);
 }

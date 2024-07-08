@@ -116,6 +116,7 @@ int32_t main(int32_t argc, char* argv[]) {
 
             log_info(logger,"PID: %u - Operacion: IO_FS_CREATE", PID);
             char* nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            free(buffer);
             crear_archivo(nombre_archivo);
             log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
             break;
