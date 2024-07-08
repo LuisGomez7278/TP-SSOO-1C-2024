@@ -20,6 +20,12 @@ void iniciar_logs( char* nombre_interfaz) {
         exit(EXIT_FAILURE);
     }
 
+    logger = start_logger("log_debug_E-S.log", "log_debug_E-S", LOG_LEVEL_TRACE);
+
+    if (logger == NULL) {
+        perror("No se pudo crear el logger debug");
+        exit(EXIT_FAILURE);
+    }
     free(path_log);
     free(nombre_log);
 }

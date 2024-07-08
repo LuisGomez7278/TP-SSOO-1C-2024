@@ -8,6 +8,7 @@
 #include "../../utils/include/utils.h"
 
 t_log* logger;
+t_log* logger_debug;
 t_config* config;
 
 char* IP_KERNEL;

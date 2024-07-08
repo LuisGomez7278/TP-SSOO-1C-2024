@@ -11,7 +11,7 @@ void inicializar_FS()
     path_bitmap = string_duplicate(PATH_BASE_DIALFS);
     string_append(&path_bitmap, "bitmap.dat");
 
-    crear_bitmap();
+    inicializar_bitmap();
     inicializar_bloques();
 }
 
@@ -44,7 +44,7 @@ void inicializar_bloques()
     free(dump_bloques);
 }
 
-void crear_bitmap()
+void inicializar_bitmap()
 {
     uint32_t tam_bitmap = BLOCK_COUNT/8;
     char* bloque = malloc(tam_bitmap);
@@ -79,4 +79,50 @@ void crear_bitmap()
     log_info(logger, "Bitmap inicializado, hexdump: %s", dump_bitmap);
     fclose(archivo_bitmap);
     free(dump_bitmap);
+}
+
+void crear_archivo(char* nombre_archivo)
+{
+    int32_t bloque = buscar_bloque_libre();
+    if (bloque != -1)
+    {
+        crear_metadata(bloque, nombre_archivo);
+        log_info(logger, "Se crea metadata del archivo: %s", nombre_archivo);
+    }
+    else
+    {
+        log_error(log_error, "No hay espacio disponible para crear el archivo: %s", nombre_archivo);
+    }
+}
+
+int32_t buscar_bloque_libre()
+{
+    int32_t cant_bloques = bitarray_get_max_bit(bitmap_bloques);
+    int32_t bloque_libre = -1;
+
+    for (int i = 0; i < cant_bloques; i++) {
+        if (!bitarray_test_bit(bitmap_bloques, i)) { // Si el bit está en 0, el bloque está libre
+            bloque_libre = i;
+            bitarray_set_bit(bitmap_bloques, i); // Marcar el bit como ocupado
+            break;
+        }
+    }
+    if (bloque_libre == -1) {
+        return -1; // No hay bloques libres
+    }
+}
+
+void crear_metadata(int32_t bloque, char* nombre_archivo)
+{
+    char* path_archivo_metadata = string_duplicate(path_metadata);
+    string_append(&path_archivo_metadata, nombre_archivo);
+
+    t_config* metadata = config_create(path_archivo_metadata);
+    char* bloque_inicial;
+    sprintf(bloque_inicial, "%d", bloque);
+    config_set_value(metadata, "BLOQUE_INICIAL", bloque_inicial);
+    config_set_value(metadata, "TAMANIO_ARCHIVO", "0");
+    free(bloque_inicial);
+
+    config_save_in_file(metadata, path_archivo_metadata);
 }

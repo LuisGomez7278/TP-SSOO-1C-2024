@@ -7,6 +7,7 @@
 #include <commons/memory.h>
 
 extern t_log* logger;
+extern t_log* logger_debug;
 
 extern uint32_t TIEMPO_UNIDAD_TRABAJO;
 extern char* PATH_BASE_DIALFS;
@@ -22,6 +23,10 @@ extern char* path_metadata;
 
 void inicializar_FS();
 void inicializar_bloques();
-void crear_bitmap();
+void inicializar_bitmap();
+
+void crear_archivo(char* nombre_archivo);
+int32_t buscar_bloque_libre();
+void crear_metadata(int32_t bloque, char* nombre_archivo);
 
 #endif //ENTRADASALIDA_FS_H_

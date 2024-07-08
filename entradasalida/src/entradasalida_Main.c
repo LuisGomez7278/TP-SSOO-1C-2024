@@ -42,20 +42,21 @@ int32_t main(int32_t argc, char* argv[]) {
             recibir_mensaje(socket_entradasalida_kernel, logger);
             break;
         case DESALOJO_POR_IO_GEN_SLEEP:
-            log_info(logger,"PID: %d - Operacion: IO_GEN_SLEEP", PID);
             uint32_t unidades_trabajo;
             buffer = recibir_buffer(&size, socket_entradasalida_kernel);
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             unidades_trabajo = atoi(leer_de_buffer_string(buffer, &desplazamiento));
+            log_info(logger,"PID: %u - Operacion: IO_GEN_SLEEP", PID);
             
             free(buffer);
             usleep(unidades_trabajo);
             notificar_kernel(PID);
             break;
         case DESALOJO_POR_IO_STDIN:
-            log_info(logger,"PID: %d - Operacion: IO_STDIN_READ", PID);
             buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
 
+            log_info(logger,"PID: %u - Operacion: IO_STDIN_READ", PID);
             tamanio_total = leer_de_buffer_uint32(buffer, &desplazamiento);
             cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
             char* string_leida = leer_de_teclado(tamanio_total);
@@ -83,9 +84,10 @@ int32_t main(int32_t argc, char* argv[]) {
             break;
 
         case DESALOJO_POR_IO_STDOUT:
-            log_info(logger,"PID: %d - Operacion: IO_STDOUT_WRITE ", PID);
             buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
 
+            log_info(logger,"PID: %u - Operacion: IO_STDOUT_WRITE ", PID);
             tamanio_total = leer_de_buffer_uint32(buffer, &desplazamiento);
             cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
             
@@ -109,6 +111,15 @@ int32_t main(int32_t argc, char* argv[]) {
             break;
 
         case DESALOJO_POR_IO_FS_CREATE:
+            buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+            log_info(logger,"PID: %u - Operacion: IO_FS_CREATE", PID);
+            char* nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            crear_archivo(nombre_archivo);
+            log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
+            break;
+
         case DESALOJO_POR_IO_FS_DELETE:
         case DESALOJO_POR_IO_FS_TRUNCATE:
         case DESALOJO_POR_IO_FS_WRITE:
