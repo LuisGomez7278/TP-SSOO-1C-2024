@@ -5,6 +5,7 @@
 #include "../../utils/include/conexiones.h"
 #include <commons/bitarray.h>
 #include <commons/memory.h>
+#include <math.h>
 
 extern t_log* logger;
 extern t_log* logger_debug;
@@ -33,5 +34,7 @@ void crear_metadata(int32_t bloque, char* nombre_archivo);
 void eliminar_archivo(char* nombre_archivo);
 bool existe_archivo(char* nombre_archivo, int32_t* indice);
 void liberar_bloques(char* path_archivo_metadata);
+
+void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio);
 
 #endif //ENTRADASALIDA_FS_H_

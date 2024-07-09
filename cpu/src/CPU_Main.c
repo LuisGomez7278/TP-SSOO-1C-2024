@@ -288,8 +288,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         valorgrande1 = *registro;
 
-        //ejecutar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, valorgrande1);
-        //break;
+        solicitar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, valorgrande1);
+        break;
 
     case IO_FS_WRITE:
         log_info(logger,"PID: %u - Ejecutando: IO_FS_WRITE - %s %s %s %s %s", PID, ins_actual->arg1, ins_actual->arg2, ins_actual->arg3, ins_actual->arg4, ins_actual->arg5);

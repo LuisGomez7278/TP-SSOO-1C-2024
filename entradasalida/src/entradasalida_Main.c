@@ -132,6 +132,16 @@ int32_t main(int32_t argc, char* argv[]) {
             eliminar_archivo(nombre_archivo);
             break;
         case DESALOJO_POR_IO_FS_TRUNCATE:
+            buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+            log_info(logger,"PID: %u - Operacion: IO_FS_TRUNCATE", PID);
+            char* nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            int32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
+            free(buffer);
+            log_info(logger, "PID: %u - Truncar Archivo: %s", PID, nombre_archivo);
+            truncar_archivo(nombre_archivo, nuevo_tamanio);
+            break;
         case DESALOJO_POR_IO_FS_WRITE:
         case DESALOJO_POR_IO_FS_READ:
             

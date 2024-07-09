@@ -171,11 +171,30 @@ void liberar_bloques(char* path_archivo_metadata)
     t_config* metadata = config_create(path_archivo_metadata);
     int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
     int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
-    int32_t cant_bloques = (tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0); //Si la cuenta da redonda es +0 si no es +1
+    int32_t cant_bloques = floor(tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0); //Si la cuenta da redonda es +0 si no es +1
 
     for (int32_t i = 0; i < cant_bloques; i++)
     {
         bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
     }
     config_destroy(metadata);
+}
+
+void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio)
+{
+    if (!existe_archivo(nombre_archivo))
+    {
+        log_error(logger, "Se trato de truncar un archivo que no existe: %s", nombre_archivo);
+    }
+    else
+    {
+        char* path_archivo_metadata = string_duplicate(path_metadata);
+        string_append(&path_archivo_metadata, nombre_archivo);
+        t_config* metadata = config_create(path_archivo_metadata);
+        int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+        int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
+        int32_t cant_bloques = floor(tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0);
+        int32_t bloque_final = bloque_inicial + cant_bloques;
+
+    }
 }
