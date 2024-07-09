@@ -11,6 +11,8 @@ void inicializar_FS()
     path_bitmap = string_duplicate(PATH_BASE_DIALFS);
     string_append(&path_bitmap, "bitmap.dat");
 
+    archivos_existentes = list_create();
+
     inicializar_bitmap();
     inicializar_bloques();
 }
@@ -88,10 +90,11 @@ void crear_archivo(char* nombre_archivo)
     {
         crear_metadata(bloque, nombre_archivo);
         log_info(logger, "Se crea metadata del archivo: %s", nombre_archivo);
+        list_add(archivos_existentes, nombre_archivo);
     }
     else
     {
-        log_error(logger_debug, "No hay espacio disponible para crear el archivo: %s", nombre_archivo);
+        log_error(logger, "No hay espacio disponible para crear el archivo: %s", nombre_archivo);
     }
 }
 
@@ -123,5 +126,56 @@ void crear_metadata(int32_t bloque, char* nombre_archivo)
     free(bloque_inicial);
 
     config_save_in_file(metadata, path_archivo_metadata);
+    config_destroy(metadata);
+    free(path_archivo_metadata);
+}
+
+void eliminar_archivo(char* nombre_archivo)
+{
+    int32_t indice;
+    if (existe_archivo(nombre_archivo, &indice))
+    {
+        list_remove(archivos_existentes, indice); //Eliminar de la lista de archivos existentes
+        char* path_archivo_metadata = string_duplicate(path_metadata);
+        string_append(&path_archivo_metadata, nombre_archivo);
+
+        liberar_bloques(path_archivo_metadata);
+
+        remove(path_archivo_metadata); //Eliminar archivo de metadata
+        free(path_archivo_metadata);
+        log_info(logger, "Se elimino el archivo: %s con exito", nombre_archivo);
+    }
+    else
+    {
+        log_warning(logger, "Se trato de eliminar un archivo que no existe: %s", nombre_archivo);
+    }
+    
+}
+
+bool existe_archivo(char* nombre_archivo, int32_t* indice)
+{
+    char* elem;
+    for (int i = 0; i < list_size(archivos_existentes); i++)
+    {
+        elem = list_get(archivos_existentes, i)
+        if (string_equals_ignore_case(elem, nombre_archivo)){
+            *indice = i;
+            return true;
+            }
+    }
+    return false;
+}
+
+void liberar_bloques(char* path_archivo_metadata)
+{
+    t_config* metadata = config_create(path_archivo_metadata);
+    int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
+    int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+    int32_t cant_bloques = (tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0); //Si la cuenta da redonda es +0 si no es +1
+
+    for (int32_t i = 0; i < cant_bloques; i++)
+    {
+        bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
+    }
     config_destroy(metadata);
 }

@@ -117,11 +117,20 @@ int32_t main(int32_t argc, char* argv[]) {
             log_info(logger,"PID: %u - Operacion: IO_FS_CREATE", PID);
             char* nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             free(buffer);
-            crear_archivo(nombre_archivo);
             log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
+            crear_archivo(nombre_archivo);
             break;
 
         case DESALOJO_POR_IO_FS_DELETE:
+            buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+            log_info(logger,"PID: %u - Operacion: IO_FS_DELETE", PID);
+            char* nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            free(buffer);
+            log_info(logger, "PID: %u - Eliminar Archivo: %s", PID, nombre_archivo);
+            eliminar_archivo(nombre_archivo);
+            break;
         case DESALOJO_POR_IO_FS_TRUNCATE:
         case DESALOJO_POR_IO_FS_WRITE:
         case DESALOJO_POR_IO_FS_READ:

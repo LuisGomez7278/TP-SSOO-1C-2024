@@ -31,5 +31,6 @@ char* path_bloques;
 char* path_bitmap;
 t_bitarray* bitmap_bloques;
 char* path_metadata;
+t_list* archivos_existentes;
 
 #endif /*  ENTRADASALIDA_INICIO_H_ */
