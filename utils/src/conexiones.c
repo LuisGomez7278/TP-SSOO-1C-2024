@@ -461,18 +461,18 @@ cod_ins leer_de_buffer_cod_ins(void* buffer, uint32_t* desplazamiento)
     return codigo;
 };
 
-void agregar_a_paquete_int_code(t_paquete* paquete, int_code codigo)
+void agregar_a_paquete_op_code(t_paquete* paquete, op_code codigo)
 {    
-    paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(int_code));
-	memcpy(paquete->buffer->stream + paquete->buffer->size, &codigo, sizeof(int_code));
-	paquete->buffer->size += sizeof(int_code);    
+    paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(op_code));
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &codigo, sizeof(op_code));
+	paquete->buffer->size += sizeof(op_code);    
 };
 
-int_code leer_de_buffer_int_code(void* buffer, uint32_t* desplazamiento)
+op_code leer_de_buffer_op_code(void* buffer, uint32_t* desplazamiento)
 {
-    int_code codigo;
-    memcpy(&codigo,  buffer + (*desplazamiento), sizeof(int_code));
-    (*desplazamiento) += sizeof(int_code);    
+    op_code codigo;
+    memcpy(&codigo,  buffer + (*desplazamiento), sizeof(op_code));
+    (*desplazamiento) += sizeof(op_code);    
     return codigo;
 };
 

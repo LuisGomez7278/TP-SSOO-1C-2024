@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     pthread_create(&hilo_conexion_memoria, NULL, (void*) gestionar_conexion_memoria, NULL);
     pthread_detach(hilo_conexion_memoria);
         
-    while(true){
+        while(true){
         if (detener_ejecucion)
         {
         log_info(logger,"Esperando un proceso");
@@ -40,7 +40,6 @@ int main(int argc, char* argv[]) {
         }
         
         
-
         fetch(PID, contexto_interno.PC);
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
@@ -62,6 +61,8 @@ int main(int argc, char* argv[]) {
 
     }
 
+
+
     // pthread_create(hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_memoria, NULL);
     // pthread_join(hilo_conexion_dispatch, NULL);
 
@@ -75,6 +76,10 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+
+
+
 
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual){
     cod_ins codigo = ins_actual->ins;

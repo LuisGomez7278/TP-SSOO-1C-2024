@@ -157,7 +157,7 @@ bool existe_archivo(char* nombre_archivo, int32_t* indice)
     char* elem;
     for (int i = 0; i < list_size(archivos_existentes); i++)
     {
-        elem = list_get(archivos_existentes, i)
+        elem = list_get(archivos_existentes, i);
         if (string_equals_ignore_case(elem, nombre_archivo)){
             *indice = i;
             return true;

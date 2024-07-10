@@ -33,7 +33,7 @@ int32_t main(int32_t argc, char* argv[]) {
         uint32_t desplazamiento = 0;
         t_paquete* paquete;
         op_code cod_op = recibir_operacion(socket_entradasalida_kernel);
-
+        char* nombre_archivo;
         uint32_t tamanio_total;
         uint32_t cant_accesos;
 
@@ -115,7 +115,7 @@ int32_t main(int32_t argc, char* argv[]) {
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
 
             log_info(logger,"PID: %u - Operacion: IO_FS_CREATE", PID);
-            char* nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             free(buffer);
             log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
             crear_archivo(nombre_archivo);
@@ -126,7 +126,7 @@ int32_t main(int32_t argc, char* argv[]) {
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
 
             log_info(logger,"PID: %u - Operacion: IO_FS_DELETE", PID);
-            char* nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             free(buffer);
             log_info(logger, "PID: %u - Eliminar Archivo: %s", PID, nombre_archivo);
             eliminar_archivo(nombre_archivo);

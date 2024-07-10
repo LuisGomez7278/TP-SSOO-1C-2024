@@ -15,7 +15,7 @@ extern uint32_t PID;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
 
-extern int_code interrupcion;
+extern op_code interrupcion;
 extern op_code tipo_interrupcion;
 extern bool detener_ejecucion;
 
@@ -27,6 +27,5 @@ void enviar_CE_con_5_arg(op_code motivo_desalojo, char* arg1, char* arg2, char* 
 bool esperar_respuesta_recurso();
 
 void gestionar_conexion_interrupt();
-
 
 #endif //CPU_KERNEL_H_

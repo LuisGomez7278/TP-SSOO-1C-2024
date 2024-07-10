@@ -56,8 +56,8 @@ void conexion_con_cpu(){
 }
 
 void fetch(int socket_cpu_memoria){ 
-    uint32_t PID=0; 
-    uint32_t PC=0;
+    uint32_t PID; 
+    uint32_t PC;
     recibir_fetch(socket_cpu_memoria, &PID, &PC);
     log_info(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     

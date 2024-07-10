@@ -141,7 +141,8 @@ uint32_t signal_recursos ( char*recurso_solicitado,uint32_t PID){
 void eliminar_proceso_de_lista_recursos (uint32_t PID){
     t_pcb* pcb_a_eliminar;
     t_recurso* auxiliar = lista_de_recursos;
-
+    
+    log_info(logger_debug,"Eliminando proceso de la lista de recursos");
     while(auxiliar!=NULL){
         pcb_a_eliminar=buscar_pcb_por_PID_en_lista(auxiliar->lista_de_espera,PID,&semaforo_recursos);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){

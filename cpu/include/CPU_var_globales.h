@@ -38,7 +38,7 @@ sem_t hay_proceso_ejecutando;
 t_instruccion* ins_actual;
 sem_t prox_instruccion;
 
-int_code interrupcion;
+op_code interrupcion;
 op_code motivo_desalojo;
 
 pthread_t hilo_conexion_dispatch;

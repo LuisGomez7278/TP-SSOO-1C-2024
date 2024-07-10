@@ -88,8 +88,7 @@ bool encontrado=false;
 
 if (pid_a_finalizar==pcb_actual_en_cpu){
     encontrado=true;
-    op_code a_enviar = INT_CONSOLA;
-    send(socket_kernel_cpu_interrupt,&a_enviar,sizeof(int_code),0);
+    enviar_instruccion_con_PID_por_socket(INT_CONSOLA,pid_a_finalizar,socket_kernel_cpu_interrupt);
 }
 
 
