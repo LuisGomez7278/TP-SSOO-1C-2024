@@ -506,4 +506,50 @@ uint32_t recibir_de_buffer_solo_PID (int32_t socket_a_recibir){      /// PARA EJ
     return PID;
 }
 
-/*----------Fin Serializacion----------*/
+char* codigo_operacion_string(op_code codigo){  ////////////////////////// TRANSFORMA EL CODIGO DE OPERACION EN UN STRING PARA LOGGEO
+    if(codigo == CONTEXTO)                               return "CONTEXTO";   
+    if(codigo == SIG_INS)                                return "SIG_INS";   
+    if(codigo == FETCH)                                 return "FETCH";
+    if(codigo == PROCESO_NO_CARGADO)                     return "PROCESO_NO_CARGADO";               
+    if(codigo == TAM_PAG)                                return "TAM_PAG";   
+    if(codigo == TLB_MISS)                               return "TLB_MISS";   
+    if(codigo == CREAR_PROCESO)                          return "CREAR_PROCESO";       
+    if(codigo == ELIMINAR_PROCESO)                       return "ELIMINAR_PROCESO";           
+    if(codigo == CARGA_EXITOSA_PROCESO)                  return "CARGA_EXITOSA_PROCESO";               
+    if(codigo == ERROR_AL_CARGAR_EL_PROCESO)             return "ERROR_AL_CARGAR_EL_PROCESO";                       
+    if(codigo == OUT_OF_MEMORY)                          return "OUT_OF_MEMORY";       
+    if(codigo == SOLICITUD_IO_STDIN_READ)                return "SOLICITUD_IO_STDIN_READ";                   
+    if(codigo == SOLICITUD_IO_STDOUT_WRITE)              return "SOLICITUD_IO_STDOUT_WRITE";                   
+    if(codigo == SOLICITUD_MOV_OUT)                      return "SOLICITUD_MOV_OUT";           
+    if(codigo == SOLICITUD_MOV_IN)                       return "SOLICITUD_MOV_IN";           
+    if(codigo == SOLICITUD_RESIZE)                       return "SOLICITUD_RESIZE";           
+    if(codigo == SOLICITUD_COPY_STRING_READ)             return "SOLICITUD_COPY_STRING_READ";                       
+    if(codigo == SOLICITUD_COPY_STRING_WRITE)            return "SOLICITUD_COPY_STRING_WRITE";                       
+    if(codigo == RECIBIR_CE_DISPATCH)                    return "RECIBIR_CE_DISPATCH";               
+    if(codigo == MENSAJE)                                return "MENSAJE";   
+    if(codigo == HANDSHAKE)                              return "HANDSHAKE";   
+    if(codigo == PAQUETE)                                return "PAQUETE";   
+    if(codigo == DESALOJO_POR_WAIT)                      return "DESALOJO_POR_WAIT";           
+    if(codigo == DESALOJO_POR_SIGNAL)                    return "DESALOJO_POR_SIGNAL";               
+    if(codigo == DESALOJO_POR_QUANTUM)                   return "DESALOJO_POR_QUANTUM";               
+    if(codigo == DESALOJO_POR_FIN_PROCESO)               return "DESALOJO_POR_FIN_PROCESO";                   
+    if(codigo == DESALOJO_POR_CONSOLA )                  return "DESALOJO_POR_CONSOLA";               
+    if(codigo == DESALOJO_POR_INTERRUPCION)              return "DESALOJO_POR_INTERRUPCION";                   
+    if(codigo == DESALOJO_POR_IO_GEN_SLEEP)              return "DESALOJO_POR_IO_GEN_SLEEP";                   
+    if(codigo == DESALOJO_POR_IO_STDIN)                  return "DESALOJO_POR_IO_STDIN";               
+    if(codigo == DESALOJO_POR_IO_STDOUT)                 return "DESALOJO_POR_IO_STDOUT";                   
+    if(codigo == DESALOJO_POR_IO_FS_CREATE)              return "DESALOJO_POR_IO_FS_CREATE";                   
+    if(codigo == DESALOJO_POR_IO_FS_DELETE)              return "DESALOJO_POR_IO_FS_DELETE";                   
+    if(codigo == DESALOJO_POR_IO_FS_TRUNCATE)            return "DESALOJO_POR_IO_FS_TRUNCATE";                       
+    if(codigo == DESALOJO_POR_IO_FS_WRITE)               return "DESALOJO_POR_IO_FS_WRITE";                   
+    if(codigo == DESALOJO_POR_IO_FS_READ)                return "DESALOJO_POR_IO_FS_READ";                   
+    if(codigo == VERIFICAR_CONEXION)                     return "VERIFICAR_CONEXION";               
+    if(codigo == FINALIZA_IO)                            return "FINALIZA_IO";       
+    if(codigo == OK)                                    return "OK";
+    if(codigo == FALLO)                                 return "FALLO";
+    if(codigo == NUEVA_IO)                               return "NUEVA_IO";   
+    if(codigo == SOLICITUD_EXITOSA_IO)                   return "SOLICITUD_EXITOSA_IO";               
+    if(codigo == ERROR_SOLICITUD_IO)                     return "ERROR_SOLICITUD_IO";               
+    else                    							return "OPERACION NO EXISTE";
+}
+/*- --------Fin Serializacion----------*/    

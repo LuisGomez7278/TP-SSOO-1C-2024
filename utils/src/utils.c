@@ -52,9 +52,9 @@ char* codigo_estado_string(t_estado codigo){  ////////////////////////// TRANSFO
 	if(codigo == NEW) 				return "NUEVO";
 	if(codigo == READY) 			return "READY";
     if(codigo == READY_PRIORITARIO) return "READY_PRIORITARIO";
-	if(codigo == EXEC) 		return "EJECUCION";
+	if(codigo == EXEC) 	        	return "EJECUCION";
 	if(codigo == BLOCKED) 			return "BLOQUEO";
-	if(codigo == EXITT) 			return "EXITT";
+	if(codigo == EXITT) 			return "EXIT";
 	else							return "ERROR";
 }
 

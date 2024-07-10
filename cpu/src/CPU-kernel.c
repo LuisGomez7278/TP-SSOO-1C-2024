@@ -19,9 +19,11 @@ void gestionar_conexion_dispatch()
             break;
         case CONTEXTO:
             recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
-            log_info(logger, "Llega un proceso de PID: %u", PID);
-            sem_post(&hay_proceso_ejecutando);
+            log_trace(logger, "Llega un proceso de PID: %u", PID);
             interrupcion = INT_NO;
+            detener_ejecucion=false;
+            sleep(1);
+            sem_post(&hay_proceso_ejecutando);
             break;
         
         case FALLO:
@@ -42,8 +44,8 @@ void desalojar_proceso(op_code motivo_desalojo){
     serializar_CE(paquete, contexto_interno);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    log_info(logger, "El proceso PID: %u es desalojado, motivo: %d", PID, motivo_desalojo);
-    sem_wait(&hay_proceso_ejecutando);
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+    detener_ejecucion=true;
 }
 
 void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
@@ -54,7 +56,7 @@ void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
     agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    sem_wait(&hay_proceso_ejecutando);
+    detener_ejecucion=true;
 };
 
 void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
@@ -66,7 +68,7 @@ void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
     agregar_a_paquete_string(paquete, strlen(arg2) + 1, arg2);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    sem_wait(&hay_proceso_ejecutando);
+    detener_ejecucion=true;
 };
 
 void enviar_CE_con_5_arg(op_code motivo_desalojo, char* arg1, char* arg2, char* arg3, char* arg4, char* arg5)
@@ -81,7 +83,7 @@ void enviar_CE_con_5_arg(op_code motivo_desalojo, char* arg1, char* arg2, char* 
     agregar_a_paquete_string(paquete, strlen(arg5) + 1, arg5);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    sem_wait(&hay_proceso_ejecutando);
+    detener_ejecucion=true;
 };
 
 void gestionar_conexion_interrupt()

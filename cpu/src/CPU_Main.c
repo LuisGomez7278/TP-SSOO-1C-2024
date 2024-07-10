@@ -33,7 +33,13 @@ int main(int argc, char* argv[]) {
     pthread_detach(hilo_conexion_memoria);
         
     while(true){
+        if (detener_ejecucion)
+        {
+        log_info(logger,"Esperando un proceso");
         sem_wait(&hay_proceso_ejecutando);
+        }
+        
+        
 
         fetch(PID, contexto_interno.PC);
         sem_wait(&prox_instruccion);
@@ -47,7 +53,12 @@ int main(int argc, char* argv[]) {
             else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
             desalojar_proceso(motivo_desalojo);
         };
-        sem_post(&hay_proceso_ejecutando);
+        
+                                                                 // SIN PERDER LA INFORMACION DE LOS QUE YA ESTAN EN LA COLA DE WAIT
+
+        int32_t actual_valor;  
+        sem_getvalue(&hay_proceso_ejecutando, &actual_valor);
+        log_info(logger_debug,"El valor del semaforo al fin del while es %d",actual_valor);
 
     }
 

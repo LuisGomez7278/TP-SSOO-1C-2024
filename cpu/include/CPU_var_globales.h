@@ -29,6 +29,7 @@ char* algoritmo_TLB;
 uint32_t tamanio_de_pagina;
 bool usa_TLB;
 t_list* tabla_TLB;
+bool detener_ejecucion=true;
 
 uint32_t PID;
 t_contexto_ejecucion contexto_interno;

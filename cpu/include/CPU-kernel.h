@@ -17,6 +17,7 @@ extern sem_t hay_proceso_ejecutando;
 
 extern int_code interrupcion;
 extern op_code tipo_interrupcion;
+extern bool detener_ejecucion;
 
 void gestionar_conexion_dispatch(void);
 void desalojar_proceso(op_code motivo_desalojo);

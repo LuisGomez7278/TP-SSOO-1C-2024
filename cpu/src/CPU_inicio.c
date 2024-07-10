@@ -20,6 +20,7 @@ void iniciar_CPU(void){
     contexto_interno.SI = 0;
 
     sem_init(&prox_instruccion, 0, 0);
+    sem_init(&hay_proceso_ejecutando, 0, 0);
 }
 
 void iniciar_logs(void){
