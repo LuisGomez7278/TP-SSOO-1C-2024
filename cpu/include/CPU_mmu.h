@@ -39,7 +39,6 @@ entrada_TLB* TLB_miss(uint32_t PID, uint32_t nro_pag);
 entrada_TLB* buscar_entrada_para_reemplazar(uint32_t PID, uint32_t nro_pag, uint32_t marco);
 entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* entrada_a_reemplazar);
 
-char* leer_string_de_memoria(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar);
 void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar);
 void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WRITE, uint32_t bytes_a_copiar);
 

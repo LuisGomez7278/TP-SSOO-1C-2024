@@ -139,25 +139,6 @@ entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* en
     return entrada;
 }
 
-char* leer_string_de_memoria(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar)
-{
-    solicitar_lectura_string(direccion_logica_READ, bytes_a_copiar);
-    if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_COPY_STRING_READ) 
-    {
-        log_error(logger, "Esperaba una string por SOLICITUD_COPY_STRING_READ y vino otra cosa");
-        return (char*) NULL;
-    }
-    uint32_t size;
-    uint32_t desplazamiento = 0;
-    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
-
-    char* string_leida = leer_de_buffer_string(buffer, &desplazamiento);
-    log_info(logger, "Llego la string: %s de memoria", string_leida);
-    free(buffer);
-
-    return string_leida;
-}
-
 void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar)
 {
     uint32_t bytes_restantes = bytes_a_copiar;

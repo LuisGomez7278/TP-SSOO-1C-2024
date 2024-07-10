@@ -34,6 +34,16 @@ void gestionar_conexion_memoria()
             log_error(logger, "Modulo MEMORIA desconectado, terminando servidor");
             continuar_iterando = false;
             break;
+        
+        case SOLICITUD_COPY_STRING_READ:
+            uint32_t size;
+            uint32_t desplazamiento = 0;
+            void* buffer = recibir_buffer(&size, socket_cpu_memoria);
+            string_leida_de_memoria = leer_de_buffer_string(buffer, &desplazamiento);
+            log_info(logger_debug, "Llego la string \'%s\' de memoria", string_leida_de_memoria);
+            sem_post(&respuesta_copy_string);
+            free(buffer);
+            break;
        
         default:
             log_error(logger, "Llego una operacion desconocida por socket memoria, op_code: %d", operacion);

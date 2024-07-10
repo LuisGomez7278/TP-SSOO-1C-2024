@@ -37,6 +37,7 @@ sem_t hay_proceso_ejecutando;
 
 t_instruccion* ins_actual;
 sem_t prox_instruccion;
+char* string_leida_de_memoria;
 
 op_code interrupcion;
 op_code motivo_desalojo;

@@ -61,7 +61,6 @@ void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     detener_ejecucion=true;
-    
 };
 
 void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
@@ -71,22 +70,6 @@ void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
     serializar_CE(paquete, contexto_interno);
     agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
     agregar_a_paquete_string(paquete, strlen(arg2) + 1, arg2);
-    enviar_paquete(paquete, socket_cpu_kernel_dispatch);
-    eliminar_paquete(paquete);
-    detener_ejecucion=true;
-    
-};
-
-void enviar_CE_con_5_arg(op_code motivo_desalojo, char* arg1, char* arg2, char* arg3, char* arg4, char* arg5)
-{
-    t_paquete* paquete = crear_paquete(motivo_desalojo);
-    agregar_a_paquete_uint32(paquete, PID);
-    serializar_CE(paquete, contexto_interno);
-    agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
-    agregar_a_paquete_string(paquete, strlen(arg2) + 1, arg2);
-    agregar_a_paquete_string(paquete, strlen(arg3) + 1, arg3);
-    agregar_a_paquete_string(paquete, strlen(arg4) + 1, arg4);
-    agregar_a_paquete_string(paquete, strlen(arg5) + 1, arg5);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     detener_ejecucion=true;
@@ -108,19 +91,14 @@ void gestionar_conexion_interrupt()
             break;
 
         case DESALOJO_POR_CONSOLA:
-            
             recibir_de_buffer_solo_PID(socket_cpu_kernel_interrupt);
-
             if (!detener_ejecucion)
             {
                 log_info(logger, "El usuario finaliza el proceso PID: %u por consola", PID);
-                interrupcion = INT_CONSOLA;
-                
+                interrupcion = INT_CONSOLA;                
             }else{
                 log_error(logger_debug,"Llego un proceso para desalojar por consola que no es el que esta ejecutando");
             }
-            
-
             break;
 
         case DESALOJO_POR_QUANTUM:

@@ -241,7 +241,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         uint32_t direccion_logica_READ = contexto_interno->SI;
         uint32_t direccion_logica_WRITE = contexto_interno->DI;
 
-        char* string_leida = leer_string_de_memoria(direccion_logica_READ, bytes_a_copiar);
+        solicitar_lectura_string(direccion_logica_READ, bytes_a_copiar);
+        sem_wait(&respuesta_copy_string);
         escribir_en_memoria_string(string_leida, direccion_logica_WRITE, bytes_a_copiar);
         // recibir_respuesta_COPY_STRING();
         contexto_interno->PC++;
@@ -251,6 +252,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: IO_GEN_SLEEP - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_GEN_SLEEP;
+        // arg1: nombre_interfaz, arg2: unidades_trabajo
         enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);
         break;
 
@@ -450,6 +452,7 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    detener_ejecucion=true;
 }
 
 void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
@@ -497,6 +500,7 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    detener_ejecucion=true;
 }
 
 void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint32_t tamanio)
@@ -509,6 +513,7 @@ void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint3
     agregar_a_paquete_uint32(paquete, tamanio);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    detener_ejecucion=true;
 };
 
 void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, char* nombre_archivo, uint32_t direccion_logica, uint32_t tamanio_a_leer, uint32_t puntero)
@@ -558,6 +563,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    detener_ejecucion=true;
 }
 
 void loggear_valores()

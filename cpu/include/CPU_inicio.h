@@ -29,6 +29,7 @@ extern op_code interrupcion;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
 extern sem_t prox_instruccion;
+extern sem_t respuesta_copy_string;
 
 void iniciar_CPU(void);
 void iniciar_logs(void);

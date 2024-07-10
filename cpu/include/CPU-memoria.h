@@ -23,6 +23,8 @@ extern sem_t hay_proceso_ejecutando;
 
 extern t_instruccion* ins_actual;
 extern sem_t prox_instruccion;
+extern sem_t respuesta_copy_string;
+extern char* string_leida_de_memoria;
 
 void gestionar_conexion_memoria();
 
