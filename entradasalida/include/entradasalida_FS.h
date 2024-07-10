@@ -36,5 +36,8 @@ bool existe_archivo(char* nombre_archivo, int32_t* indice);
 void liberar_bloques(char* path_archivo_metadata);
 
 void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio);
+int32_t cantidad_de_bloques(int32_t tamanio_archivo);
+void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar);
+bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar);
 
 #endif //ENTRADASALIDA_FS_H_

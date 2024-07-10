@@ -171,7 +171,7 @@ void liberar_bloques(char* path_archivo_metadata)
     t_config* metadata = config_create(path_archivo_metadata);
     int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
     int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
-    int32_t cant_bloques = floor(tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0); //Si la cuenta da redonda es +0 si no es +1
+    int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo); //Si la cuenta da redonda es +0 si no es +1
 
     for (int32_t i = 0; i < cant_bloques; i++)
     {
@@ -193,8 +193,34 @@ void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio)
         t_config* metadata = config_create(path_archivo_metadata);
         int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
         int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
-        int32_t cant_bloques = floor(tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0);
-        int32_t bloque_final = bloque_inicial + cant_bloques;
 
+        int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
+        int32_t nueva_cant_bloques = cantidad_de_bloques(nuevo_tamanio);
+        int32_t diferencia_cant_bloques = cant_bloques - nueva_cant_bloques;
+        if (diferencia_cant_bloques<=0)
+        {
+            liberar_n_bloques(bloque_inicial+nueva_cant_bloques, 0-diferencia_cant_bloques);
+        }
+        else
+        {
+            bool asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
+        }
+        
+        config_set_value(metadata, TAMANIO_ARCHIVO, string_itoa(nuevo_tamanio));
+        config_save(metadata);
     }
+}
+
+int32_t cantidad_de_bloques(int32_t tamanio_archivo)
+{
+    return floor(tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0); //Si la cuenta da redonda es +0 si no es +1
+}
+
+void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar)
+{
+    for (int32_t i = 0; i < bloques_a_liberar; i++)
+    {
+        bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
+    }
+    log_info(logger_debug, "Se liberaron %d bloques del bitmap", bloques_a_liberar);
 }
