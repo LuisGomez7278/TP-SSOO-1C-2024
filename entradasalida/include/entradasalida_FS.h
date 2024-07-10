@@ -6,6 +6,8 @@
 #include <commons/bitarray.h>
 #include <commons/memory.h>
 #include <math.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 extern t_log* logger;
 extern t_log* logger_debug;

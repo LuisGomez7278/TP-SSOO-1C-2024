@@ -21,6 +21,8 @@ int32_t main(int32_t argc, char* argv[]) {
     if (string_equals_ignore_case(TIPO_INTERFAZ, "DIALFS"))
     {
         inicializar_FS();
+        int fd = open(path_bloques ,O_RDWR);
+        char* bloques = mmap(NULL, BLOCK_SIZE*BLOCK_COUNT, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     }
     
 
@@ -133,6 +135,7 @@ int32_t main(int32_t argc, char* argv[]) {
             log_info(logger, "PID: %u - Eliminar Archivo: %s", PID, nombre_archivo);
             eliminar_archivo(nombre_archivo);
             break;
+
         case DESALOJO_POR_IO_FS_TRUNCATE:
             buffer = recibir_buffer(&size, socket_entradasalida_kernel);
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -144,9 +147,22 @@ int32_t main(int32_t argc, char* argv[]) {
             log_info(logger, "PID: %u - Truncar Archivo: %s", PID, nombre_archivo);
             truncar_archivo(nombre_archivo, nuevo_tamanio);
             break;
+
         case DESALOJO_POR_IO_FS_WRITE:
-        case DESALOJO_POR_IO_FS_READ:
+            buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             
+
+
+            
+            break;
+
+        case DESALOJO_POR_IO_FS_READ:
+            buffer = recibir_buffer(&size, socket_entradasalida_kernel);
+            PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+            
+            break;
+
         case FALLO:
             log_error(logger, "La ENTRADASALIDA SE DESCONECTO. Terminando servidor");
             continuarIterando=0;
@@ -157,6 +173,7 @@ int32_t main(int32_t argc, char* argv[]) {
         }
     }
 
+    if (bloques) {munmap(bloques, BLOCK_SIZE*BLOCK_COUNT);}
     if (socket_entradasalida_memoria) {liberar_conexion(socket_entradasalida_memoria);}
     if (socket_entradasalida_kernel) {liberar_conexion(socket_entradasalida_kernel);}
 

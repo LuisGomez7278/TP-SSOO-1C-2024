@@ -109,11 +109,11 @@ entrada_TLB* TLB_miss(uint32_t PID, uint32_t nro_pag)
 
 entrada_TLB* buscar_entrada_para_reemplazar(uint32_t PID, uint32_t nro_pag, uint32_t marco)
 {
-
     entrada_TLB* entrada_actual = list_get(tabla_TLB, 0);
     entrada_TLB* entrada_a_reemplazar = entrada_actual;
     for (int i = 0; i < cant_entradas_TLB; i++)
     {
+        entrada_actual = list_get(tabla_TLB, i);
         if (entrada_actual->libre) {return entrada_actual;}
         else 
         {
