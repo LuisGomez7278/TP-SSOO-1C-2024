@@ -38,6 +38,21 @@ uint32_t obtener_desplazamiento(uint32_t direccion_logica)
     return direccion_logica%tamanio_de_pagina;
 }
 
+uint32_t get_marco(uint32_t PID, uint32_t nro_pag)
+{
+    uint32_t marco;
+    if (usa_TLB)
+    {
+        entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
+        marco = marco_TLB(entrada);
+    }
+    else
+    {
+        marco = pedir_marco_a_memoria(PID, nro_pag);
+    }
+    return marco;
+}
+
 entrada_TLB* buscar_en_tlb(uint32_t PID, uint32_t nro_pag)
 {
     entrada_TLB* entrada;
@@ -149,7 +164,6 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica_READ);
     uint32_t offset = obtener_desplazamiento(direccion_logica_READ);
-    entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
     uint32_t marco;
     
     uint32_t cant_accesos = ceil((bytes_a_copiar + offset) / tamanio_de_pagina);
@@ -157,13 +171,8 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
     agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
-
-    if (usa_TLB)
-    {
-        entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
-        marco = marco_TLB(entrada);
-    }
-    else {marco = pedir_marco_a_memoria(PID, nro_pag);}
+    
+    marco = get_marco(PID, nro_pag);
 
     uint32_t dir_fisica = (marco*tamanio_de_pagina)+offset;
     agregar_a_paquete_uint32(paquete, dir_fisica);
@@ -175,12 +184,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     int i = 1;
     while (bytes_restantes>0)
     {
-        if (usa_TLB)
-        {
-            entrada = buscar_en_tlb(PID, nro_pag+i);
-            marco = marco_TLB(entrada);
-        }
-        else{marco = pedir_marco_a_memoria(PID, nro_pag+i);}
+        marco = get_marco(PID, nro_pag);
         
         dir_fisica = marco*tamanio_de_pagina;
 
@@ -209,7 +213,6 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica_WRITE);
     uint32_t offset = obtener_desplazamiento(direccion_logica_WRITE);
     uint32_t marco;
-    entrada_TLB* entrada;
 
     uint32_t cant_accesos = ceil((bytes_a_copiar + offset) / tamanio_de_pagina);
 
@@ -217,12 +220,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
     
-    if (usa_TLB)
-    {
-        entrada = buscar_en_tlb(PID, nro_pag);
-        marco = marco_TLB(entrada);
-    }
-    else {marco = pedir_marco_a_memoria(PID, nro_pag);}
+    marco = get_marco(PID, nro_pag);
 
     uint32_t dir_fisica = (marco*tamanio_de_pagina)+offset;
     uint32_t tam_acceso = cant_accesos==1 ? bytes_a_copiar : (tamanio_de_pagina-offset);
@@ -233,12 +231,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     int i = 1;
     while (bytes_restantes>0)
     {
-        if (usa_TLB)
-        {
-            entrada = buscar_en_tlb(PID, nro_pag+i);
-            marco = marco_TLB(entrada);
-        }
-        else{marco = pedir_marco_a_memoria(PID, nro_pag+i);}
+        marco = get_marco(PID, nro_pag);
         
         dir_fisica = marco*tamanio_de_pagina;
 
@@ -276,24 +269,16 @@ void solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
     agregar_a_paquete_uint32(paquete, cant_accesos);
     agregar_a_paquete_uint32(paquete, tamanio_registro);
 
-    if (usa_TLB)
-    {
-        entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
-        marco = marco_TLB(entrada);
-    }
-    else {marco = pedir_marco_a_memoria(PID, nro_pag);}
+
+    marco = get_marco(PID, nro_pag);
 
     dir_fisica = (marco*tamanio_de_pagina)+offset;
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, (tamanio_de_pagina-offset));//n bytes, los faltantes hasta el fin del marco/pagina
 
-    if (cant_accesos>1){
-        if (usa_TLB)
-        {
-        entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
-        marco = marco_TLB(entrada);
-        }
-        else {marco = pedir_marco_a_memoria(PID, nro_pag);}
+    if (cant_accesos>1)
+    {
+        marco = get_marco(PID, nro_pag);
 
         dir_fisica = (marco*tamanio_de_pagina);
         agregar_a_paquete_uint32(paquete, dir_fisica);
@@ -353,12 +338,7 @@ void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int
     agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
-    if (usa_TLB)
-    {
-        entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
-        marco = marco_TLB(entrada);
-    }
-    else {marco = pedir_marco_a_memoria(PID, nro_pag);}
+    marco = get_marco(PID, nro_pag);
 
     dir_fisica = (marco*tamanio_de_pagina)+offset;
     agregar_a_paquete_uint32(paquete, dir_fisica);
@@ -367,13 +347,9 @@ void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int
     agregar_a_paquete_string(paquete, tam_acceso, puntero_valor);
     
     bytes_restantes -= (tamanio_de_pagina-offset);
-    if (cant_accesos>1){
-        if (usa_TLB)
-        {
-        entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
-        marco = marco_TLB(entrada);
-        }
-        else {marco = pedir_marco_a_memoria(PID, nro_pag);}
+    if (cant_accesos>1)
+    {
+        marco = get_marco(PID, nro_pag);
 
         dir_fisica = (marco*tamanio_de_pagina);
         agregar_a_paquete_uint32(paquete, dir_fisica);

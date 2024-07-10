@@ -31,6 +31,7 @@ void inicializar_TLB();
 uint32_t obtener_nro_pagina(uint32_t direccion_logica);
 uint32_t obtener_desplazamiento(uint32_t direccion_logica);
 
+uint32_t get_marco(uint32_t PID, uint32_t nro_pag);
 entrada_TLB* buscar_en_tlb(uint32_t PID, uint32_t nro_pag);
 uint32_t marco_TLB(entrada_TLB* entrada);
 uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag);
