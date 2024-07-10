@@ -157,7 +157,7 @@ bool existe_archivo(char* nombre_archivo, int32_t* indice)
     char* elem;
     for (int i = 0; i < list_size(archivos_existentes); i++)
     {
-        elem = list_get(archivos_existentes, i)
+        elem = list_get(archivos_existentes, i);
         if (string_equals_ignore_case(elem, nombre_archivo)){
             *indice = i;
             return true;
@@ -182,7 +182,8 @@ void liberar_bloques(char* path_archivo_metadata)
 
 void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio)
 {
-    if (!existe_archivo(nombre_archivo))
+    int32_t indice;
+    if (!existe_archivo(nombre_archivo, &indice))
     {
         log_error(logger, "Se trato de truncar un archivo que no existe: %s", nombre_archivo);
     }
@@ -293,11 +294,12 @@ bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_c
     }
     else
     {
+        int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
         for (int32_t i = 0; i < cant_bloques; i++)
         {
             bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
         }
-        config_set_value(metadata, "BLOQUE_INICIAL", nuevo_inicio);
+        config_set_value(metadata, "BLOQUE_INICIAL", string_itoa(nuevo_inicio));
         config_save(metadata);
 
         for (int32_t i = 0; i < nueva_cant_bloques; i++)
