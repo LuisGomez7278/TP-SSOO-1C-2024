@@ -39,5 +39,6 @@ void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio);
 int32_t cantidad_de_bloques(int32_t tamanio_archivo);
 void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar);
 bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar);
+bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_cant_bloques);
 
 #endif //ENTRADASALIDA_FS_H_

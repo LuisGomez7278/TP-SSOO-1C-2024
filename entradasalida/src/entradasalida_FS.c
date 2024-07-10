@@ -171,7 +171,7 @@ void liberar_bloques(char* path_archivo_metadata)
     t_config* metadata = config_create(path_archivo_metadata);
     int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
     int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
-    int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo); //Si la cuenta da redonda es +0 si no es +1
+    int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
 
     for (int32_t i = 0; i < cant_bloques; i++)
     {
@@ -197,16 +197,38 @@ void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio)
         int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
         int32_t nueva_cant_bloques = cantidad_de_bloques(nuevo_tamanio);
         int32_t diferencia_cant_bloques = cant_bloques - nueva_cant_bloques;
+        config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
         if (diferencia_cant_bloques<=0)
         {
             liberar_n_bloques(bloque_inicial+nueva_cant_bloques, 0-diferencia_cant_bloques);
         }
         else
         {
-            bool asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
+        bool asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);//Si hay bloques contiguos disponibles
+
+        if (!asignacion)//Si no, intenta reasignarle bloques al final del bitmap
+        {
+            asignacion = reasignar_bloques(metadata, cant_bloques, nueva_cant_bloques);
+
+            if (!asignacion)//Si no puede, hace compactacion y lo intenta de nuevo
+            {
+                // compactacion debe dejar el archivo actual al final del bitmap
+                // tambien debe asignar el nuevo bloque inicial a la metadata o devolverlo como int32
+                // compactacion();
+                bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+                asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
+            }               
+        }            
+        if (!asignacion)
+        {
+            log_warning(logger, "No se pudo truncar el archivo: %s por falta de espacio", nombre_archivo);
+        }
+        else
+        {
+            log_info(logger, "Se trunco con exito el archivo: %s, nuevo tamaño: %u", nombre_archivo, nuevo_tamanio);
+        }
         }
         
-        config_set_value(metadata, TAMANIO_ARCHIVO, string_itoa(nuevo_tamanio));
         config_save(metadata);
     }
 }
@@ -223,4 +245,66 @@ void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar)
         bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
     }
     log_info(logger_debug, "Se liberaron %d bloques del bitmap", bloques_a_liberar);
+}
+
+bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar)
+{
+    int32_t bloques_disponibles = 0;
+
+    for (int32_t i = 1; i <= bloques_a_asignar; i++)
+    {
+        if (bitarray_test_bit(bitmap_bloques, bloque_inicial+i)) {break;}
+
+        else {bloques_disponibles++;}
+    }
+    if (bloques_disponibles<bloques_a_asignar) { return false;}
+    else
+    {
+        for (int32_t i = 1; i <= bloques_a_asignar; i++)
+        {
+            bitarray_set_bit(bitmap_bloques, bloque_inicial+i);
+        }
+        return true;
+    }
+}
+
+bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_cant_bloques)
+{
+    int32_t bloques_disponibles = 0;
+    int32_t nuevo_inicio = 0;
+
+    for (int32_t i = 0; i < bitarray_get_max_bit(bitmap_bloques); i++)
+    {
+        if (!bitarray_test_bit(bitmap_bloques, i))
+        {
+            bloques_disponibles++;
+            if (bloques_disponibles>=nueva_cant_bloques)
+                {break;}
+        }
+        else {
+            bloques_disponibles=0;
+            nuevo_inicio=i+1;
+        }
+    }
+    if (bloques_disponibles < nueva_cant_bloques)
+    {
+        log_info(logger_debug, "No hay suficiente espacio para asignar al archivo");
+        return false;
+    }
+    else
+    {
+        for (int32_t i = 0; i < cant_bloques; i++)
+        {
+            bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
+        }
+        config_set_value(metadata, "BLOQUE_INICIAL", nuevo_inicio);
+        config_save(metadata);
+
+        for (int32_t i = 0; i < nueva_cant_bloques; i++)
+        {
+            bitarray_set_bit(bitmap_bloques, bloque_inicial+i);
+        }
+        log_info(logger_debug, "Se reasigna el archivo a la nueva posicion: %d", nuevo_inicio);
+        return true;
+    }
 }
