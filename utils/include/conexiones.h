@@ -59,15 +59,12 @@ typedef enum CODIGOS_DE_OPERACIONES{
     FALLO,
     NUEVA_IO,
     SOLICITUD_EXITOSA_IO,
-    ERROR_SOLICITUD_IO
-} op_code;
-
-typedef enum CODIGOS_DE_INTERRUPCIONES
-{
+    ERROR_SOLICITUD_IO,
     INT_NO,
     INT_QUANTUM,
     INT_CONSOLA
-} int_code;
+} op_code;
+
 
 typedef struct
 {
@@ -133,8 +130,8 @@ uint8_t leer_de_buffer_uint8(void* buffer, uint32_t* desplazamiento);
 uint32_t leer_de_buffer_uint32(void* buffer, uint32_t* desplazamiento);
 char* leer_de_buffer_string(void* buffer, uint32_t* desplazamiento);
 cod_ins leer_de_buffer_cod_ins(void* buffer, uint32_t* desplazamiento);
-void agregar_a_paquete_int_code(t_paquete* paquete, int_code codigo);
-int_code leer_de_buffer_int_code(void* buffer, uint32_t* desplazamiento);
+void agregar_a_paquete_op_code(t_paquete* paquete, op_code codigo);
+op_code leer_de_buffer_op_code(void* buffer, uint32_t* desplazamiento);
 void leer_de_buffer_CE(void* buffer, uint32_t* desplazamiento, t_contexto_ejecucion* contexto_contenedor);
 
 
@@ -143,7 +140,7 @@ void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
 void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int32_t socket_a_enviar);
 uint32_t recibir_de_buffer_solo_PID(int32_t socket_a_recibir);
 cod_interfaz leer_de_buffer_tipo_interfaz(void* buffer, uint32_t* desplazamiento);
-
+char* codigo_operacion_string(op_code codigo);
 
 /*----------Fin Serializacion----------*/
 

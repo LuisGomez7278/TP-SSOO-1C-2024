@@ -29,6 +29,7 @@ char* algoritmo_TLB;
 uint32_t tamanio_de_pagina;
 bool usa_TLB;
 t_list* tabla_TLB;
+bool detener_ejecucion=true;
 
 uint32_t PID;
 t_contexto_ejecucion contexto_interno;
@@ -37,7 +38,7 @@ sem_t hay_proceso_ejecutando;
 t_instruccion* ins_actual;
 sem_t prox_instruccion;
 
-int_code interrupcion;
+op_code interrupcion;
 op_code motivo_desalojo;
 
 pthread_t hilo_conexion_dispatch;

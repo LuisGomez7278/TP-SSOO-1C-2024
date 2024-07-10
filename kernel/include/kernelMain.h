@@ -11,14 +11,6 @@
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
 
-//#include "planificacion.h"
-//#include "Kernel-CPU-dispatch.h"
-//#include "Kernel-CPU-Interrupt.h"
-//#include "Kernel-EntradaSalida.h"
-//#include "Kernel-Memoria.h"
-//#include "inicioKernel.h"
-//#include "consola.h"
-
 
 #include "extern_globales.h"
 
@@ -64,7 +56,7 @@
     t_list *lista_bloqueado_prioritario;
     t_list *lista_de_interfaces;
 
-
+    pthread_t hilo_CPU_dispatch;
 
 
 #endif //TP_KERNEL_MAIN_H_

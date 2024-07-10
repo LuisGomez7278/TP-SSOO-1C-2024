@@ -67,6 +67,8 @@ extern sem_t cantidad_procesos_bloqueados;
 extern sem_t semaforo_plp;
 extern sem_t semaforo_pcp;
 extern bool detener_planificacion;
+extern bool gestionando_dispatch;
+extern bool ocupacion_cpu;
 
 extern pthread_mutex_t semaforo_new;
 extern pthread_mutex_t semaforo_ready;
@@ -81,6 +83,9 @@ extern uint32_t identificador_PID;
 extern pthread_mutex_t mutex_pid;
 extern uint32_t pcb_actual_en_cpu;
 
+extern pthread_t hilo_CPU_dispatch;
+extern pthread_t hilo_de_desalojo_por_quantum; 
+
 
 //atender_operacion.h:
     void atender_instruccion_validada(char* leido);
@@ -92,6 +97,7 @@ extern uint32_t pcb_actual_en_cpu;
     void ingresar_en_lista(t_pcb* pcb, t_list* lista,  pthread_mutex_t* semaforo_mutex, sem_t* semaforo_contador, t_estado estado);
     void cambiar_grado_multiprogramacion(int32_t nuevo_valor);
     void gestionar_dispatch ();
+    void enviar_siguiente_proceso_a_ejecucion ();
 
 //kernel-cpu-dispatch
     void atender_conexion_CPU_DISPATCH_KERNEL ();

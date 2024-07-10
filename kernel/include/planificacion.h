@@ -29,10 +29,12 @@ int64_t tiempo_recien_ejecutado=0;
 pthread_t hilo_de_desalojo_por_quantum;
 uint32_t pcb_actual_en_cpu=0;
 int64_t backup_de_quantum_ejecutado=0;
+bool gestionando_dispatch=false;
+bool ocupacion_cpu=true;
 
 void interruptor_de_QUANTUM(void* quantum_de_pcb);
+pthread_t hilo_de_desalojo_por_quantum; 
 
-void enviar_siguiente_proceso_a_ejecucion ();
 
 void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar);
 void respuesta_CPU_recurso(op_code respuesta);

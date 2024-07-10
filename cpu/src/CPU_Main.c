@@ -32,24 +32,36 @@ int main(int argc, char* argv[]) {
     pthread_create(&hilo_conexion_memoria, NULL, (void*) gestionar_conexion_memoria, NULL);
     pthread_detach(hilo_conexion_memoria);
         
-    while(true){
+        while(true){
+        if (detener_ejecucion)
+        {
+        log_info(logger,"Esperando un proceso");
         sem_wait(&hay_proceso_ejecutando);
-
+        }
+        
+        
         fetch(PID, contexto_interno.PC);
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
-        free(ins_actual);
+        
         loggear_valores();
 
-        if (interrupcion != INT_NO) {
+        if (interrupcion != INT_NO && ins_actual->ins!=EXIT) {
             log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
             if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
             else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
             desalojar_proceso(motivo_desalojo);
         };
-        sem_post(&hay_proceso_ejecutando);
+        free(ins_actual);
+                                                                 // SIN PERDER LA INFORMACION DE LOS QUE YA ESTAN EN LA COLA DE WAIT
+
+        int32_t actual_valor;  
+        sem_getvalue(&hay_proceso_ejecutando, &actual_valor);
+        log_info(logger_debug,"El valor del semaforo al fin del while es %d",actual_valor);
 
     }
+
+
 
     // pthread_create(hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_memoria, NULL);
     // pthread_join(hilo_conexion_dispatch, NULL);
@@ -64,6 +76,10 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+
+
+
 
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual){
     cod_ins codigo = ins_actual->ins;

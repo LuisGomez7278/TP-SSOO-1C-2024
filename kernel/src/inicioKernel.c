@@ -86,6 +86,9 @@ void iniciar_estructuras_planificacion(){
 	sem_init(&cantidad_procesos_bloqueados, 0, 0);
 	sem_init(&semaforo_plp, 0, 0);
 	sem_init(&semaforo_pcp, 0, 0);
+//	sem_init(&gestionando_dispatch, 0, 0);
+//	sem_init(&ocupacion_cpu, 0, 1);
+	
 
 
 

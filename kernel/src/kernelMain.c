@@ -34,11 +34,11 @@ int32_t main(int32_t argc, char* argv[]) {
         // pthread_detach(hilo_entradaSalida);
     
     
-    // CREO HILO DE CPU DISPATCH
-        pthread_t hilo_CPU_dispatch;
+    // CREO HILO ESCUCHA DE CPU DISPATCH
+        
         pthread_create(&hilo_CPU_dispatch,NULL,(void*)atender_conexion_CPU_DISPATCH_KERNEL,NULL);
-        pthread_detach(hilo_CPU_dispatch);    
-           
+       // pthread_detach(hilo_CPU_dispatch);    
+
 
     //CREO HILO de MEMORIA
         pthread_t hilo_MEMORIA;

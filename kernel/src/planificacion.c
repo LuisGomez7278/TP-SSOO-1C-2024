@@ -57,19 +57,30 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 		log_info(logger,"Lista de PID de procesos en estado READY Prioritario %s : %s",algoritmo_planificacion, log_cola_ready_prioritario);
 		free(log_cola_ready_prioritario);
 	}
-pthread_mutex_unlock(semaforo_mutex);
+    pthread_mutex_unlock(semaforo_mutex);
 
-if(strcmp(estado_nuevo_string, "READY_PRIORITARIO")==0 || strcmp(estado_nuevo_string, "READY")==0)
-{        //aca si no jhay ningun proceso ejecutando debo ejecutar
-    if ((list_size(lista_ready)+list_size(lista_ready_prioridad))==1 && pcb_actual_en_cpu==0)
-    {
-        enviar_siguiente_proceso_a_ejecucion();
-    }
+
+
+    if(strcmp(estado_nuevo_string, "READY_PRIORITARIO")==0 || strcmp(estado_nuevo_string, "READY")==0){
+
+
+
+        if (!gestionando_dispatch && !ocupacion_cpu)            //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
+        {   
+                if (pthread_cancel(hilo_CPU_dispatch) != 0) {
+                perror("Error cancelando el hilo");
+            }
     
+            if (pthread_join(hilo_CPU_dispatch, NULL) != 0) {
+                perror("Error haciendo join al hilo");
+            }
+    
+            if (pthread_create(&hilo_CPU_dispatch, NULL,(void*) enviar_siguiente_proceso_a_ejecucion, NULL) != 0) {
+                perror("Error creando el hilo enviar_siguiente_proceso_a_ejecucion");
+            }
 
-
-}
-
+        }
+    }
 
 }
 
@@ -122,15 +133,21 @@ void gestionar_dispatch (){
 
     while(continuarIterando){    
 
+        gestionando_dispatch=false;
+
         cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
+
+        ocupacion_cpu=false;
+        gestionando_dispatch=true;    
         
         
-        
-        if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL)
+        if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL && cod_op!= DESALOJO_POR_QUANTUM)
         {
             tiempo_recien_ejecutado= temporal_gettime(temporizador); //recupero el valor antes de eliminar el temporizador
             temporal_destroy(temporizador);
+            temporizador=NULL;
             pthread_cancel(hilo_de_desalojo_por_quantum);
+            pthread_join(hilo_de_desalojo_por_quantum,NULL);
         }
 
     ////////////////////////////////   EXTRAIGO DEL SOCKET LO COMUN A TODOS LOS PROCESOS //////////////////
@@ -139,13 +156,25 @@ void gestionar_dispatch (){
         void* buffer = recibir_buffer(&size, socket_kernel_cpu_dispatch);
 
         desplazamiento = 0;
+
+        if (cod_op==MENSAJE)
+        {
+            char* mensaje = leer_de_buffer_string(buffer, &desplazamiento);
+            log_info(logger_debug, "%s", mensaje);
+            free(mensaje);
+            
+        }else{
+            pcb_dispatch->PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+            leer_de_buffer_CE(buffer, &desplazamiento, &pcb_dispatch->CE);
+            pcb_dispatch->quantum_ejecutado=tiempo_recien_ejecutado+ backup_de_quantum_ejecutado;
+            pcb_dispatch->estado=EXEC;
+            backup_de_quantum_ejecutado=0;      ////    RESETEO BACKUP DE QUANTUM   
+            tiempo_recien_ejecutado=0;          ////    RESETEO EL VALOR QUE OBTIENE EL TIEMPO DEL CONTADOR
+            pcb_actual_en_cpu=0;                ////Para indicar que actualmente no hay ningun proceso en ejecucion
+        }
         
-        pcb_dispatch->PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        leer_de_buffer_CE(buffer, &desplazamiento, &pcb_dispatch->CE);
-        pcb_dispatch->quantum_ejecutado=tiempo_recien_ejecutado+ backup_de_quantum_ejecutado;
-        backup_de_quantum_ejecutado=0;      ////    RESETEO BACKUP DE QUANTUM   
-        tiempo_recien_ejecutado=0;          ////    RESETEO EL VALOR QUE OBTIENE EL TIEMPO DEL CONTADOR
-        pcb_actual_en_cpu=0;                ////Para indicar que actualmente no hay ningun proceso en ejecucion
+        
+
 
     ///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION  ///////////////////////
 
@@ -158,9 +187,9 @@ void gestionar_dispatch (){
 
         switch (cod_op){
         case MENSAJE:
-            char* mensaje = leer_de_buffer_string(buffer, &desplazamiento);
-            log_info(logger_debug, "%s", mensaje);
-            break;
+        //lo dejo vacio para que pegue la vuelta
+        break;
+        
         case OUT_OF_MEMORY:
             log_info(logger, "Finaliza el proceso PID: %u Motivo: OUT_OF_MEMORY ", pcb_dispatch->PID);
             log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
@@ -313,24 +342,26 @@ void gestionar_dispatch (){
 void enviar_siguiente_proceso_a_ejecucion ()               
 {
 sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
+ocupacion_cpu=true;    
+
     t_pcb* pcb_a_ejecutar;
 
     if (list_size(lista_ready_prioridad)>0)
     {   
         pthread_mutex_lock(&semaforo_ready_prioridad);
-        pcb_a_ejecutar = list_remove(lista_ready_prioridad, 0);
+        pcb_a_ejecutar = (t_pcb*) list_remove(lista_ready_prioridad, 0);
         pthread_mutex_unlock(&semaforo_ready_prioridad);
     }
     else{
         pthread_mutex_lock(&semaforo_ready);
-        pcb_a_ejecutar = list_remove(lista_ready, 0);
+        pcb_a_ejecutar = (t_pcb*)  list_remove(lista_ready, 0);
         pthread_mutex_unlock(&semaforo_ready);
     
     }
     
     if(strcmp(algoritmo_planificacion,"VRR")==0 || strcmp(algoritmo_planificacion,"RR")==0){       //CREO HILO DE DESALOJO SI CORRESPONDIERA
-        int64_t* quantum_ptr = malloc(sizeof(int64_t));                                                    //LA UNICA DIFERENCIA ENTRE EL FIFO Y EL RR ES EL DESALOJO POR QUANTUM
-        if (quantum_ptr == NULL) {
+        t_pcb *pcb_interrupt = malloc(sizeof(t_pcb));                                                    //LA UNICA DIFERENCIA ENTRE EL FIFO Y EL RR ES EL DESALOJO POR QUANTUM
+        if (pcb_interrupt== NULL) {
             perror("malloc");
             return;
         }
@@ -339,9 +370,9 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
 
         if(pcb_a_ejecutar->quantum_ejecutado<quantum)
         {
-            *quantum_ptr = pcb_a_ejecutar->quantum_ejecutado;
-            pthread_t hilo_de_desalojo_por_quantum;                
-            pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, quantum_ptr); 
+            *pcb_interrupt = *pcb_a_ejecutar;
+                           
+            pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, pcb_interrupt); 
             pthread_detach(hilo_de_desalojo_por_quantum);
             
             enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);  
@@ -361,15 +392,19 @@ sem_wait(&cantidad_procesos_en_algun_ready);                                 // 
         log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' \n", pcb_a_ejecutar->PID,algoritmo_planificacion);
     }
     
+    
+     
     free(pcb_a_ejecutar);
+    gestionar_dispatch ();
+
 }
 
 
 
-void interruptor_de_QUANTUM(void* quantum_de_pcb)
-{
-    int64_t quantumEjecutado = *((int64_t*)quantum_de_pcb);
-    int64_t quantum_ejecucion=quantum - quantumEjecutado;
+void interruptor_de_QUANTUM(void* pcb)
+{   
+    t_pcb* pcb_interrupt= (t_pcb*)pcb;
+    int64_t quantum_ejecucion= quantum - pcb_interrupt->quantum_ejecutado;
     
     log_trace(logger_debug,"El tiempo a ejecutar registrado es %ld",quantum_ejecucion);
     
@@ -378,30 +413,32 @@ void interruptor_de_QUANTUM(void* quantum_de_pcb)
     usleep(quantum_ejecucion*1000);
  
 
-    op_code interrupcion = DESALOJO_POR_QUANTUM;
-    send(socket_kernel_cpu_interrupt, &interrupcion, sizeof(op_code), 0);
 
-    free(quantum_de_pcb);
+    enviar_instruccion_con_PID_por_socket(DESALOJO_POR_QUANTUM,pcb_interrupt->PID,socket_kernel_cpu_interrupt);
+    log_trace(logger_debug,"Interrupcion de quantum enviado");
+    free(pcb);
 
 }
 
 
 void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar){                         //ESTA FUNCION ES PARA CUANDO SE SOLICITA UN RECURSO Y PUEDE SEGUIR EJECUTANDO
 
-
-    int64_t* quantum_ptr = malloc(sizeof(int64_t));                                                    
-    if (quantum_ptr == NULL) {
+    ocupacion_cpu=true;
+    t_pcb *pcb_interrupt = malloc(sizeof(t_pcb));                                                    //LA UNICA DIFERENCIA ENTRE EL FIFO Y EL RR ES EL DESALOJO POR QUANTUM
+    if (pcb_interrupt== NULL) {
         perror("malloc");
         return;
     }
-    *quantum_ptr = pcb_a_reenviar->quantum_ejecutado;
+    *pcb_interrupt = *pcb_a_reenviar;
     pthread_t hilo_de_desalojo_por_quantum;                
-    pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, quantum_ptr); 
+    pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, pcb_interrupt); 
     pthread_detach(hilo_de_desalojo_por_quantum);
     
 
     enviar_CE(socket_kernel_cpu_dispatch, pcb_a_reenviar->PID,pcb_a_reenviar->CE);     
     log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u\n", pcb_a_reenviar->PID);
+    
+    gestionar_dispatch ();
     
 }
 
