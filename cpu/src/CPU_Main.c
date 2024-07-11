@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
         {
         
         log_info(logger,"Esperando un proceso");
-        sem_post(&espera_iterador);
         sem_wait(&hay_proceso_ejecutando);
         
         }
@@ -51,6 +50,7 @@ int main(int argc, char* argv[]) {
         log_info(logger_valores, "Despues de ejecutar");
         loggear_valores();
 
+        sem_post(&espera_iterador);
         if (interrupcion != INT_NO && ins_actual->ins!=EXIT) {
             log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
             if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
