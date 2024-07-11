@@ -103,7 +103,11 @@ void carga_exitosa_en_memoria(void* buffer){
     
     if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
     {   log_info(logger_debug,"Planificacion largo plazo detenida");
-        sem_wait(&semaforo_plp);
+            pthread_mutex_lock(&mutex_cont_pcp);
+            cantidad_procesos_bloq_pcp++;
+            pthread_mutex_unlock(&mutex_cont_pcp);
+            log_debug(logger_debug,"El valor del semaforo es: %d",cantidad_procesos_bloq_pcp);
+            sem_wait(&semaforo_plp);
     }
     
     t_pcb* pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID,&semaforo_new);

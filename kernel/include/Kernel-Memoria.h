@@ -22,7 +22,8 @@
 
 
 
-
+pthread_mutex_t mutex_cont_pcp;
+int32_t cantidad_procesos_bloq_pcp=0;
 
 
 

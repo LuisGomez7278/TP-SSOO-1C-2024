@@ -14,6 +14,7 @@ extern int32_t socket_cpu_kernel_interrupt;
 extern uint32_t PID;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
+extern sem_t espera_iterador;
 
 extern op_code interrupcion;
 extern op_code tipo_interrupcion;

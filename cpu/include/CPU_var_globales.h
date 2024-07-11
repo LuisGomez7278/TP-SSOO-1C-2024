@@ -34,6 +34,7 @@ bool detener_ejecucion=true;
 uint32_t PID;
 t_contexto_ejecucion contexto_interno;
 sem_t hay_proceso_ejecutando;
+sem_t espera_iterador;
 
 t_instruccion* ins_actual;
 sem_t prox_instruccion;

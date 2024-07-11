@@ -28,6 +28,7 @@ extern uint32_t PID;
 extern op_code interrupcion;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
+extern sem_t espera_iterador;
 extern sem_t prox_instruccion;
 extern sem_t respuesta_copy_string;
 

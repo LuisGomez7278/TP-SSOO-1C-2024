@@ -27,12 +27,24 @@ void atender_instruccion_validada(char* leido)
     }else if (strcmp(array_de_comando[0],"INICIAR_PLANIFICACION")==0)//---------------------------------/////////////
     {   
         if (detener_planificacion)
-        {
-        sem_post(&semaforo_pcp);
-        sem_post(&semaforo_plp);  
+        {   
+            detener_planificacion=false;          
+            log_error(logger_debug,"El valor del contador es: %d", cantidad_procesos_bloq_pcp);
+            while (cantidad_procesos_bloq_pcp>0)
+            {
+                sem_post(&semaforo_plp);
+                pthread_mutex_lock(&mutex_cont_pcp);
+                cantidad_procesos_bloq_pcp--;
+                pthread_mutex_unlock(&mutex_cont_pcp);
+                log_error(logger_debug,"El valor del semaforo (W) es: %d",cantidad_procesos_bloq_pcp);
+            }
+            
+            sem_post(&semaforo_pcp);
+            cantidad_procesos_bloq_pcp=0;
+
         }
         
-        detener_planificacion=false;
+        
  
 
 

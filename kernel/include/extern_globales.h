@@ -86,6 +86,8 @@ extern uint32_t pcb_actual_en_cpu;
 extern pthread_t hilo_CPU_dispatch;
 extern pthread_t hilo_de_desalojo_por_quantum; 
 
+extern pthread_mutex_t mutex_cont_pcp;
+extern int32_t cantidad_procesos_bloq_pcp;
 
 //atender_operacion.h:
     void atender_instruccion_validada(char* leido);
