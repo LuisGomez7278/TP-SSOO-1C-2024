@@ -8,10 +8,14 @@ void gestionar_conexion_memoria()
     
     op_code operacion;
     bool continuar_iterando = true;
+    uint32_t size;
+    uint32_t desplazamiento=0;
 
     while (continuar_iterando)
-    {
+    {   
+
         operacion = recibir_operacion(socket_cpu_memoria);
+        void* buffer=NULL;
         switch (operacion)
         {
         case MENSAJE:
@@ -31,9 +35,9 @@ void gestionar_conexion_memoria()
             break;
         
         case SOLICITUD_COPY_STRING_READ:
-            uint32_t size;
-            uint32_t desplazamiento = 0;
-            void* buffer = recibir_buffer(&size, socket_cpu_memoria);
+            
+            desplazamiento = 0;
+            buffer = recibir_buffer(&size, socket_cpu_memoria);
             string_leida_de_memoria = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger_debug, "Llego la string \'%s\' de memoria", string_leida_de_memoria);
             sem_post(&respuesta_copy_string);
@@ -41,14 +45,14 @@ void gestionar_conexion_memoria()
             break;
 
         case SOLICITUD_MOV_IN:
-            uint32_t size;
-            uint32_t desplazamiento = 0;
-            void* buffer = recibir_buffer(&size, socket_cpu_memoria);
+             
+            desplazamiento = 0;
+            buffer = recibir_buffer(&size, socket_cpu_memoria);
 
             uint32_t tamanio = leer_de_buffer_uint32(&buffer, &desplazamiento);
             uint32_t respuesta = leer_de_buffer_uint32(&buffer, &desplazamiento);
 
-            if (tamanio = sizeof(uint8_t))
+            if (tamanio == sizeof(uint8_t))
                 {respuesta_mov_in_8 = respuesta;}
             else {respuesta_mov_in_32 = respuesta;}
             
@@ -64,6 +68,7 @@ void gestionar_conexion_memoria()
             log_error(logger, "Llego una operacion desconocida por socket memoria, op_code: %d", operacion);
             break;
         }
+        free(buffer);
     }
 }
 
