@@ -2,8 +2,8 @@
 
 int main(int argc, char* argv[]) {
     
-// INICIALIZO LOGs
-    inciarlogs();
+// INICIALIZO LOGs Y SEMAFOROS
+    inciarlogsYsemaforos();
 
 // OBTENGO LOS VALORES DEL CONFIG
     cargarConfig();

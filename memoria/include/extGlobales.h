@@ -53,4 +53,11 @@ cod_ins hash_ins(char* ins);
 char* path_completo(char* path_base, char* path_parcial);
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC);
 
+///MUTEX 
+extern pthread_mutex_t mutex_tablaDePaginas;
+extern pthread_mutex_t mutex_procesos;
+extern pthread_mutex_t mutex_listaDeinstrucciones;
+extern pthread_mutex_t mutex_bitmap;
+
+
 #endif //TP_MEMORIA_EXT_H_

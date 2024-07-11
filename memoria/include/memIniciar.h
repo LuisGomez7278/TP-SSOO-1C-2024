@@ -16,7 +16,7 @@
 #include "../../utils/include/conexiones.h"
 #include "extGlobales.h"
 
-void inciarlogs();
+void inciarlogsYsemaforos();
 void cargarConfig();
 void inicializarEspacioMem();
 

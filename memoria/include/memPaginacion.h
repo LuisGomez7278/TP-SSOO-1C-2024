@@ -51,4 +51,6 @@ bool escribir_memoria(uint32_t direccion_fisica, uint32_t bytes, char* valor, ui
 
 char* leer_memoria(uint32_t direccion_fisica, int bytes, uint32_t PID);
 
+
+
 #endif //TP_MEMORIA_PAGINACION_H_

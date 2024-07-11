@@ -61,6 +61,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
     free(buffer);
 }
 
+
 void eliminar_proceso(){ // llega un pid
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;

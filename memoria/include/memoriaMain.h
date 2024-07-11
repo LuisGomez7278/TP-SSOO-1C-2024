@@ -30,4 +30,9 @@ int32_t socket_escucha;
 
 void enviar_tam_pag();
 
+//MUTEX
+pthread_mutex_t mutex_tablaDePaginas;
+pthread_mutex_t mutex_procesos;
+pthread_mutex_t mutex_listaDeinstrucciones;
+pthread_mutex_t mutex_bitmap;
 #endif //TP_MEMORIA_MAIN_H_

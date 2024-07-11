@@ -17,10 +17,16 @@ bool crear_procesoM(char* path_instrucciones, uint32_t PID){
     proceso->paginas = tabla_paginas;
 
     añadirTablaALista(tabla_paginas, PID);
+    
+    pthread_mutex_lock(&mutex_procesos);
     list_add(procesos, proceso);
+    pthread_mutex_unlock(&mutex_procesos);
+   
+    
     log_info(logger_debug, "Proceso con PID %d creado", PID);
     return true;
 } 
+
 
 void eliminar_procesoM(uint32_t PID){
     // Buscar el proceso en la lista de procesos
@@ -38,17 +44,24 @@ void eliminar_procesoM(uint32_t PID){
         log_info(logger, "Destrucción de Tabla de Páginas: PID: %u Tamaño: %d", PID, list_size(tabla_pag_p->paginas));
 
         for (int i = 0; i < list_size(tablaDePaginas); i++) {
-            tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
+                pthread_mutex_lock(&mutex_tablaDePaginas);
+                tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
+                pthread_mutex_unlock(&mutex_tablaDePaginas);
+            
             if (tabla->pid == PID) {
                 // Liberar la memoria asociada a la tabla de páginas del proceso
                 list_destroy_and_destroy_elements(tabla->paginas, free);
+                pthread_mutex_lock(&mutex_tablaDePaginas);
                 list_remove_and_destroy_element(tablaDePaginas, i, free);
+                pthread_mutex_unlock(&mutex_tablaDePaginas);
                 break;
             }
         }
     }
 
     // Eliminar el proceso de la lista de procesos
+    pthread_mutex_lock(&mutex_procesos);
+       
     for (int i = 0; i < list_size(procesos); i++) {
         procesoM* p = list_get(procesos, i);
         if (p->pid == PID) {
@@ -56,6 +69,7 @@ void eliminar_procesoM(uint32_t PID){
             break;
         }
     }
+    pthread_mutex_unlock(&mutex_procesos);
 
     // Liberar la memoria asociada al proceso
     list_destroy(proceso->instrs);
@@ -168,18 +182,24 @@ void añadirTablaALista(t_list* paginas, uint32_t PID){
     nueva_tabla_proceso->paginas = paginas;
 
     log_info(logger, "Creación de Tabla de Páginas: PID: %u Tamaño: %d", PID, list_size(paginas));
-
+    
+    pthread_mutex_lock(&mutex_tablaDePaginas);
     list_add(tablaDePaginas, nueva_tabla_proceso);
+    pthread_mutex_unlock(&mutex_tablaDePaginas);
+
 }
 
 tabla_pag_proceso* obtener_tabla_pag_proceso(uint32_t PID){
+     pthread_mutex_lock(&mutex_tablaDePaginas);
     for (int i = 0; i < list_size(tablaDePaginas); i++) {
         tabla_pag_proceso* tabla = list_get(tablaDePaginas, i);
         if (tabla->pid == PID) {
             //log_info(logger, "Tabla de paginas del proceso PID: %d obtenida con exito", PID);
+            pthread_mutex_unlock(&mutex_tablaDePaginas);
             return tabla;
         }
     }
+    pthread_mutex_unlock(&mutex_tablaDePaginas);
     return NULL;
 }
 
@@ -204,12 +224,16 @@ tabla_pag* buscar_siguiente_pagina(tabla_pag_proceso* tabla_proceso, int marco_a
 }
 
 procesoM* buscar_proceso_por_pid(uint32_t pid){
+        pthread_mutex_lock(&mutex_procesos);
+        
     for (int i = 0; i < list_size(procesos); i++) {
         procesoM* proceso = list_get(procesos, i);
         if (proceso->pid == pid) {
+            pthread_mutex_unlock(&mutex_procesos);
             return proceso;
         }
     }
+    pthread_mutex_unlock(&mutex_procesos);
     log_error(logger_debug, "Proceso con PID %d no encontrado", pid);
     return NULL;
 }

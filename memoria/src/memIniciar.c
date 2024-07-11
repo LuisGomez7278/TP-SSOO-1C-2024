@@ -1,9 +1,20 @@
 #include "../include/memIniciar.h"
 
-void inciarlogs(){
+void inciarlogsYsemaforos(){
     //INICIALIZO LOGGER
-    logger = start_logger("log_memoria.log", "LOG MEMORIA", LOG_LEVEL_INFO);
+    logger = start_logger("log_memoria.log", "LOG MEMORIA", LOG_LEVEL_TRACE);
     logger_debug = start_logger("log_memoria_debug.log", "LOG MEMORIA DEBUG", LOG_LEVEL_TRACE);
+
+     pthread_mutex_init(&mutex_tablaDePaginas, NULL);
+     pthread_mutex_init(&mutex_procesos, NULL);
+     pthread_mutex_init(&mutex_listaDeinstrucciones, NULL);
+     pthread_mutex_init(& mutex_bitmap,NULL);
+     
+     
+
+
+
+
 }
 
 void cargarConfig(){

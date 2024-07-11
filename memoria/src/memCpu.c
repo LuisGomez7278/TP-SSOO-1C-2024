@@ -61,16 +61,21 @@ void fetch(int socket_cpu_memoria){
     recibir_fetch(socket_cpu_memoria, &PID, &PC);
     log_info(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     
-    t_list* lista_instrucciones = obtener_instrs(PID);
 
+pthread_mutex_unlock(&mutex_listaDeinstrucciones);
+
+    pthread_mutex_lock(&mutex_listaDeinstrucciones);
+    
+    t_list* lista_instrucciones = obtener_instrs(PID);
+    
     if(lista_instrucciones==NULL){ 
         t_paquete* paquete = crear_paquete(PROCESO_NO_CARGADO);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
     }
-
     t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
-
+    pthread_mutex_unlock(&mutex_listaDeinstrucciones);
+    
     usleep(retardo*1000);
 
     enviar_instruccion(socket_cpu_memoria, sig_ins);
