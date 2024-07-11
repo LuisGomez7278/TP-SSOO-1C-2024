@@ -41,7 +41,7 @@ void gestionar_conexion_memoria()
             void* buffer = recibir_buffer(&size, socket_cpu_memoria);
             string_leida_de_memoria = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger_debug, "Llego la string \'%s\' de memoria", string_leida_de_memoria);
-            sem_post(&respuesta_copy_string);
+//            sem_post(&respuesta_copy_string);
             free(buffer);
             break;
        

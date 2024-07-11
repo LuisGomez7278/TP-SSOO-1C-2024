@@ -20,11 +20,12 @@ void gestionar_conexion_dispatch()
         case CONTEXTO:
             
             recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
-            log_trace(logger, "Llega un proceso de PID: %u", PID);
+            
             interrupcion = INT_NO;
             detener_ejecucion=false;
-            sem_post(&hay_proceso_ejecutando);
             sem_wait(&espera_iterador);                                         ///ESTE SEMAFORO LO PUSE PARA SINCRONIZAR WL WHILW(1) CON RECIBIR MENSAJE
+            log_trace(logger, "Llega un proceso de PID: %u", PID);
+            sem_post(&hay_proceso_ejecutando);
             break;
         
         case FALLO:

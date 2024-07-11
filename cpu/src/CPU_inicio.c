@@ -21,7 +21,7 @@ void iniciar_CPU(void){
 
     sem_init(&prox_instruccion, 0, 0);
     sem_init(&hay_proceso_ejecutando, 0, 0);
-    sem_init(&respuesta_copy_string, 0, 0);
+//    sem_init(&respuesta_copy_string, 0, 0);
     sem_init(&espera_iterador, 0, 1);
     
 }
