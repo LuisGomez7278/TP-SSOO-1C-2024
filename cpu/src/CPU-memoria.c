@@ -21,7 +21,7 @@ void gestionar_conexion_memoria()
         case FETCH:
             ins_actual = recibir_instruccion();
             sem_post(&prox_instruccion);
-            log_info(logger, "CPU recibe una instruccion de memoria, codigo: %d", ins_actual->ins);
+            log_info(logger, "CPU recibe una instruccion de memoria, codigo: %s", codigo_instruccion_string(ins_actual->ins) );
             break;
 
         case PROCESO_NO_CARGADO:

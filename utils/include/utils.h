@@ -119,4 +119,5 @@ t_config *start_config(char* path);
 t_log *start_logger(char* fileName, char* processName, t_log_level logLevel);
 void end_program(t_log* logger, t_config* config);
 char* codigo_estado_string(t_estado codigo);
+char* codigo_instruccion_string(cod_ins codigo);
 #endif
