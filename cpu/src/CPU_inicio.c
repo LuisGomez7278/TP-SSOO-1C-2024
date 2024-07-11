@@ -19,10 +19,12 @@ void iniciar_CPU(void){
     contexto_interno.DI = 0;
     contexto_interno.SI = 0;
 
-    sem_init(&prox_instruccion, 0, 0);
     sem_init(&hay_proceso_ejecutando, 0, 0);
-//    sem_init(&respuesta_copy_string, 0, 0);
     sem_init(&espera_iterador, 0, 1);
+    
+    sem_init(&prox_instruccion, 0, 0);
+    sem_init(&respuesta_copy_string, 0, 0);
+    sem_init(&respuesta_MOV_IN, 0, 0);
     
 }
 

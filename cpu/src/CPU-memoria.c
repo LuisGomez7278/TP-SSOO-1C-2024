@@ -29,11 +29,6 @@ void gestionar_conexion_memoria()
             sem_post(&prox_instruccion);
             log_warning(logger, "CPU pidio una instruccion de un proceso que no esta cargado en memoria, PID: %u", PID);
             break;
-
-        case FALLO:
-            log_error(logger, "Modulo MEMORIA desconectado, terminando servidor");
-            continuar_iterando = false;
-            break;
         
         case SOLICITUD_COPY_STRING_READ:
             uint32_t size;
@@ -41,10 +36,30 @@ void gestionar_conexion_memoria()
             void* buffer = recibir_buffer(&size, socket_cpu_memoria);
             string_leida_de_memoria = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger_debug, "Llego la string \'%s\' de memoria", string_leida_de_memoria);
-//            sem_post(&respuesta_copy_string);
+            sem_post(&respuesta_copy_string);
             free(buffer);
             break;
-       
+
+        case SOLICITUD_MOV_IN:
+            uint32_t size;
+            uint32_t desplazamiento = 0;
+            void* buffer = recibir_buffer(&size, socket_cpu_memoria);
+
+            uint32_t tamanio = leer_de_buffer_uint32(&buffer, &desplazamiento);
+            uint32_t respuesta = leer_de_buffer_uint32(&buffer, &desplazamiento);
+
+            if (tamanio = sizeof(uint8_t))
+                {respuesta_mov_in_8 = respuesta;}
+            else {respuesta_mov_in_32 = respuesta;}
+            
+            sem_post(&respuesta_MOV_IN);
+            break;
+
+        case FALLO:
+            log_error(logger, "Modulo MEMORIA desconectado, terminando servidor");
+            continuar_iterando = false;
+            break;
+
         default:
             log_error(logger, "Llego una operacion desconocida por socket memoria, op_code: %d", operacion);
             break;

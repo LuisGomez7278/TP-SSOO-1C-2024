@@ -112,6 +112,7 @@ void movIn(int socket_cpu_memoria){
     
     if(buffer != NULL){
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t tamanio_total = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -129,6 +130,7 @@ void movIn(int socket_cpu_memoria){
         usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
+        agregar_a_paquete_uint32(paquete, tamanio_total);
         agregar_a_paquete_uint32(paquete, num);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);            

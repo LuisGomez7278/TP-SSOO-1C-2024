@@ -38,6 +38,10 @@ sem_t espera_iterador;
 
 t_instruccion* ins_actual;
 sem_t prox_instruccion;
+sem_t respuesta_MOV_IN;
+uint8_t respuesta_mov_in_8;
+uint32_t respuesta_mov_in_32;
+sem_t respuesta_copy_string;
 char* string_leida_de_memoria;
 
 op_code interrupcion;

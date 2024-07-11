@@ -182,14 +182,16 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         if (registro_chico(ins_actual->arg1))
         {
             solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
-            valorchico1 = recibir_respuesta_MOV_IN_8b();
+            sem_wait(&respuesta_MOV_IN);
+            valorchico1 = respuesta_mov_in_8;
             memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
             log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorchico1);
         }
         else
         {
             solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
-            valorgrande1 = recibir_respuesta_MOV_IN_32b();
+            sem_wait(&respuesta_MOV_IN);
+            valorgrande1 = respuesta_mov_in_32;
             memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
             log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorgrande1);
         }
@@ -241,7 +243,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
      //   uint32_t direccion_logica_WRITE = contexto_interno->DI;
 
         solicitar_lectura_string(direccion_logica_READ, bytes_a_copiar);
-//        sem_wait(&respuesta_copy_string);
+        sem_wait(&respuesta_copy_string);
         //escribir_en_memoria_string(string_leida, direccion_logica_WRITE, bytes_a_copiar);
         // recibir_respuesta_COPY_STRING();
         contexto_interno->PC++;
