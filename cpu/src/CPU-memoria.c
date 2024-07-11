@@ -52,7 +52,8 @@ void gestionar_conexion_memoria()
     }
 }
 
-void fetch(uint32_t PID, uint32_t PC){    
+void fetch(uint32_t PID, uint32_t PC){
+    log_info(logger_debug, "PID: %u solicita la instruccion nro: %u", PID, PC);
     t_paquete* p = crear_paquete(FETCH);
     agregar_a_paquete_uint32(p, PID);
     agregar_a_paquete_uint32(p, PC);

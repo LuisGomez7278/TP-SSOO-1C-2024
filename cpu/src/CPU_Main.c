@@ -41,12 +41,14 @@ int main(int argc, char* argv[]) {
         sem_wait(&hay_proceso_ejecutando);
         
         }
-        
+        log_info(logger_valores, "Antes de ejecutar");
+        loggear_valores();
         
         fetch(PID, contexto_interno.PC);
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
         
+        log_info(logger_valores, "Despues de ejecutar");
         loggear_valores();
 
         if (interrupcion != INT_NO && ins_actual->ins!=EXIT) {
@@ -95,6 +97,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     {
     case SET:
         log_info(logger,"PID: %u - Ejecutando: SET - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
+        contexto_interno->PC++;
         registro = direccion_registro(contexto_interno, ins_actual->arg1);
         if(registro_chico(ins_actual->arg1))
         {
@@ -106,11 +109,11 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             valorgrande1 = atoi(ins_actual->arg2); 
             memcpy(registro, &valorgrande1, sizeof(uint32_t));
         }
-        contexto_interno->PC++;
         break;
 
     case SUM:
         log_info(logger,"PID: %u - Ejecutando: SUM - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
+        contexto_interno->PC++;
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
         if(registro_chico(ins_actual->arg1))
@@ -127,11 +130,11 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             valorgrande2 = valorgrande1+valorgrande2;
             memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
         }
-        contexto_interno->PC++;
         break;
 
     case SUB:
         log_info(logger,"PID: %u - Ejecutando: SUB - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
+        contexto_interno->PC++;
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
         if(registro_chico(ins_actual->arg1))
@@ -160,7 +163,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             
             memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
         }
-        contexto_interno->PC++;
         break;
         
     case JNZ:
@@ -363,7 +365,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case EXIT:
         log_info(logger,"PID: %u - Ejecutando: EXIT", PID);
-        contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
         desalojar_proceso(motivo_desalojo);
         break;
@@ -565,8 +566,8 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
 
 void loggear_valores()
 {
-    log_info(logger_valores, "PC: %u, AX: %u, BX: %u, CX: %u, DX: %u, EAX: %u, EBX: %u, ECX: %u, EDX: %u, SI: %u, DI: %u",
-    contexto_interno.PC,
+    log_info(logger_valores, "PID: %u, PC: %u, AX: %u, BX: %u, CX: %u, DX: %u, EAX: %u, EBX: %u, ECX: %u, EDX: %u, SI: %u, DI: %u",
+    PID, contexto_interno.PC,
     contexto_interno.AX, contexto_interno.BX, contexto_interno.CX, contexto_interno.DX,
     contexto_interno.EAX, contexto_interno.EBX, contexto_interno.ECX, contexto_interno.EDX,
     contexto_interno.SI, contexto_interno.DI);

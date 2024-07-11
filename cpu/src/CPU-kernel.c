@@ -18,13 +18,27 @@ void gestionar_conexion_dispatch()
             recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
             break;
         case CONTEXTO:
+            t_contexto_ejecucion contexto_espera;
             
-            recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_interno);
+            recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_espera);
+            log_trace(logger, "Llega un proceso de PID: %u", PID);
             
             interrupcion = INT_NO;
             detener_ejecucion=false;
             sem_wait(&espera_iterador);                                         ///ESTE SEMAFORO LO PUSE PARA SINCRONIZAR WL WHILW(1) CON RECIBIR MENSAJE
-            log_trace(logger, "Llega un proceso de PID: %u", PID);
+            contexto_interno.PC = contexto_espera.PC;
+            contexto_interno.AX = contexto_espera.AX;
+            contexto_interno.BX = contexto_espera.BX;
+            contexto_interno.CX = contexto_espera.CX;
+            contexto_interno.DX = contexto_espera.DX;
+            contexto_interno.EAX = contexto_espera.EAX;
+            contexto_interno.EBX = contexto_espera.EBX;
+            contexto_interno.ECX = contexto_espera.ECX;
+            contexto_interno.EDX = contexto_espera.EDX;
+            contexto_interno.SI = contexto_espera.SI;
+            contexto_interno.DI = contexto_espera.DI;
+
+            log_trace(logger, "Se carga nuevo contexto de ejecucion");
             sem_post(&hay_proceso_ejecutando);
             break;
         
