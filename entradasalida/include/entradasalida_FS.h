@@ -47,5 +47,6 @@ bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar);
 bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_cant_bloques);
 
 void FS_WRITE(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, char* datos_a_escribir);
+void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, void* datos_leidos);
 
 #endif //ENTRADASALIDA_FS_H_

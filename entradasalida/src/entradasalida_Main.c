@@ -37,6 +37,7 @@ int32_t main(int32_t argc, char* argv[]) {
         uint32_t desplazamiento = 0;
         t_paquete* paquete;
         op_code cod_op = recibir_operacion(socket_entradasalida_kernel);
+
         char* nombre_archivo;
         uint32_t tamanio_total;
         uint32_t cant_accesos;
@@ -45,8 +46,10 @@ int32_t main(int32_t argc, char* argv[]) {
 
         uint32_t puntero;
         char* path_archivo_metadata;
+        t_config* metadata;
         uint32_t tamanio_archivo;
         uint32_t bloque_inicial;
+        uint32_t acumulador;
 
         switch (cod_op) {
         case MENSAJE:
@@ -76,14 +79,13 @@ int32_t main(int32_t argc, char* argv[]) {
             agregar_a_paquete_uint32(paquete, tamanio_total);
             agregar_a_paquete_uint32(paquete, cant_accesos);
 
-            uint32_t acumulador = 0;
+            acumulador = 0;
             for (int i = 0; i < cant_accesos; i++)
             {
                 uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                 uint32_t tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
                 
                 agregar_a_paquete_uint32(paquete, dir_fisica);
-                agregar_a_paquete_uint32(paquete, tamanio_a_leer);
                 agregar_a_paquete_string(paquete, tamanio_a_leer, string_leida+acumulador);
                 acumulador+=tamanio_a_leer;
             }
@@ -192,7 +194,7 @@ int32_t main(int32_t argc, char* argv[]) {
 
             path_archivo_metadata = string_duplicate(path_metadata);
             string_append(&path_archivo_metadata, nombre_archivo);
-            t_config* metadata = config_create(path_archivo_metadata);
+            metadata = config_create(path_archivo_metadata);
             tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
             bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
 
@@ -205,19 +207,62 @@ int32_t main(int32_t argc, char* argv[]) {
             {
                 FS_WRITE(bloques, bloque_inicial, puntero, tamanio_total, string_leida_memoria);
             }
-            
+            free(buffer);
+            config_destroy(metadata);
             break;
 
         case DESALOJO_POR_IO_FS_READ:
             buffer = recibir_buffer(&size, socket_entradasalida_kernel);
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-            
+            nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            tamanio_total = leer_de_buffer_uint32(buffer, &desplazamiento);
+            puntero = leer_de_buffer_uint32(buffer, &desplazamiento);
+            cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+            path_archivo_metadata = string_duplicate(path_metadata);
+            string_append(&path_archivo_metadata, nombre_archivo);
+            metadata = config_create(path_archivo_metadata);
+            tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
+            bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+
+            log_info(logger, "PID: %u - Escribir Archivo: %s - Tamaño a Escribir: %u - Puntero Archivo: %u", PID, nombre_archivo, tamanio_total, puntero);
+            void* datos_leidos;
+            if (puntero+tamanio_total >= tamanio_archivo)
+            {
+                log_error(logger, "PID: %u trato de leer de disco al archivo: %s mas alla de su tamaño asignado", PID, nombre_archivo);
+            }
+            else
+            {
+                datos_leidos = malloc(tamanio_total);
+                FS_READ(bloques, bloque_inicial, puntero, tamanio_total, datos_leidos);
+            }
+            free(buffer);
+            config_destroy(metadata);
+
+            t_paquete* paq = crear_paquete(DESALOJO_POR_IO_FS_READ);
+            agregar_a_paquete_uint32(paq, tamanio_total);
+            agregar_a_paquete_uint32(paq, cant_accesos);
+
+            acumulador = 0;
+            for (int i = 0; i < cant_accesos; i++)
+            {
+                dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
+                tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+                
+                agregar_a_paquete_uint32(paquete, dir_fisica);
+                agregar_a_paquete_string(paquete, tamanio_a_leer, datos_leidos+acumulador);
+                acumulador+=tamanio_a_leer;
+            }
+            enviar_paquete(paq, socket_entradasalida_memoria);
+            eliminar_paquete(paq);
+            free(datos_leidos);
             break;
 
         case FALLO:
             log_error(logger, "La ENTRADASALIDA SE DESCONECTO. Terminando servidor");
             continuarIterando=0;
             break;
+
         default:
             log_warning(logger,"Operacion desconocida de ENTRADA Y SALIDA. No quieras meter la pata");
             break;
