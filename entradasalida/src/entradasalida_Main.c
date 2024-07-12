@@ -90,6 +90,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 acumulador+=tamanio_a_leer;
             }
             free(buffer);
+            free(string_leida);
 
             enviar_paquete(paquete, socket_entradasalida_memoria);
             eliminar_paquete(paquete);
@@ -122,13 +123,16 @@ int32_t main(int32_t argc, char* argv[]) {
             enviar_paquete(paquete, socket_entradasalida_memoria);
             eliminar_paquete(paquete);
             
-            // Enviar string a kernel para que lo imprima
             sem_wait(&respuesta_memoria);
-            paquete = crear_paquete(DESALOJO_POR_IO_STDOUT);
-            agregar_a_paquete_string(paquete, tamanio_total, string_leida_memoria);
-            enviar_paquete(paquete, socket_entradasalida_kernel);
-            eliminar_paquete(paquete);
-            log_info(logger, "Se envio la string \'%s\', a kernel para que sea imprimida en pantalla", string_leida_memoria);
+            // // Enviar string a kernel para que lo imprima
+            // paquete = crear_paquete(DESALOJO_POR_IO_STDOUT);
+            // agregar_a_paquete_string(paquete, tamanio_total, string_leida_memoria);
+            // enviar_paquete(paquete, socket_entradasalida_kernel);
+            // eliminar_paquete(paquete);
+            // log_info(logger, "Se envio la string \'%s\', a kernel para que sea imprimida en pantalla", string_leida_memoria);
+            // Imprimir por pantalla
+            printf(string_leida_memoria);
+            free(string_leida_memoria);
             break;
 
         case DESALOJO_POR_IO_FS_CREATE:
@@ -140,6 +144,7 @@ int32_t main(int32_t argc, char* argv[]) {
             free(buffer);
             log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
             crear_archivo(nombre_archivo);
+            free(nombre_archivo);
             break;
 
         case DESALOJO_POR_IO_FS_DELETE:
@@ -151,6 +156,7 @@ int32_t main(int32_t argc, char* argv[]) {
             free(buffer);
             log_info(logger, "PID: %u - Eliminar Archivo: %s", PID, nombre_archivo);
             eliminar_archivo(nombre_archivo);
+            free(nombre_archivo);
             break;
 
         case DESALOJO_POR_IO_FS_TRUNCATE:
@@ -162,7 +168,8 @@ int32_t main(int32_t argc, char* argv[]) {
             int32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
             free(buffer);
             log_info(logger, "PID: %u - Truncar Archivo: %s", PID, nombre_archivo);
-            truncar_archivo(nombre_archivo, nuevo_tamanio);
+            truncar_archivo(PID, nombre_archivo, nuevo_tamanio);
+            free(nombre_archivo);
             break;
 
         case DESALOJO_POR_IO_FS_WRITE:
@@ -209,6 +216,8 @@ int32_t main(int32_t argc, char* argv[]) {
             }
             free(buffer);
             config_destroy(metadata);
+            free(nombre_archivo);
+            free(string_leida_memoria);
             break;
 
         case DESALOJO_POR_IO_FS_READ:
@@ -256,6 +265,7 @@ int32_t main(int32_t argc, char* argv[]) {
             enviar_paquete(paq, socket_entradasalida_memoria);
             eliminar_paquete(paq);
             free(datos_leidos);
+            free(nombre_archivo);
             break;
 
         case FALLO:
