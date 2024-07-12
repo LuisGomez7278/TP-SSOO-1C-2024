@@ -21,66 +21,58 @@ void inicializar_bloques()
 {
     uint32_t tam_archivo_bloques = BLOCK_COUNT*BLOCK_SIZE;
 
-    FILE* archivo_bloques = fopen(path_bloques, "rb+");
+    int fd = open(path_bloques ,O_RDWR);
 
-    if (archivo_bloques == NULL)
+    if (fd == -1)
     {
-        FILE* archivo_bitmap = fopen(path_bitmap, "wb+");
-        if (archivo_bitmap == NULL)
-        {
-        	log_error(logger, "No existe y no se pudo crear el archivo bloques.dat.");
-            exit(1);
-        }
-        truncate(path_bloques, tam_archivo_bloques);
-        log_trace(logger, "Se crea el archivo bloques.dat");
+        log_error(logger, "No se pudo abrir el archivo bloques.dat.");
     }
     else
     {
-        truncate(path_bloques, tam_archivo_bloques);
-        log_trace(logger, "Ya existe un archivo bloques.dat, se lo trunca al tamaño necesario");
+        ftruncate(fd, tam_archivo_bloques);
+        bloques = mmap(NULL, tam_archivo_bloques, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        close(fd);
+    }
+    if (bloques == MAP_FAILED)
+    {
+        log_error(logger ,"No se pudo inicializar el archivo de bloques");
+    }
+    else
+    {
+        char* dump_bloques = mem_hexstring(bloques, tam_archivo_bloques);
+        log_info(logger, "Archivo bloques.dat inicializado, hexdump: %s", dump_bloques);
+        free(dump_bloques);
     }
 
-    char* dump_bloques = mem_hexstring(archivo_bloques, tam_archivo_bloques);
-    log_info(logger, "Archivo bloques.dat inicializado, hexdump: %s", dump_bloques);
-    fclose(archivo_bloques);
-    free(dump_bloques);
 }
 
 void inicializar_bitmap()
 {
     uint32_t tam_bitmap = BLOCK_COUNT/8;
-    char* bloque = malloc(tam_bitmap);
-    memset(bloque, 0, tam_bitmap);
-    bitmap_bloques = bitarray_create_with_mode(bloque, tam_bitmap, MSB_FIRST);
-    if (bitmap_bloques == NULL)
-    {
-        log_error(logger ,"No se pudo crear el bitmap");
-        exit(1);
-    }
     
-    FILE* archivo_bitmap = fopen(path_bitmap, "rb+");
-    if (archivo_bitmap == NULL)
+    int fd = open(path_bitmap ,O_RDWR);
+    if (fd == -1)
     {
-        FILE* archivo_bitmap = fopen(path_bitmap, "wb+");
-        if (archivo_bitmap == NULL)
-        {
-        	log_error(logger, "No se pudo abrir el archivo bitmap.dat.");
-        	bitarray_destroy(bitmap_bloques);
-            exit(1);
-        }
-        fwrite(bitmap_bloques->bitarray, 1, tam_bitmap, archivo_bitmap);
-        log_trace(logger, "Se crea el archivo bitmap.dat");
+        log_error(logger, "No se pudo abrir el archivo bitmap.dat.");
     }
     else
     {
-        fread(bitmap_bloques->bitarray, 1, tam_bitmap, archivo_bitmap);
-        log_trace(logger, "Se carga el archivo bitmap.dat existente");
+        ftruncate(fd, tam_bitmap);
+        array_bitmap = mmap(NULL, tam_bitmap, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        close(fd);
     }
-
-    char* dump_bitmap = mem_hexstring(bitmap_bloques->bitarray, tam_bitmap);
-    log_info(logger, "Bitmap inicializado, hexdump: %s", dump_bitmap);
-    fclose(archivo_bitmap);
-    free(dump_bitmap);
+    
+    bitmap_bloques = bitarray_create_with_mode(array_bitmap, tam_bitmap, MSB_FIRST);
+    if (bitmap_bloques == NULL)
+    {
+        log_error(logger ,"No se pudo inicializar el bitmap");
+    }
+    else
+    {
+        char* dump_bitmap = mem_hexstring(bitmap_bloques->bitarray, tam_bitmap);
+        log_info(logger, "Bitmap inicializado, hexdump: %s", dump_bitmap);
+        free(dump_bitmap);
+    }
 }
 
 void crear_archivo(char* nombre_archivo)
@@ -180,12 +172,12 @@ void liberar_bloques(char* path_archivo_metadata)
     config_destroy(metadata);
 }
 
-void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio)
+void truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
 {
     int32_t indice;
     if (!existe_archivo(nombre_archivo, &indice))
     {
-        log_error(logger, "Se trato de truncar un archivo que no existe: %s", nombre_archivo);
+        log_error(logger, "PID: %u, trato de truncar un archivo que no existe: %s", PID, nombre_archivo);
     }
     else
     {
@@ -215,22 +207,24 @@ void truncar_archivo(char* nombre_archivo, uint32_t nuevo_tamanio)
             {
                 // compactacion debe dejar el archivo actual al final del bitmap
                 // tambien debe asignar el nuevo bloque inicial a la metadata o devolverlo como int32
-                // compactacion();
+                compactacion(PID, nombre_archivo, nueva_cant_bloques);
                 bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
                 asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
             }               
-        }            
+        }
         if (!asignacion)
         {
-            log_warning(logger, "No se pudo truncar el archivo: %s por falta de espacio", nombre_archivo);
+            log_warning(logger, "PID: %u - No se pudo truncar el archivo: %s por falta de espacio", PID, nombre_archivo);
         }
         else
         {
-            log_info(logger, "Se trunco con exito el archivo: %s, nuevo tamaño: %u", nombre_archivo, nuevo_tamanio);
+            config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
+            log_info(logger, "PID: %u - Se trunco con exito el archivo: %s, nuevo tamaño: %u", PID, nombre_archivo, nuevo_tamanio);
         }
         }
         
         config_save(metadata);
+        free(path_archivo_metadata);
     }
 }
 
@@ -323,4 +317,14 @@ void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t 
     uint32_t inicio_lectura = (bloque_inicial*BLOCK_SIZE) + puntero;
     memcpy(datos_leidos, bloques+inicio_lectura, tamanio_total);
     log_info(logger, "Lectura exitosa");
+}
+
+void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloques)
+{
+    log_info(logger, "PID: %u - Inicio Compactación.", PID);
+    
+
+
+    sleep(RETRASO_COMPACTACION);
+    log_info(logger, "PID: %u - Fin Compactación.", PID);
 }

@@ -27,9 +27,12 @@ uint32_t BLOCK_COUNT;
 uint32_t RETRASO_COMPACTACION;
 
 char* path_bloques;
-// FILE* archivo_bloques;
+char* bloques;
+
 char* path_bitmap;
+void* array_bitmap;
 t_bitarray* bitmap_bloques;
+
 char* path_metadata;
 t_list* archivos_existentes;
 

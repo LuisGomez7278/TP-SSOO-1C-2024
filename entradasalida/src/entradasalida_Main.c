@@ -18,15 +18,11 @@ int32_t main(int32_t argc, char* argv[]) {
     socket_entradasalida_kernel = crear_conexion(IP_KERNEL, PUERTO_KERNEL);
     log_info(logger, "Se creo la conexion entre IO y Kernel");
 
-    char* bloques;
     if (string_equals_ignore_case(TIPO_INTERFAZ, "DIALFS"))
     {
         inicializar_FS();
-        int fd = open(path_bloques ,O_RDWR);
-        bloques = mmap(NULL, BLOCK_SIZE*BLOCK_COUNT, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     }
     else {bloques = NULL;}
-    
 
     bool continuarIterando = true;
     while (continuarIterando) {
@@ -131,7 +127,7 @@ int32_t main(int32_t argc, char* argv[]) {
             // eliminar_paquete(paquete);
             // log_info(logger, "Se envio la string \'%s\', a kernel para que sea imprimida en pantalla", string_leida_memoria);
             // Imprimir por pantalla
-            printf(string_leida_memoria);
+            printf("%s", string_leida_memoria);
             free(string_leida_memoria);
             break;
 
