@@ -30,6 +30,9 @@ extern uint32_t respuesta_mov_in_32;
 extern sem_t respuesta_copy_string;
 extern char* string_leida_de_memoria;
 
+extern sem_t respuesta_marco;
+extern uint32_t marco_pedido;
+
 void gestionar_conexion_memoria();
 
 void fetch(uint32_t PID, uint32_t PC);

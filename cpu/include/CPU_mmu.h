@@ -17,6 +17,8 @@ extern uint32_t tamanio_de_pagina;
 extern bool usa_TLB;
 extern t_list* tabla_TLB;
 
+extern sem_t respuesta_marco;
+extern uint32_t marco_pedido;
 typedef struct
 {
     bool libre;

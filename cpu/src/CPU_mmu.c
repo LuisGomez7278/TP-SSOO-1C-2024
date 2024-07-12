@@ -82,18 +82,11 @@ uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag)
     agregar_a_paquete_uint32(paquete, nro_pag);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
+    sem_wait(&respuesta_marco);
 
-    op_code op = recibir_operacion(socket_cpu_memoria);
-    if (op != TLB_MISS){
-        log_error(logger, "Llego otra cosa en lugar de un marco para la TLB, codigo: %d", op);
-    }
+    uint32_t marco = marco_pedido;
 
-    uint32_t size;
-    uint32_t desplazamiento = 0;
-    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
-    uint32_t marco = leer_de_buffer_uint32(buffer, &desplazamiento);
-
-    free(buffer);
+    log_info(logger, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", PID, nro_pag, marco);
     return marco;
 }
 

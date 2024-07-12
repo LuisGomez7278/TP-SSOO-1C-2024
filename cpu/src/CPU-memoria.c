@@ -55,6 +55,16 @@ void gestionar_conexion_memoria()
             else {respuesta_mov_in_32 = respuesta;}
             
             sem_post(&respuesta_MOV_IN);
+            free(buffer);
+            break;
+        
+        case TLB_MISS:
+            desplazamiento = 0;
+            buffer = recibir_buffer(&size, socket_cpu_memoria);
+            marco_pedido = leer_de_buffer_uint32(buffer, &desplazamiento);
+            
+            sem_post(&respuesta_marco);
+            free(buffer);
             break;
 
         case FALLO:

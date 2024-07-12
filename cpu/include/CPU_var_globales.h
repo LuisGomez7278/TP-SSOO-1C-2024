@@ -44,6 +44,9 @@ uint32_t respuesta_mov_in_32;
 sem_t respuesta_copy_string;
 char* string_leida_de_memoria;
 
+sem_t respuesta_marco;
+uint32_t marco_pedido;
+
 op_code interrupcion;
 op_code motivo_desalojo;
 
