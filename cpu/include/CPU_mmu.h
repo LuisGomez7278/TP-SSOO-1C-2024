@@ -42,10 +42,8 @@ entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* en
 void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar);
 void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WRITE, uint32_t bytes_a_copiar);
 
-void solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro);
-uint8_t recibir_respuesta_MOV_IN_8b();
-uint32_t recibir_respuesta_MOV_IN_32b();
-void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int valor);
+uint32_t solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro);
+uint32_t solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int valor);
 op_code recibir_respuesta_MOV_OUT();
 
 #endif //CPU_MMU_H_

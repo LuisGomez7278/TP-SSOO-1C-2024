@@ -35,22 +35,16 @@ int main(int argc, char* argv[]) {
         while(true){
         if (detener_ejecucion)
         {
-        
-        log_trace(logger,"Esperando un proceso");
-        sem_post(&espera_iterador);
-        sem_wait(&hay_proceso_ejecutando);
-        
+            log_trace(logger,"Esperando un proceso");
+            sem_post(&espera_iterador);
+            sem_wait(&hay_proceso_ejecutando);
         }
-        log_info(logger_valores, "Antes de ejecutar");
-        loggear_valores();
         
         fetch(PID, contexto_interno.PC);
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
         
-        log_info(logger_valores, "Despues de ejecutar");
         loggear_valores();
-
         
         if (interrupcion != INT_NO && ins_actual->ins!=EXIT) {
             log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
@@ -179,22 +173,23 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1); //puntero donde se guarda el dato
         registro_origen = direccion_registro(contexto_interno ,ins_actual->arg2); //puntero que contiene la direccion logica de memoria 
         direccion_logica = *registro_origen; // valor de la direccion logica
+        uint32_t dir_fisica_read;
 
         if (registro_chico(ins_actual->arg1))
         {
-            solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
+            dir_fisica_read = solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
             sem_wait(&respuesta_MOV_IN);
             valorchico1 = respuesta_mov_in_8;
             memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
-            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorchico1);
+            log_info(logger, "PID: %u - Acción: LEER - Dirección Física: %u - Valor: %u", PID, dir_fisica_read, valorchico1);
         }
         else
         {
-            solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
+            dir_fisica_read = solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
             sem_wait(&respuesta_MOV_IN);
             valorgrande1 = respuesta_mov_in_32;
             memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
-            log_info(logger,"PID: %u, Valor leido de MOV_IN: %u", PID, valorgrande1);
+            log_info(logger, "PID: %u - Acción: LEER - Dirección Física: %u - Valor: %u", PID, dir_fisica_read, valorgrande1);
         }
 
         contexto_interno->PC++;        
@@ -205,26 +200,30 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         registro_origen = direccion_registro(contexto_interno, ins_actual->arg2); //puntero donde esta almacenado el valor a escribir
         registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);//puntero que contiene la direccion logica de memoria 
         direccion_logica = *registro_destino;//valor de la direccion logica
+        uint32_t dir_fisica_write;
 
         if (registro_chico(ins_actual->arg2))
         {
             valorchico1 = *registro_origen;
-            solicitar_MOV_OUT(direccion_logica, sizeof(uint8_t), valorchico1);
+            dir_fisica_write = solicitar_MOV_OUT(direccion_logica, sizeof(uint8_t), valorchico1);
+            log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorchico1);
         }
         else
         {
             valorgrande1 = *registro_origen;
-            solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valorgrande1);
+            dir_fisica_write = solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valorgrande1);
+            log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorgrande1);
         }
+        
 
-        if (recibir_respuesta_MOV_OUT() != OK)
-        {
-            log_info(logger,"PID: %u, No pudo realizar el MOV_OUT y va al EXIT", PID);
-            motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
-            desalojar_proceso(motivo_desalojo);
-        }
-        else
-        {log_info(logger,"PID: %u, realiza MOV_OUT con exito", PID);}
+        // if (recibir_respuesta_MOV_OUT() != OK)
+        // {
+        //     log_info(logger,"PID: %u, No pudo realizar el MOV_OUT y va al EXIT", PID);
+        //     motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
+        //     desalojar_proceso(motivo_desalojo);
+        // }
+        // else
+        // {log_info(logger,"PID: %u, realiza MOV_OUT con exito", PID);}
         contexto_interno->PC++;
         break;
 

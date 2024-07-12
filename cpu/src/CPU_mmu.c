@@ -59,8 +59,14 @@ entrada_TLB* buscar_en_tlb(uint32_t PID, uint32_t nro_pag)
     for (int i = 0; i < cant_entradas_TLB; i++)
     {
         entrada = list_get(tabla_TLB, i);
-        if (entrada->PID == PID && entrada->nro_pag == nro_pag) {return entrada;}
+        if (entrada->PID == PID && entrada->nro_pag == nro_pag) 
+        {
+            log_info(logger, "ID: %u - TLB HIT - Pagina: %u", PID, nro_pag);
+            return entrada;
+        }
     }
+
+    log_info(logger, "ID: %u - TLB MISS - Pagina: %u", PID, nro_pag);
     return TLB_miss(PID, nro_pag);
 }
 
@@ -235,7 +241,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
 }
 
 
-void solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
+uint32_t solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
 {
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
@@ -244,6 +250,7 @@ void solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
 
     uint32_t marco;
     uint32_t dir_fisica;
+    uint32_t dir_fisica_inicial;
 
     t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
     agregar_a_paquete_uint32(paquete, PID);
@@ -256,6 +263,8 @@ void solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
     dir_fisica = (marco*tamanio_de_pagina)+offset;
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, (tamanio_de_pagina-offset));//n bytes, los faltantes hasta el fin del marco/pagina
+    
+    dir_fisica_inicial = dir_fisica;
 
     if (cant_accesos>1)
     {
@@ -268,43 +277,11 @@ void solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
 
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
+
+    return dir_fisica_inicial;
 }
 
-uint8_t recibir_respuesta_MOV_IN_8b()
-{
-    if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_MOV_IN) 
-    {
-        log_error(logger, "Esperaba un numero por SOLICITUD_MOV_IN y vino otra cosa");
-        return 0;
-    }
-
-    uint32_t size;
-    uint32_t desplazamiento = 0;
-    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
-
-    uint8_t valor = leer_de_buffer_uint8(buffer, &desplazamiento);
-    free(buffer);
-    return valor;
-}
-
-uint32_t recibir_respuesta_MOV_IN_32b()
-{
-    if (recibir_operacion(socket_cpu_memoria) != SOLICITUD_MOV_IN) 
-    {
-        log_error(logger, "Esperaba un numero por SOLICITUD_MOV_IN y vino otra cosa");
-        return 0;
-    }
-
-    uint32_t size;
-    uint32_t desplazamiento = 0;
-    void* buffer = recibir_buffer(&size, socket_cpu_memoria);
-
-    uint32_t valor = leer_de_buffer_uint32(buffer, &desplazamiento);
-    free(buffer);
-    return valor;
-}
-
-void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int valor)
+uint32_t solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int valor)
 {
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
@@ -314,6 +291,7 @@ void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int
 
     uint32_t marco;
     uint32_t dir_fisica;
+    uint32_t dir_fisica_inicial;
 
     t_paquete* paquete = crear_paquete(SOLICITUD_MOV_OUT);
     agregar_a_paquete_uint32(paquete, PID);
@@ -326,6 +304,7 @@ void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int
 
     uint32_t tam_acceso = cant_accesos==1 ? tamanio_registro : (tamanio_de_pagina-offset);
     agregar_a_paquete_string(paquete, tam_acceso, puntero_valor);
+    dir_fisica_inicial = dir_fisica;
     
     bytes_restantes -= (tamanio_de_pagina-offset);
     if (cant_accesos>1)
@@ -339,6 +318,7 @@ void solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro, int
 
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
+    return dir_fisica_inicial;
 }
 
 op_code recibir_respuesta_MOV_OUT()
