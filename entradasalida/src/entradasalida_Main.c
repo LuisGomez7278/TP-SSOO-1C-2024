@@ -276,6 +276,7 @@ int32_t main(int32_t argc, char* argv[]) {
     }
 
     if (bloques) {munmap(bloques, BLOCK_SIZE*BLOCK_COUNT);}
+    if (array_bitmap) {munmap(array_bitmap, BLOCK_COUNT/8);}
     if (socket_entradasalida_memoria) {liberar_conexion(socket_entradasalida_memoria);}
     if (socket_entradasalida_kernel) {liberar_conexion(socket_entradasalida_kernel);}
 

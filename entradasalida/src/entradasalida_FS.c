@@ -190,39 +190,36 @@ void truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
         int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
         int32_t nueva_cant_bloques = cantidad_de_bloques(nuevo_tamanio);
         int32_t diferencia_cant_bloques = cant_bloques - nueva_cant_bloques;
-        config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
         if (diferencia_cant_bloques<=0)
         {
+            config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
             liberar_n_bloques(bloque_inicial+nueva_cant_bloques, 0-diferencia_cant_bloques);
         }
         else
         {
-        bool asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);//Si hay bloques contiguos disponibles
+            bool asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);//Si hay bloques contiguos disponibles, los asigna
 
-        if (!asignacion)//Si no, intenta reasignarle bloques al final del bitmap
-        {
-            asignacion = reasignar_bloques(metadata, cant_bloques, nueva_cant_bloques);
-
-            if (!asignacion)//Si no puede, hace compactacion y lo intenta de nuevo
+            if (!asignacion)
             {
-                // compactacion debe dejar el archivo actual al final del bitmap
-                // tambien debe asignar el nuevo bloque inicial a la metadata o devolverlo como int32
-                compactacion(PID, nombre_archivo, nueva_cant_bloques);
-                bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
-                asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
-            }               
-        }
-        if (!asignacion)
-        {
-            log_warning(logger, "PID: %u - No se pudo truncar el archivo: %s por falta de espacio", PID, nombre_archivo);
-        }
-        else
-        {
-            config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
-            log_info(logger, "PID: %u - Se trunco con exito el archivo: %s, nuevo tamaño: %u", PID, nombre_archivo, nuevo_tamanio);
-        }
-        }
-        
+                asignacion = reasignar_bloques(metadata, cant_bloques, nueva_cant_bloques);//Si no, intenta reasignarle bloques al final del bitmap
+
+                if (!asignacion)
+                {
+                    compactacion(PID, nombre_archivo, nueva_cant_bloques);//Si no puede, hace compactacion y lo intenta de nuevo
+                    bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+                    asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
+                }               
+            }
+            if (!asignacion)
+            {
+                log_warning(logger, "PID: %u - No se pudo truncar el archivo: %s por falta de espacio", PID, nombre_archivo);
+            }
+            else
+            {
+                config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
+                log_info(logger, "PID: %u - Se trunco con exito el archivo: %s, nuevo tamaño: %u", PID, nombre_archivo, nuevo_tamanio);
+            }
+        }        
         config_save(metadata);
         free(path_archivo_metadata);
     }
@@ -322,9 +319,42 @@ void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t 
 void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloques)
 {
     log_info(logger, "PID: %u - Inicio Compactación.", PID);
-    
-
+    limpiar_bitmap();
+    char* archivo_actual;
+    for (int32_t i = 0; i < list_size(archivos_existentes); i++)
+    {
+        archivo_actual = list_get(archivos_existentes, i);
+        if (!string_equals_ignore_case(archivo_actual, nombre_archivo))
+        {
+            compactar_archivo(archivo_actual);
+        }
+    }
+    compactar_archivo(nombre_archivo);// El archivo que se quiere truncar se ubica al final de los bloques
 
     sleep(RETRASO_COMPACTACION);
     log_info(logger, "PID: %u - Fin Compactación.", PID);
+}
+
+void limpiar_bitmap()
+{
+    for (int32_t i = 0; i < bitarray_get_max_bit(bitmap_bloques); i++)
+    {
+        bitarray_clean_bit(bitmap_bloques, i);
+    }    
+}
+
+void compactar_archivo(char* nombre_archivo)
+{
+    char* path_archivo_metadata = string_duplicate(path_metadata);
+    string_append(&path_archivo_metadata, nombre_archivo);
+    t_config* metadata = config_create(path_archivo_metadata);
+    int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
+    int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
+    int32_t nuevo_inicio = buscar_bloque_libre();
+
+    asignar_n_bloques(nuevo_inicio, cant_bloques);
+    config_set_value(metadata, "BLOQUE_INICIAL", string_itoa(nuevo_inicio));
+    config_save(metadata);
+    config_destroy(metadata);
+    free(path_archivo_metadata);
 }
