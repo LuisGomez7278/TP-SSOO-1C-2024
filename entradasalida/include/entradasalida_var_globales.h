@@ -33,4 +33,7 @@ t_bitarray* bitmap_bloques;
 char* path_metadata;
 t_list* archivos_existentes;
 
+char* string_leida_memoria;
+sem_t respuesta_memoria;
+
 #endif /*  ENTRADASALIDA_INICIO_H_ */

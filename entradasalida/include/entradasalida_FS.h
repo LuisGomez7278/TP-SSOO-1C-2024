@@ -25,6 +25,9 @@ extern t_bitarray* bitmap_bloques;
 extern char* path_metadata;
 extern t_list* archivos_existentes;
 
+extern sem_t respuesta_memoria;
+
+
 void inicializar_FS();
 void inicializar_bloques();
 void inicializar_bitmap();
@@ -42,5 +45,7 @@ int32_t cantidad_de_bloques(int32_t tamanio_archivo);
 void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar);
 bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar);
 bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_cant_bloques);
+
+void FS_WRITE(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, char* datos_a_escribir);
 
 #endif //ENTRADASALIDA_FS_H_
