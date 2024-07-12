@@ -58,6 +58,7 @@ extern t_list *lista_de_interfaces;
 
 
 extern sem_t control_multiprogramacion;
+extern sem_t control_multiprogramacion2;
 extern sem_t cantidad_procesos_new;
 extern sem_t cantidad_procesos_ready;
 extern sem_t cantidad_procesos_ready_prioritario;
@@ -88,6 +89,7 @@ extern pthread_t hilo_de_desalojo_por_quantum;
 
 extern pthread_mutex_t mutex_cont_pcp;
 extern int32_t cantidad_procesos_bloq_pcp;
+extern int32_t aux_controlMProg;
 
 //atender_operacion.h:
     void atender_instruccion_validada(char* leido);

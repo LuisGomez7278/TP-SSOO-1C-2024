@@ -120,27 +120,29 @@ pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready,pid_a_finalizar,&semaforo
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_ready,pcb_a_eliminar)){
-                log_info(logger_debug,"Proceso con PID:%u eliminado de la lista READY",pid_a_finalizar);
+                log_info(logger,"Proceso con PID:%u Estado Anterior: READY --- Estado Actual: EXIT",pid_a_finalizar);
             }else{
                 log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista READY pero no se pudo eliminar.",pid_a_finalizar);
             }
+            sem_wait(&cantidad_procesos_en_algun_ready);
         }
 
 pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_ready_prioridad,pid_a_finalizar,&semaforo_ready_prioridad);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_ready_prioridad,pcb_a_eliminar)){
-                log_info(logger_debug,"Proceso con PID:%u eliminado de la lista READY PRIORITARIO",pid_a_finalizar);
+                log_info(logger,"Proceso con PID:%u Estado Anterior: READY PRIORIDAD --- Estado Actual: EXIT",pid_a_finalizar);
             }else{
                 log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista READY PRIORITARIO pero no se pudo eliminar.",pid_a_finalizar);
             }
+            sem_wait(&cantidad_procesos_en_algun_ready);
         }
 
 pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado,pid_a_finalizar,&semaforo_bloqueado);    //esta funcion me devuelve el puntero al PCB si lo encuentra o NULL si no lo encuentra
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_bloqueado,pcb_a_eliminar)){
-                log_info(logger_debug,"Proceso con PID:%u eliminado de la lista BLOCKED",pid_a_finalizar);
+                log_info(logger,"Proceso con PID:%u Estado Anterior: READY BLOCKED --- Estado Actual: EXIT",pid_a_finalizar);
             }else{
                 log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista BLOCKED pero no se pudo eliminar.",pid_a_finalizar);
             }
@@ -150,7 +152,7 @@ pcb_a_eliminar=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario,pid_a_fin
         if(pcb_a_eliminar!=NULL){
             encontrado=true;
             if(list_remove_element(lista_bloqueado_prioritario,pcb_a_eliminar)){
-                log_info(logger_debug,"Proceso con PID:%u eliminado de la lista BLOCKED PRIORITARIO",pid_a_finalizar);
+                log_info(logger,"Proceso con PID:%u Estado Anterior: READY BLOCKED PRIORITARIO --- Estado Actual: EXIT",pid_a_finalizar);
             }else{
                 log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista BLOCKED PRIORITARIO pero no se pudo eliminar.",pid_a_finalizar);
             }

@@ -75,8 +75,10 @@ void iniciar_estructuras_planificacion(){
 	
 //SEMAFORO MULTIPROGRAMACION
 
-    sem_init(&control_multiprogramacion, 0, grado_multiprogramacion);     
-
+    sem_init(&control_multiprogramacion, 0, grado_multiprogramacion);
+	sem_init(&control_multiprogramacion2, 0, grado_multiprogramacion);       
+	aux_controlMProg=grado_multiprogramacion;
+	
 // SEMAFOROS AUXILIARES 
 
     sem_init(&cantidad_procesos_new, 0, 0);
