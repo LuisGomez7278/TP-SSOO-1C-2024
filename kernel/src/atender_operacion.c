@@ -49,9 +49,19 @@ void atender_instruccion_validada(char* leido)
 
 
     }else if (strcmp(array_de_comando[0],"MULTIPROGRAMACION")==0)//---------------------------------/////////////
-    {
-        uint32_t valor= atoi (array_de_comando[1]);
-        cambiar_grado_multiprogramacion(valor);   
+    {   
+        int32_t *valor = malloc(sizeof(uint32_t));                                                    //LA UNICA DIFERENCIA ENTRE EL FIFO Y EL RR ES EL DESALOJO POR QUANTUM
+        if (valor== NULL) {
+            perror("malloc");
+            return;
+        }
+        *valor= atoi (array_de_comando[1]);
+
+
+        pthread_t hilo_cambio_multiprogramacion;
+        pthread_create(&hilo_cambio_multiprogramacion,NULL,(void*)cambiar_grado_multiprogramacion,valor);
+        pthread_detach(hilo_cambio_multiprogramacion);
+           
         
 
     }else if (strcmp(array_de_comando[0],"PROCESO_ESTADO")==0)//---------------------------------/////////////

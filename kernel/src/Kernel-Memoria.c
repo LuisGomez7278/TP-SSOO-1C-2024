@@ -107,13 +107,27 @@ void carga_exitosa_en_memoria(void* buffer){
             pthread_mutex_lock(&mutex_cont_pcp);
             cantidad_procesos_bloq_pcp++;
             pthread_mutex_unlock(&mutex_cont_pcp);
-            log_debug(logger_debug,"El valor del semaforo es: -%d",cantidad_procesos_bloq_pcp);
+            //log_debug(logger_debug,"El valor del semaforo es: -%d",cantidad_procesos_bloq_pcp);
             sem_wait(&semaforo_plp);
     }
     
-    aux_controlMProg--;
-    sem_wait(&control_multiprogramacion);///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    --------------------------------------------------------------
-    sem_wait(&control_multiprogramacion2);
+    
+     sem_wait(&control_multiprogramacion);///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    --------------------------------------------------------------
+    
+
+    if (barrera_activada)                                           /// ESTE IF-WHILE NO DEJA PASAR NINGUN PROCESO CUANDO DISMINUYO EL VALOR DE MULTIPROGRAMACION
+    {
+        while(barrera_activada){
+            sem_post(&control_multiprogramacion);    
+            //log_error(logger_debug,"Iterando while barrera");
+            sem_wait(&control_multiprogramacion);
+        }
+    }
+
+    
+
+
+
 
     t_pcb* pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID,&semaforo_new);
 

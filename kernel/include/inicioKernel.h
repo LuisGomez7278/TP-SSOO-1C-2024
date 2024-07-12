@@ -28,7 +28,7 @@
 sem_t semaforo_plp;
 sem_t semaforo_pcp;
 sem_t control_multiprogramacion;
-sem_t control_multiprogramacion2;
+
 sem_t cantidad_procesos_new;
 sem_t cantidad_procesos_ready;
 sem_t cantidad_procesos_ready_prioritario;

@@ -94,29 +94,35 @@ void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo){
 
 
 
-void cambiar_grado_multiprogramacion(int32_t nuevo_valor) {                         // CON ESTA FUNCION AGREGO O DISMINUYO INSTANCIAS DEL SEMAFORO QUE GESTIONA LA MULTIPROGRAMCION 
+void cambiar_grado_multiprogramacion(void* nuevoValor) {                         // CON ESTA FUNCION AGREGO O DISMINUYO INSTANCIAS DEL SEMAFORO QUE GESTIONA LA MULTIPROGRAMCION 
 
+        
+        int32_t *nuevo_valor = (int32_t *)nuevoValor;
+        int32_t val= grado_multiprogramacion- *nuevo_valor;
+        
     
-    if (nuevo_valor > grado_multiprogramacion) {
+    if (*nuevo_valor > grado_multiprogramacion) {
         // Incrementar el semáforo
-        printf("PRIMER IF\n");
-        for (int32_t i = 0; i < nuevo_valor - grado_multiprogramacion ; i++) {
-            printf("Aumentando valor semaforo\n");
-            sem_post(&control_multiprogramacion);
-            sem_post(&control_multiprogramacion2);                   //Suma instancias al semaforo
-            aux_controlMProg++;
+        for (int32_t i = 0; i < *nuevo_valor - grado_multiprogramacion ; i++) {
+            //log_error(logger_debug,"Aumentando valor semaforo\n");
+            sem_post(&control_multiprogramacion);                           //Suma instancias al semaforo
+                               
+            
         }
-    } else if (nuevo_valor < grado_multiprogramacion) {
-        printf("SEGUNDO IF\n");
-        // Decrementar el semáforo
-        for (int32_t i = 0; i < grado_multiprogramacion - nuevo_valor; i++) {
-            printf("Disminuyendo valor semaforo\n");
-            sem_wait(&control_multiprogramacion);
-            sem_wait(&control_multiprogramacion2);                    //Resta instancias al semaforo
-            aux_controlMProg--;
+    } else if (*nuevo_valor < grado_multiprogramacion) {
+             // Decrementar el semáforo
+        barrera_activada=true;
+        for (int32_t i = 0; i < val; i++) {
+            //log_error(logger_debug,"Disminuyendo valor semaforo\n");
+            sem_wait(&control_multiprogramacion);                           //Resta instancias al semaforo
+                                
+            
         }
+        barrera_activada=false;
     }
-    grado_multiprogramacion= nuevo_valor;
+    grado_multiprogramacion= *nuevo_valor;
+
+    free(nuevo_valor);
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -204,8 +210,8 @@ void gestionar_dispatch (){
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel); ///ELIMINO DE MEMORIA
             eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);                                           //ELIMINO DE LISTA DE RECURSOS ASIGNADOS  
             sem_post(&control_multiprogramacion);
-            sem_post(&control_multiprogramacion2);
-            aux_controlMProg++;                                                             //AGREGO UNA INSTANCIA A CANTIDAD DE PROCESOS  
+            
+                                                                         //AGREGO UNA INSTANCIA A CANTIDAD DE PROCESOS  
             enviar_siguiente_proceso_a_ejecucion();
             break;
 
@@ -233,8 +239,8 @@ void gestionar_dispatch (){
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion); 
-                    sem_post(&control_multiprogramacion2); 
-                    aux_controlMProg++;              
+                     
+                                 
                     enviar_siguiente_proceso_a_ejecucion();	    
                     break;
                 default:
@@ -260,8 +266,7 @@ void gestionar_dispatch (){
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
-                    sem_post(&control_multiprogramacion2);
-                    aux_controlMProg++;
+                    
                     enviar_siguiente_proceso_a_ejecucion();
                     break;
                 case -2:
@@ -271,8 +276,7 @@ void gestionar_dispatch (){
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
-                    sem_post(&control_multiprogramacion2);
-                    aux_controlMProg++;
+                    
                     enviar_siguiente_proceso_a_ejecucion();
             }
         break;
@@ -292,8 +296,6 @@ void gestionar_dispatch (){
                 enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                 eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                 sem_post(&control_multiprogramacion);
-                sem_post(&control_multiprogramacion2);
-                aux_controlMProg++;
                 enviar_siguiente_proceso_a_ejecucion();
 
             break;
@@ -302,8 +304,6 @@ void gestionar_dispatch (){
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
             eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
             sem_post(&control_multiprogramacion);
-            sem_post(&control_multiprogramacion2);
-            aux_controlMProg++;
             enviar_siguiente_proceso_a_ejecucion();
             break;
         case DESALOJO_POR_IO_GEN_SLEEP:

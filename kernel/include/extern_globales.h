@@ -58,7 +58,6 @@ extern t_list *lista_de_interfaces;
 
 
 extern sem_t control_multiprogramacion;
-extern sem_t control_multiprogramacion2;
 extern sem_t cantidad_procesos_new;
 extern sem_t cantidad_procesos_ready;
 extern sem_t cantidad_procesos_ready_prioritario;
@@ -89,7 +88,7 @@ extern pthread_t hilo_de_desalojo_por_quantum;
 
 extern pthread_mutex_t mutex_cont_pcp;
 extern int32_t cantidad_procesos_bloq_pcp;
-extern int32_t aux_controlMProg;
+extern bool barrera_activada;
 
 //atender_operacion.h:
     void atender_instruccion_validada(char* leido);
@@ -99,7 +98,7 @@ extern int32_t aux_controlMProg;
 //planificacion.h
     void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo);
     void ingresar_en_lista(t_pcb* pcb, t_list* lista,  pthread_mutex_t* semaforo_mutex, sem_t* semaforo_contador, t_estado estado);
-    void cambiar_grado_multiprogramacion(int32_t nuevo_valor);
+    void cambiar_grado_multiprogramacion(void* nuevo_valor);
     void gestionar_dispatch ();
     void enviar_siguiente_proceso_a_ejecucion ();
 
