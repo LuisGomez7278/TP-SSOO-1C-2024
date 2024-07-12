@@ -23,6 +23,8 @@ extern uint32_t BLOCK_SIZE;
 extern uint32_t BLOCK_COUNT;
 extern uint32_t RETRASO_COMPACTACION;
 
+extern sem_t respuesta_memoria;
+
 void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz);
 void iniciar_logs(char* nombre_interfaz);
 void iniciar_config(char* config_interfaz);

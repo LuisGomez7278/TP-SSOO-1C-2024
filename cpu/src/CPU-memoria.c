@@ -10,12 +10,12 @@ void gestionar_conexion_memoria()
     bool continuar_iterando = true;
     uint32_t size;
     uint32_t desplazamiento=0;
+    void* buffer=NULL;
 
     while (continuar_iterando)
     {   
 
         operacion = recibir_operacion(socket_cpu_memoria);
-        void* buffer=NULL;
         switch (operacion)
         {
         case MENSAJE:
@@ -35,7 +35,6 @@ void gestionar_conexion_memoria()
             break;
         
         case SOLICITUD_COPY_STRING_READ:
-            
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);
             string_leida_de_memoria = leer_de_buffer_string(buffer, &desplazamiento);
@@ -45,7 +44,6 @@ void gestionar_conexion_memoria()
             break;
 
         case SOLICITUD_MOV_IN:
-             
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);
 

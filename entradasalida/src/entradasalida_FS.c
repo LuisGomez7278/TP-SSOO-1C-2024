@@ -310,3 +310,17 @@ bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_c
         return true;
     }
 }
+
+void FS_WRITE(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, char* datos_a_escribir)
+{
+    uint32_t inicio_escritura = (bloque_inicial*BLOCK_SIZE) + puntero;
+    memcpy(bloques+inicio_escritura, datos_a_escribir, tamanio_total);
+    log_info(logger, "Escritura exitosa");
+}
+
+void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, void* datos_leidos)
+{
+    uint32_t inicio_lectura = (bloque_inicial*BLOCK_SIZE) + puntero;
+    memcpy(datos_leidos, bloques+inicio_lectura, tamanio_total);
+    log_info(logger, "Lectura exitosa");
+}
