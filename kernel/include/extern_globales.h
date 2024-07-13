@@ -88,7 +88,9 @@ extern op_code cod_op_dispatch;
 extern pthread_t hilo_CPU_dispatch;
 extern pthread_t hilo_de_desalojo_por_quantum; 
 
+extern pthread_mutex_t mutex_cont_plp;
 extern pthread_mutex_t mutex_cont_pcp;
+extern int32_t cantidad_procesos_bloq_plp;
 extern int32_t cantidad_procesos_bloq_pcp;
 extern bool barrera_activada;
 

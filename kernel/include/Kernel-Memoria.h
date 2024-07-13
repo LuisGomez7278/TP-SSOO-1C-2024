@@ -22,7 +22,9 @@
 
 
 
+pthread_mutex_t mutex_cont_plp;
 pthread_mutex_t mutex_cont_pcp;
+int32_t cantidad_procesos_bloq_plp=0;
 int32_t cantidad_procesos_bloq_pcp=0;
 bool barrera_activada= false;
 

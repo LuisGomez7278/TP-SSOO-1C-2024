@@ -173,9 +173,14 @@ void gestionar_dispatch (){
 
         if (detener_planificacion)                             /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
         {
+            
+            pthread_mutex_lock(&mutex_cont_pcp);
+            cantidad_procesos_bloq_pcp++;
+            pthread_mutex_unlock(&mutex_cont_pcp);
             log_info(logger_debug,"Planificacion corto plazo detenida");
             sem_wait(&semaforo_pcp);
         }
+       
 
 
         
@@ -368,6 +373,17 @@ void enviar_siguiente_proceso_a_ejecucion ()
 {
 sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
 ocupacion_cpu=true;    
+
+
+        if (detener_planificacion)                             /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
+        {
+            
+            pthread_mutex_lock(&mutex_cont_pcp);
+            cantidad_procesos_bloq_pcp++;
+            pthread_mutex_unlock(&mutex_cont_pcp);
+            sem_wait(&semaforo_pcp);
+        }
+
 
     t_pcb* pcb_a_ejecutar;
 

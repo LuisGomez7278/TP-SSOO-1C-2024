@@ -96,15 +96,12 @@ void carga_exitosa_en_memoria(void* buffer){
         log_error(logger_debug,"Error al recibir el buffer");
     }
 
+    
 
-                                                    
               
-    
-    
     
      sem_wait(&control_multiprogramacion);///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    --------------------------------------------------------------
     
-
     if (barrera_activada)                                           /// ESTE IF-WHILE NO DEJA PASAR NINGUN PROCESO CUANDO DISMINUYO EL VALOR DE MULTIPROGRAMACION
     {
         while(barrera_activada){
@@ -114,17 +111,25 @@ void carga_exitosa_en_memoria(void* buffer){
         }
     }
 
+    printf("Pase la barrera\n");
+    
     
 
     if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
     {   
                 
-            pthread_mutex_lock(&mutex_cont_pcp);
-            cantidad_procesos_bloq_pcp++;
-            pthread_mutex_unlock(&mutex_cont_pcp);
-            //log_debug(logger_debug,"El valor del semaforo es: -%d",cantidad_procesos_bloq_pcp);
+            pthread_mutex_lock(&mutex_cont_plp);
+            cantidad_procesos_bloq_plp++;
+            pthread_mutex_unlock(&mutex_cont_plp);
+            //log_debug(logger_debug,"El valor del semaforo es: -%d",cantidad_procesos_bloq_plp);
             sem_wait(&semaforo_plp);
+            while(barrera_activada || detener_planificacion){
+                sem_post(&control_multiprogramacion);   
+                sem_wait(&control_multiprogramacion);   //ESTE LO PONGO PARA QUE NO SE LIBEREN PROCESO EN ESTADO DETENIDO - DIMINUCION MULTIPROGRAMACION
+            }
     }
+
+    printf("Pase la detencion\n");
 
 
 

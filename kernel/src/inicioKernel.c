@@ -104,9 +104,9 @@ void iniciar_estructuras_planificacion(){
 	pthread_mutex_init(&semaforo_ready_prioridad, NULL);
 	pthread_mutex_init(&semaforo_recursos, NULL);
 	pthread_mutex_init(&semaforo_lista_interfaces, NULL);
-//MUTEX PARA PLANIFICADOR LARGO PLAZO	
+//MUTEX PARA PLANIFICADOR LARGO Y CORTO PLAZO	
+	pthread_mutex_init(&mutex_cont_plp, NULL);
 	pthread_mutex_init(&mutex_cont_pcp, NULL);
-	
 
 //mutex asignacion pid
 	pthread_mutex_init(&mutex_pid, NULL);

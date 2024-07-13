@@ -30,24 +30,32 @@ void atender_instruccion_validada(char* leido)
         if (detener_planificacion)
         {   
             detener_planificacion=false;          
-            //log_error(logger_debug,"El valor del contador es: %d", cantidad_procesos_bloq_pcp);
-            while (cantidad_procesos_bloq_pcp>0)
+            //log_error(logger_debug,"El valor del contador es: %d", cantidad_procesos_bloq_plp);
+            while (cantidad_procesos_bloq_plp>0)
             {
                 sem_post(&semaforo_plp);
+                pthread_mutex_lock(&mutex_cont_plp);
+                cantidad_procesos_bloq_plp--;
+                pthread_mutex_unlock(&mutex_cont_plp);
+                //log_error(logger_debug,"El valor del semaforo (W) es: %d",cantidad_procesos_bloq_plp);
+            }
+
+            while (cantidad_procesos_bloq_pcp>0)
+            {
+                sem_post(&semaforo_pcp);
                 pthread_mutex_lock(&mutex_cont_pcp);
                 cantidad_procesos_bloq_pcp--;
                 pthread_mutex_unlock(&mutex_cont_pcp);
-                //log_error(logger_debug,"El valor del semaforo (W) es: %d",cantidad_procesos_bloq_pcp);
+                //log_error(logger_debug,"El valor del semaforo (W) es: %d",cantidad_procesos_bloq_plp);
             }
-            
-            sem_post(&semaforo_pcp);
+
+            cantidad_procesos_bloq_plp=0;
             cantidad_procesos_bloq_pcp=0;
 
         }
         
         
- 
-
+        
 
     }else if (strcmp(array_de_comando[0],"MULTIPROGRAMACION")==0)//---------------------------------/////////////
     {   
@@ -123,7 +131,7 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                 log_info(logger,"Proceso con PID:%u Estado Anterior: EJECUCION || Estado Actual: EXIT",pid_a_finalizar);
                 
 
-                if (list_size(lista_ready)==0 && list_size(lista_ready_prioridad)==0)       //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
+                if (list_size(lista_new)==0 )       //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
                 {   
                         if (pthread_cancel(hilo_CPU_dispatch) != 0) {
                         perror("Error cancelando el hilo");
