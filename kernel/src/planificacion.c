@@ -138,7 +138,7 @@ void cambiar_grado_multiprogramacion(void* nuevoValor) {                        
 
 
 void gestionar_dispatch (){ 
-    op_code cod_op;
+    
     uint32_t desplazamiento;
     uint32_t size;
 
@@ -147,15 +147,15 @@ void gestionar_dispatch (){
 
     while(continuarIterando){    
 
-        gestionando_dispatch=false;
+        gestionando_dispatch=false;             ///GESTIONANDO DISPATCH Y OCUPACION CPU SON PARA SINCRONIZAR LA ENTRADA DE NUEVOS PROCESOS
 
-        cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
+        cod_op_dispatch = recibir_operacion(socket_kernel_cpu_dispatch);
 
         ocupacion_cpu=false;
         gestionando_dispatch=true;    
         
         
-        if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL && cod_op!= DESALOJO_POR_QUANTUM)
+        if ((strcmp(algoritmo_planificacion,"VRR")==0 ||strcmp(algoritmo_planificacion,"RR")==0 ) && temporizador!=NULL && cod_op_dispatch!= DESALOJO_POR_QUANTUM)
         {
             tiempo_recien_ejecutado= temporal_gettime(temporizador); //recupero el valor antes de eliminar el temporizador
             temporal_destroy(temporizador);
@@ -171,7 +171,15 @@ void gestionar_dispatch (){
 
         desplazamiento = 0;
 
-        if (cod_op==MENSAJE)
+        if (detener_planificacion)                             /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
+        {
+            log_info(logger_debug,"Planificacion corto plazo detenida");
+            sem_wait(&semaforo_pcp);
+        }
+
+
+        
+        if (cod_op_dispatch==MENSAJE)
         {
             char* mensaje = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger_debug, "%s", mensaje);
@@ -192,21 +200,18 @@ void gestionar_dispatch (){
 
     ///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION  ///////////////////////
 
-        if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
-        {
-            log_info(logger_debug,"Planificacion corto plazo detenida");
-            sem_wait(&semaforo_pcp);
-        }
-        
 
-        switch (cod_op){
+        switch (cod_op_dispatch){
+        case RETORNAR:
+
+        break;
         case MENSAJE:
         //lo dejo vacio para que pegue la vuelta
         break;
         
         case OUT_OF_MEMORY:
             log_info(logger, "Finaliza el proceso PID: %u Motivo: OUT_OF_MEMORY ", pcb_dispatch->PID);
-            log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
+            log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel); ///ELIMINO DE MEMORIA
             eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);                                           //ELIMINO DE LISTA DE RECURSOS ASIGNADOS  
             sem_post(&control_multiprogramacion);
@@ -234,7 +239,7 @@ void gestionar_dispatch (){
                     break;
                 case -1:  
                     log_info(logger, "Finaliza el proceso PID: %u Motivo: INVALID_RESOURCE: %s", pcb_dispatch->PID, recurso_solicitado);
-                    log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
+                    log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
                     //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
@@ -261,7 +266,7 @@ void gestionar_dispatch (){
                     break;
                 case -1:
                     log_info(logger, "Finaliza el proceso PID: %u Motivo: INVALID_RESOURCE: %s", pcb_dispatch->PID, recurso_solicitado);
-                    log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
+                    log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
                     //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
@@ -271,7 +276,7 @@ void gestionar_dispatch (){
                     break;
                 case -2:
                     log_info(logger, "Finaliza el proceso PID: %u Motivo: RECURSO NO ASIGNADO: %s", pcb_dispatch->PID, recurso_solicitado);
-                    log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
+                    log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
                     //SIGANL FALLIDO, NO TIENE ASIGNAOD EL RECURSO LIBERADO
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
@@ -291,7 +296,7 @@ void gestionar_dispatch (){
 
         case DESALOJO_POR_FIN_PROCESO:
                 log_info(logger, "Finaliza el proceso PID: %u Motivo: SUCCESS", pcb_dispatch->PID);
-                log_info(logger, "PID: %u - Cambio de estado EXECUTE-> EXIT", pcb_dispatch->PID);
+                log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
                 //ENVIO PID A MEMORIA PARA QUE ELIMINE EL PROCESO
                 enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                 eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
@@ -318,9 +323,9 @@ void gestionar_dispatch (){
                 char* nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
                 log_info(logger, "PID: %u envia peticion a interfaz %s", pcb_dispatch->PID, nombre_interfaz);
 
-                if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op)){
+                if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op_dispatch)){
                 
-                    t_paquete *paquete = crear_paquete(cod_op);
+                    t_paquete *paquete = crear_paquete(cod_op_dispatch);
                     agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
                     agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
                     

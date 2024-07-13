@@ -13,8 +13,8 @@ void iniciar_consola_interactiva(){
             validacion_leido = validacion_de_ingreso_por_consola (leido);
             
             if(validacion_leido){
-                atender_instruccion_validada(leido);
                 log_trace(logger_debug, "Comando VALIDO");          
+                atender_instruccion_validada(leido);
             }else{                
                  log_error(logger_debug, "Comando NO reconocido");
             }

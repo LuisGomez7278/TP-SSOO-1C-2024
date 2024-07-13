@@ -97,19 +97,9 @@ void carga_exitosa_en_memoria(void* buffer){
     }
 
 
-                                                    ///         GESTIONO LAS LISTAS DE ESTADO    
-
+                                                    
               
     
-    if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
-    {   log_info(logger_debug,"Planificacion largo plazo detenida");
-                
-            pthread_mutex_lock(&mutex_cont_pcp);
-            cantidad_procesos_bloq_pcp++;
-            pthread_mutex_unlock(&mutex_cont_pcp);
-            //log_debug(logger_debug,"El valor del semaforo es: -%d",cantidad_procesos_bloq_pcp);
-            sem_wait(&semaforo_plp);
-    }
     
     
      sem_wait(&control_multiprogramacion);///         SOLO AVANZO SI LA MULTIPROGRAMACION LO PERMITE    --------------------------------------------------------------
@@ -126,13 +116,23 @@ void carga_exitosa_en_memoria(void* buffer){
 
     
 
+    if (detener_planificacion)                      /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
+    {   
+                
+            pthread_mutex_lock(&mutex_cont_pcp);
+            cantidad_procesos_bloq_pcp++;
+            pthread_mutex_unlock(&mutex_cont_pcp);
+            //log_debug(logger_debug,"El valor del semaforo es: -%d",cantidad_procesos_bloq_pcp);
+            sem_wait(&semaforo_plp);
+    }
 
 
 
     t_pcb* pcb_ready= buscar_pcb_por_PID_en_lista(lista_new,PID,&semaforo_new);
 
     if(pcb_ready==NULL){
-        log_error(logger_debug,"Error al buscar el proceso con PID= %u en la lista New",PID);
+        log_warning(logger_debug,"Proceso PID= %u ya no se encuentra en la lista NEW",PID);
+        sem_post(&control_multiprogramacion);
     }else{
         pthread_mutex_lock(&semaforo_new);        
         if (list_remove_element(lista_new, pcb_ready)){
@@ -178,13 +178,13 @@ t_pcb* buscar_pcb_por_PID_en_lista(t_list* lista, uint32_t pid_buscado,pthread_m
 			//log_trace(logger_debug,"Leyendo de lista el PCB con PID: %u",pcb_auxiliar->PID );
 			
             if (pcb_auxiliar->PID == pid_buscado){
-                log_info(logger_debug,"PCB encontrado. PID: %u",pcb_auxiliar->PID);
+                //log_info(logger_debug,"PCB encontrado. PID: %u",pcb_auxiliar->PID);
                 pthread_mutex_unlock(semaforo_mutex);
                 return pcb_auxiliar;
             }
             }
     pthread_mutex_unlock(semaforo_mutex);        
-    log_info(logger_debug,"PCB NO encontrado. PID: %u",pid_buscado);
+    //log_info(logger_debug,"PCB NO encontrado. PID: %u",pid_buscado);
 	return NULL;
 
 }

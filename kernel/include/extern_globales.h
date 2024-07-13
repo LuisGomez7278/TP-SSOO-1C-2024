@@ -82,6 +82,8 @@ extern pthread_mutex_t semaforo_recursos;
 extern uint32_t identificador_PID;
 extern pthread_mutex_t mutex_pid;
 extern uint32_t pcb_actual_en_cpu;
+extern op_code cod_op_dispatch;
+
 
 extern pthread_t hilo_CPU_dispatch;
 extern pthread_t hilo_de_desalojo_por_quantum; 
@@ -101,6 +103,7 @@ extern bool barrera_activada;
     void cambiar_grado_multiprogramacion(void* nuevo_valor);
     void gestionar_dispatch ();
     void enviar_siguiente_proceso_a_ejecucion ();
+    
 
 //kernel-cpu-dispatch
     void atender_conexion_CPU_DISPATCH_KERNEL ();
