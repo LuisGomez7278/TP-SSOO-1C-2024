@@ -115,7 +115,7 @@ void gestionar_conexion_interrupt()
                 log_info(logger, "El usuario finaliza el proceso PID: %u por consola", PID);
                 interrupcion = INT_CONSOLA;                
             }else{
-                log_error(logger_debug,"Llego una interrupcion por consola mientras no se estaba ejecutando ejecutando");
+                log_warning(logger_debug,"Llego una interrupcion por consola mientras no se estaba ejecutando");
             }
             break;
 
@@ -126,7 +126,7 @@ void gestionar_conexion_interrupt()
                 log_info(logger, "El proceso PID: %u termino su quantum sera desalojado", PID);
                 interrupcion = INT_QUANTUM;
             }else{
-                log_error(logger_debug,"Llego una interrupcion de quantum mientras no se estaba ejecutando ejecutando");
+                log_warning(logger_debug,"Llego una interrupcion de quantum mientras no se estaba ejecutando");
             }
             break;
 
