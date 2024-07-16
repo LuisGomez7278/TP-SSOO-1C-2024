@@ -25,8 +25,6 @@ int32_t main(int32_t argc, char* argv[]) {
 
     iniciar_entradasalida(nombre_interfaz, config_interfaz);
 
-    //socket_memoria_entradasalida = crear_conexion(IP_MEMORIA, PUERTO_MEMORIA);
-    //log_info(logger, "Se creo la conexion entre IO: %s y Memoria",nombre_interfaz);
 
     socket_kernel_entradasalida = crear_conexion(IP_KERNEL,PUERTO_KERNEL);
     log_info(logger, "Se creo la conexion entre IO y Kernel");
@@ -48,6 +46,17 @@ int32_t main(int32_t argc, char* argv[]) {
     enviar_paquete(paquete,socket_kernel_entradasalida);
     eliminar_paquete(paquete);
     log_debug(logger_debug,"paquete enviado");
+
+    if (interfaz!=GENERICA)
+    {
+        socket_memoria_entradasalida = crear_conexion(IP_MEMORIA,PUERTO_MEMORIA);
+        log_info(logger, "Se creo la conexion entre IO y MEMORIA");
+
+        enviar_mensaje("CONEXION CON INTERFAZ OK", socket_memoria_entradasalida);
+        log_info(logger_debug, "Handshake enviado: KERNEL")    ;
+        
+    }
+    
 
     if (string_equals_ignore_case(TIPO_INTERFAZ, "DIALFS"))
     {

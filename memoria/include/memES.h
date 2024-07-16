@@ -18,7 +18,8 @@
 #include "../include/extGlobales.h"
 
 void conexion_con_es();
-void read_es();
-void write_es();
+void read_es(int32_t socket);
+void write_es(int32_t socket);
+void escuchar_nueva_Interfaz_mem(void* socket);
 
 #endif //TP_MEMORIA_ES_H_

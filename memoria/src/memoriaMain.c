@@ -116,24 +116,26 @@ int main(int argc, char* argv[]) {
     log_trace(logger_debug, "Esperando que se conecte KERNEL");
     socket_kernel_memoria = esperar_cliente(socket_escucha,logger_debug);
 
-// ESPERO QUE SE CONECTE E/S
-    // log_trace(logger_debug, "Esperando que se conecte E/S");
-    // socket_entradasalida_memoria = esperar_cliente(socket_escucha,logger_debug);
 
 // CREO HILO ESCUCHA CPU
     pthread_t hilo_cpu_memoria;
     pthread_create(&hilo_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
     pthread_detach(hilo_cpu_memoria);
 
+
+// CREO HILO ESCUCHA ENTRADA-SALIDA
+     pthread_t hilo_entradaSalida_memoria;
+     pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
+     pthread_detach(hilo_entradaSalida_memoria);
+
+
+
 // CREO HILO ESCUCHA KERNEL 
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
     pthread_join(hilo_kernel_memoria, NULL); 
     
-// CREO HILO ESCUCHA ENTRADA-SALIDA
-    // pthread_t hilo_entradaSalida_memoria;
-    // pthread_create(&hilo_entradaSalida_memoria,NULL,(void*)conexion_con_es,NULL);
-    // pthread_detach(hilo_entradaSalida_memoria);
+
 
     //--------------------------------------------
 
