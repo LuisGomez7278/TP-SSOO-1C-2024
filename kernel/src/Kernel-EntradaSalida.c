@@ -137,6 +137,7 @@ void gestionar_envio_cola_nueva_interfaz(void* interfaz){
     t_pid_paq* a_enviar= (t_pid_paq*)list_get(interfaz_puntero_hilo->cola_de_espera,0);
     pthread_mutex_unlock(&semaforo_lista_interfaces);
     enviar_paquete(a_enviar->paquete_cola,interfaz_puntero_hilo->socket_interfaz);
+    log_trace(logger, "Se envia una nueva solicitud a la interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);
     free(a_enviar->paquete_cola);
     }
     log_error(logger_debug,"Gestor de cola de la INTERFAZ: '%s' terminado por cierre de socket",interfaz_puntero_hilo->nombre_interfaz);
