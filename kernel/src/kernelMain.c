@@ -29,28 +29,29 @@ int32_t main(int32_t argc, char* argv[]) {
     
 
     // CREO HILO ENTRADA-SALIDA
-        // pthread_t hilo_entradaSalida;
-        // pthread_create(&hilo_entradaSalida,NULL,(void*)atender_conexion_ENTRADASALIDA_KERNEL,NULL);
-        // pthread_detach(hilo_entradaSalida);
+         pthread_t hilo_entradaSalida;
+         pthread_create(&hilo_entradaSalida,NULL,(void*)atender_conexion_ENTRADASALIDA_KERNEL,NULL);
+         pthread_detach(hilo_entradaSalida);
     
     
     // CREO HILO ESCUCHA DE CPU DISPATCH
         
         pthread_create(&hilo_CPU_dispatch,NULL,(void*)atender_conexion_CPU_DISPATCH_KERNEL,NULL);
-       // pthread_detach(hilo_CPU_dispatch);    
+        pthread_detach(hilo_CPU_dispatch);    
 
-
-    //CREO HILO de MEMORIA
-        pthread_t hilo_MEMORIA;
-        pthread_create(&hilo_MEMORIA,NULL,(void*)atender_conexion_MEMORIA_KERNEL,NULL);
-        pthread_detach(hilo_MEMORIA); 
     
                   
     //  INICIO CONSOLA INTERACTIVA  
         pthread_t hilo_consola_interactiva;
         pthread_create(&hilo_consola_interactiva,NULL,(void*)iniciar_consola_interactiva,NULL);
-        pthread_join(hilo_consola_interactiva,NULL);  
+        pthread_detach(hilo_consola_interactiva); 
+         
 
+
+    //CREO HILO de MEMORIA
+        pthread_t hilo_MEMORIA;
+        pthread_create(&hilo_MEMORIA,NULL,(void*)atender_conexion_MEMORIA_KERNEL,NULL);
+        pthread_join(hilo_MEMORIA,NULL);
 
     if (socket_escucha) {liberar_conexion(socket_escucha);}
     if (socket_kernel_cpu_dispatch) {liberar_conexion(socket_kernel_cpu_dispatch);}

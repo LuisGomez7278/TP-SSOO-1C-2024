@@ -14,12 +14,12 @@ void atender_conexion_entradasalida_KERNEL(){
 
     while (true)
     {
-        codigo = recibir_operacion(socket_entradasalida_kernel);
+        codigo = recibir_operacion(socket_kernel_entradasalida);
 
         switch (codigo)
         {
         case DESALOJO_POR_IO_GEN_SLEEP:
-            buffer = recibir_buffer(&size, socket_entradasalida_kernel);            
+            buffer = recibir_buffer(&size, socket_kernel_entradasalida);            
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             tiempo_unidad_trabajo = leer_de_buffer_string(buffer, &desplazamiento);

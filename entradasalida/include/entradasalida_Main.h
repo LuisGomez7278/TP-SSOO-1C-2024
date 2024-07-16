@@ -1,23 +1,78 @@
 #ifndef TP_ENTRADASALIDA_MAIN_H_
 #define TP_ENTRADASALIDA_MAIN_H_
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include<commons/log.h>
+#include<commons/string.h>
+#include<commons/config.h>
+#include<readline/readline.h>
+#include <readline/history.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include <sys/types.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
+
 #include "entradasalida_var_globales.h"
-#include "entradasalida_inicio.h"
-#include "entradasalida_FS.h"
-#include "entradasalida-memoria.h"
-#include "entradasalida-kernel.h"
+
 
 char* nombre_interfaz;
 char* config_interfaz;
 
-void validar_argumentos(char* nombre_interfaz, char* config_interfaz);
-void notificar_kernel(uint32_t PID);
-char* leer_de_teclado(uint32_t tamanio_a_leer);
+
+//lo que estaba en entrada salida memoria
+
+int32_t socket_memoria_entradasalida;
+sem_t respuesta_memoria;
+char* string_leida_memoria;
+
+// lo que estaba en entrada salida kernel
+
+
+int32_t socket_kernel_entradasalida;
+
+//lo que estaba en entra da salida inicio
+
+
+ t_config* config;
+
+ char* IP_KERNEL;
+ char* PUERTO_KERNEL;
+ char* IP_MEMORIA;
+ char* PUERTO_MEMORIA;
+
+ char* TIPO_INTERFAZ;
+ uint32_t TIEMPO_UNIDAD_TRABAJO;
+
+
+
+ // lo que estaba en entrada salida FS
+
+t_log* logger;
+t_log* logger_debug;
+uint32_t TIEMPO_UNIDAD_TRABAJO;
+char* PATH_BASE_DIALFS;
+uint32_t BLOCK_SIZE;
+uint32_t BLOCK_COUNT;
+uint32_t RETRASO_COMPACTACION;
+char* path_bloques;
+char* bloques;
+char* path_bitmap;
+void* array_bitmap;
+t_bitarray* bitmap_bloques;
+char* path_metadata;
+t_list* archivos_existentes;
+
+
+ 
+
+
+
 
 #endif //TP_ENTRADASALIDA_MAIN_H_

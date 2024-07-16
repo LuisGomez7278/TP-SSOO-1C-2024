@@ -453,6 +453,16 @@ void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo)
 	paquete->buffer->size += sizeof(cod_ins);    
 };
 
+
+void agregar_a_paquete_cod_interfaz(t_paquete* paquete, cod_interfaz interfaz)
+{    
+    paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(cod_interfaz));
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &interfaz, sizeof(cod_interfaz));
+	paquete->buffer->size += sizeof(cod_interfaz);    
+};
+
+
+
 cod_ins leer_de_buffer_cod_ins(void* buffer, uint32_t* desplazamiento)
 {
     cod_ins codigo;

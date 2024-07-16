@@ -4,6 +4,7 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
 
     while (1)
     {
+        
         IO_type* nueva_interfaz = malloc(sizeof(IO_type));
         if (nueva_interfaz == NULL) {
             perror("malloc");
@@ -11,41 +12,47 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
         }
         nueva_interfaz->socket_interfaz = esperar_cliente(socket_escucha, logger);
         log_info(logger_debug,"Kernel conectado a  UNA I/O");
+        
 
     //ENVIAR MENSAJE ENTRADA SALIDA
-        recibir_mensaje(nueva_interfaz->socket_interfaz,logger_debug);
-            enviar_mensaje("CONEXION CON KERNEL OK", socket_kernel_cpu_dispatch);
-             log_info(logger, "Handshake enviado: CPU-DISPATCH");
         enviar_mensaje("CONEXION CON KERNEL OK", nueva_interfaz->socket_interfaz);
-        log_info(logger_debug, "Handshake enviado: INTERFAZ");
 
-        /*
-    //RECIBIR TIPO Y NOMBRE DE INTERFAZ
+
+        recibir_operacion( nueva_interfaz->socket_interfaz);
+        recibir_mensaje(nueva_interfaz->socket_interfaz,logger_debug);
+
+        
+        log_info(logger_debug, "Handshake enviado: INTERFAZ");
+    
+        
+    //RECIBIR TIPO Y NOMBRE DE INTERFAZ         op_code (nueva IO) ||  cod_interfaz tipo interfaz || string nombre interfaz
+
         op_code cod_operacion= recibir_operacion(nueva_interfaz->socket_interfaz);
 
         switch (cod_operacion)
         {
         case NUEVA_IO:
-        crear_nodo_interfaz(nueva_interfaz);
+        IO_type* interfaz_para_hilo= crear_nodo_interfaz(nueva_interfaz);
         
         pthread_t hilo_escucha_ENTRADASALIDA_KERNEL;
-        pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_Nueva_Interfaz,nueva_interfaz);    //Hilo donde escucho los mensajes que envia la interfaz recien creada
+        pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_Nueva_Interfaz,interfaz_para_hilo);    //Hilo donde escucho los mensajes que envia la interfaz recien creada
         pthread_detach(hilo_escucha_ENTRADASALIDA_KERNEL);
 
         pthread_t hilo_gestion_Cola_interfaz;
-        pthread_create(&hilo_gestion_Cola_interfaz,NULL,(void*)gestionar_envio_cola_nueva_interfaz,nueva_interfaz);       //Hilo que envia instrucciones a medida que se desocupa la interfaz
+        pthread_create(&hilo_gestion_Cola_interfaz,NULL,(void*)gestionar_envio_cola_nueva_interfaz,interfaz_para_hilo);       //Hilo que envia instrucciones a medida que se desocupa la interfaz
         pthread_detach(hilo_gestion_Cola_interfaz);
+        break;
 
         default:
             log_error(logger_debug,"Error al recibir nueva interfaz");
             break;
         }
-    */
-    }
+    
+     } 
 }
 
 
-void crear_nodo_interfaz (IO_type* nueva_interfaz){                                 ///RECIBO DE BUFFER:  COD_INTERFAZ  STRING_NOMBRE 
+ IO_type* crear_nodo_interfaz (IO_type* nueva_interfaz){                                 ///RECIBO DE BUFFER:  COD_INTERFAZ  STRING_NOMBRE 
         uint32_t size;
         void* buffer=recibir_buffer(&size,nueva_interfaz->socket_interfaz);
         uint32_t desplazamiento=0;
@@ -62,14 +69,14 @@ void crear_nodo_interfaz (IO_type* nueva_interfaz){                             
             list_add(lista_de_interfaces,nueva_interfaz);  //-------------------------------------         //LO AGREGO A LA LISTA DE INTERFACES
             pthread_mutex_unlock(&semaforo_lista_interfaces);
             log_info(logger_debug,"Creada nueva interfaz: %s",nueva_interfaz->nombre_interfaz);
-
+            return nueva_interfaz;
   
         }else{             
             log_info(logger_debug,"Se conecto nuevamente la interfaz: %s",nueva_interfaz->nombre_interfaz);                                                                                 //si ya existe una interfaz con ese nombre solo actualizo el socket
             vieja_interfaz->socket_interfaz= nueva_interfaz->socket_interfaz;
             sem_init(&vieja_interfaz->utilizacion_interfaz,0,0);
-           
             free(nueva_interfaz);
+            return vieja_interfaz;
         }
       
 }
@@ -78,7 +85,7 @@ void crear_nodo_interfaz (IO_type* nueva_interfaz){                             
     
 
 void escuchar_a_Nueva_Interfaz(void* interfaz){
-    IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
+    IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;   ///ESTE PUNTERO APUNTA A LA INTERFAZ QUE SE ENCUENTRA EN LISTA DE INTERFACES
     bool continuarIterando=true;
     op_code operacion;
     t_pid_paq* elemento_lista_espera;
@@ -90,10 +97,10 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
         {
         case SOLICITUD_EXITOSA_IO:
             elemento_lista_espera= (t_pid_paq*) list_remove(interfaz_puntero_hilo->cola_de_espera,0);
-            sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
+            sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);           //cantidad de procesos en la cola 
             cambiar_proceso_de_block_a_ready(elemento_lista_espera->PID_cola);
             free(elemento_lista_espera);
-            sem_post(&interfaz_puntero_hilo->utilizacion_interfaz);
+            sem_post(&interfaz_puntero_hilo->utilizacion_interfaz);             //se desocupo la interfaz
             break;
         case ERROR_SOLICITUD_IO:                                            //Como no solicita esta funcionalidad sigo enviando procesos y el que arrojo error queda bloqueado forever
             elemento_lista_espera= (t_pid_paq*)list_remove(interfaz_puntero_hilo->cola_de_espera,0);
@@ -120,9 +127,10 @@ void gestionar_envio_cola_nueva_interfaz(void* interfaz){
     IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
 
     while (interfaz_puntero_hilo->socket_interfaz>0)                            //sigo iterando hasta que se cierre el socket de esa interfaz
-    {    
-    sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
-    sem_wait(&interfaz_puntero_hilo->utilizacion_interfaz);
+    {   
+    log_info(logger_debug,"Gestionando interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);     
+    sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);                   //cantidad de procesos en la cola
+    sem_wait(&interfaz_puntero_hilo->utilizacion_interfaz);                     //espero que se libere la interfaz
     pthread_mutex_lock(&semaforo_lista_interfaces);
     t_pid_paq* a_enviar= (t_pid_paq*)list_get(interfaz_puntero_hilo->cola_de_espera,0);
     pthread_mutex_unlock(&semaforo_lista_interfaces);
@@ -272,8 +280,30 @@ if (strcmp("VRR",algoritmo_planificacion)==0)
 }   
 
 
+IO_type* buscar_interfaz_con_nombre(char*nombre_a_buscar){
+	
+    IO_type* int_punt_auxiliar=NULL;
+ 
+            pthread_mutex_lock(&semaforo_lista_interfaces);
+    		for(int32_t i=0; i<list_size(lista_de_interfaces); i++){
+			int_punt_auxiliar = (IO_type*)list_get(lista_de_interfaces, i);
+			log_trace(logger_debug,"Buscando en lista interfaz con nombre: %s",nombre_a_buscar );
+			log_debug(logger_debug,"Leyendo en lista interfaz con nombre: %s",int_punt_auxiliar->nombre_interfaz );
+            if (strcmp(int_punt_auxiliar->nombre_interfaz,nombre_a_buscar)  == 0){
+                log_info(logger_debug,"Interfaz encontrada: %s",int_punt_auxiliar->nombre_interfaz);
+                pthread_mutex_unlock(&semaforo_lista_interfaces);
+                return int_punt_auxiliar;
+            }
+            }
+    pthread_mutex_unlock(&semaforo_lista_interfaces);        
+    log_info(logger_debug,"Interfaz no encontrada. nombre : %s",nombre_a_buscar);
+	return NULL;
+
+}
 
 
+
+/*
 
 IO_type* buscar_interfaz_con_nombre(char*nombre_a_buscar){
     t_link_element *auxiliar=lista_de_interfaces->head;
@@ -301,7 +331,7 @@ return puntero_interfaz;
 
 }
 
-
+*/
 
 
 

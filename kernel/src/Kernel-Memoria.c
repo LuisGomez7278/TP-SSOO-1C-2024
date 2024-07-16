@@ -105,13 +105,13 @@ void carga_exitosa_en_memoria(void* buffer){
     if (barrera_activada)                                           /// ESTE IF-WHILE NO DEJA PASAR NINGUN PROCESO CUANDO DISMINUYO EL VALOR DE MULTIPROGRAMACION
     {
         while(barrera_activada){
-            sem_post(&control_multiprogramacion);    
+            sem_post(&control_multiprogramacion);                       //esto lo pongo por el caso especial eliminar procesos algun ready luego bajar multiprogramacion
             //log_error(logger_debug,"Iterando while barrera");
             sem_wait(&control_multiprogramacion);
         }
     }
 
-    printf("Pase la barrera\n");
+    //printf("Pase la barrera\n");
     
     
 
@@ -129,7 +129,7 @@ void carga_exitosa_en_memoria(void* buffer){
             }
     }
 
-    printf("Pase la detencion\n");
+    //printf("Pase la detencion\n");
 
 
 

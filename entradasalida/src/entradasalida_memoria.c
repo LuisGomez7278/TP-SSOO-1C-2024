@@ -10,7 +10,7 @@ void gestionar_conexion_memoria()
 
     while (continuar_iterando)
     {
-        operacion = recibir_operacion(socket_entradasalida_memoria);
+        operacion = recibir_operacion(socket_memoria_entradasalida);
 
         uint32_t size;
         uint32_t desplazamiento;
@@ -18,18 +18,18 @@ void gestionar_conexion_memoria()
         switch (operacion)
         {
         case MENSAJE:
-            recibir_mensaje(socket_entradasalida_memoria, logger_debug);
+            recibir_mensaje(socket_memoria_entradasalida, logger_debug);
             break;
 
         case DESALOJO_POR_IO_STDOUT:
-            buffer = recibir_buffer(&size, socket_entradasalida_memoria);
+            buffer = recibir_buffer(&size, socket_memoria_entradasalida);
             string_leida_memoria = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "Entrada-salida recibe una respuesta de memoria por STDOUT, string: %s", string_leida_memoria);
             sem_post(&respuesta_memoria);
             break;
 
         case DESALOJO_POR_IO_FS_WRITE:
-            buffer = recibir_buffer(&size, socket_entradasalida_memoria);
+            buffer = recibir_buffer(&size, socket_memoria_entradasalida);
             string_leida_memoria = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "Entrada-salida recibe una respuesta de memoria por FS_WRITE, string: %s", string_leida_memoria);
             sem_post(&respuesta_memoria);

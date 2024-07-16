@@ -21,7 +21,7 @@
 
 #include "extern_globales.h"
 
-void crear_nodo_interfaz (IO_type* nueva_interfaz);
+ IO_type* crear_nodo_interfaz (IO_type* nueva_interfaz);
 void escuchar_a_Nueva_Interfaz(void* interfaz);
 void gestionar_envio_cola_nueva_interfaz(void* interfaz);
 void cambiar_proceso_de_block_a_ready(uint32_t PID);
