@@ -84,6 +84,10 @@ int32_t main(int32_t argc, char* argv[]) {
     uint32_t tamanio_archivo;
     uint32_t bloque_inicial;
     uint32_t acumulador;
+
+    op_code exito_io = SOLICITUD_EXITOSA_IO;
+    op_code error_io = ERROR_SOLICITUD_IO;
+
     
     while (continuarIterando) {
         verificacion = recibir_operacion(socket_kernel_entradasalida);
@@ -105,7 +109,8 @@ int32_t main(int32_t argc, char* argv[]) {
             
             free(buffer);
             sleep(unidades_trabajo);
-            notificar_kernel(PID);
+            // notificar_kernel(PID);
+            send(socket_kernel_entradasalida, &exito_io, sizeof(op_code), 0);
             log_trace(logger, "PID: %u - Finaliza GEN_SLEEP", PID);
             break;
         case DESALOJO_POR_IO_STDIN:
