@@ -89,6 +89,7 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
     bool continuarIterando=true;
     op_code operacion;
     t_pid_paq* elemento_lista_espera;
+    log_trace(logger, "Se crea un hilo de escucha para la interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);
     while(continuarIterando){    
         
         operacion = recibir_operacion(interfaz_puntero_hilo->socket_interfaz);
@@ -97,6 +98,7 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
         {
         case SOLICITUD_EXITOSA_IO:
             elemento_lista_espera= (t_pid_paq*) list_remove(interfaz_puntero_hilo->cola_de_espera,0);
+            log_info(logger, "La interfaz: %s, realizo una operacion con exito para el proceso PID: %u.", interfaz_puntero_hilo->nombre_interfaz, elemento_lista_espera->PID_cola);
             sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);           //cantidad de procesos en la cola 
             cambiar_proceso_de_block_a_ready(elemento_lista_espera->PID_cola);
             free(elemento_lista_espera);

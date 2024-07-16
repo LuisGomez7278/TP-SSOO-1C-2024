@@ -36,8 +36,8 @@ int32_t main(int32_t argc, char* argv[]) {
     recibir_operacion(socket_kernel_entradasalida);
     recibir_mensaje(socket_kernel_entradasalida, logger);
 
-
-    t_paquete* paquete= crear_paquete(NUEVA_IO);                     //Envio nombre y tipo a kernel:::  op_code (nueva IO) ||  cod_interfaz tipo interfaz || string nombre interfaz
+    //Envio nombre y tipo a kernel:::  op_code (nueva IO) ||  cod_interfaz tipo interfaz || string nombre interfaz
+    t_paquete* paquete= crear_paquete(NUEVA_IO);
     cod_interfaz interfaz = get_tipo_interfaz(TIPO_INTERFAZ);
     agregar_a_paquete_cod_interfaz(paquete,interfaz);
     
@@ -45,7 +45,7 @@ int32_t main(int32_t argc, char* argv[]) {
     agregar_a_paquete_string(paquete,tamanio,nombre_interfaz);
     enviar_paquete(paquete,socket_kernel_entradasalida);
     eliminar_paquete(paquete);
-    log_debug(logger_debug,"paquete enviado");
+    log_debug(logger_debug,"Se confirma a kernel la creacion de la IO");
 
     if (interfaz!=GENERICA)
     {
@@ -65,31 +65,33 @@ int32_t main(int32_t argc, char* argv[]) {
     else {bloques = NULL;}
 
     bool continuarIterando = true;
-        uint32_t PID;
+    op_code cod_op;
+    op_code verificacion;
+    uint32_t size;
+    uint32_t desplazamiento = 0;
+    void* buffer;
 
-        uint32_t size;
-        //t_paquete* paquete;
+    uint32_t PID;
+    char* nombre_archivo;
+    uint32_t tamanio_total;
+    uint32_t cant_accesos;
+    uint32_t dir_fisica;
+    uint32_t tamanio_a_leer;
 
-        char* nombre_archivo;
-        uint32_t tamanio_total;
-        uint32_t cant_accesos;
-        uint32_t dir_fisica;
-        uint32_t tamanio_a_leer;
-
-        uint32_t puntero;
-        char* path_archivo_metadata;
-        t_config* metadata;
-        uint32_t tamanio_archivo;
-        uint32_t bloque_inicial;
-        uint32_t acumulador;
-        
-    while (continuarIterando) {
+    uint32_t puntero;
+    char* path_archivo_metadata;
+    t_config* metadata;
+    uint32_t tamanio_archivo;
+    uint32_t bloque_inicial;
+    uint32_t acumulador;
     
-        op_code cod_op = recibir_operacion(socket_kernel_entradasalida);
-        uint32_t desplazamiento = 0;
-        void* buffer;
+    while (continuarIterando) {
+        verificacion = recibir_operacion(socket_kernel_entradasalida);
+        log_debug(logger_debug, "Cod verificar: %d", verificacion);
         
-        
+        cod_op = recibir_operacion(socket_kernel_entradasalida);
+        log_debug(logger_debug, "Cod operacion: %d", cod_op);
+
         switch (cod_op) {
         case MENSAJE:
             recibir_mensaje(socket_kernel_entradasalida, logger);
@@ -102,8 +104,9 @@ int32_t main(int32_t argc, char* argv[]) {
             log_info(logger,"PID: %u - Operacion: IO_GEN_SLEEP", PID);
             
             free(buffer);
-            usleep(unidades_trabajo);
+            sleep(unidades_trabajo);
             notificar_kernel(PID);
+            log_trace(logger, "PID: %u - Finaliza GEN_SLEEP", PID);
             break;
         case DESALOJO_POR_IO_STDIN:
             buffer = recibir_buffer(&size, socket_kernel_entradasalida);
@@ -309,9 +312,14 @@ int32_t main(int32_t argc, char* argv[]) {
             continuarIterando=0;
             break;
 
-        default:
-            log_warning(logger,"Operacion desconocida de ENTRADA Y SALIDA. No quieras meter la pata");
+        case VERIFICAR_CONEXION:
+            log_info(logger, "Kernel pide verificar la conexion");
             break;
+
+        default:
+            log_warning(logger,"Operacion desconocida de ENTRADA Y SALIDA. Codigo: %d", cod_op);
+            break;
+        
         }
 
     free(buffer);
@@ -323,14 +331,7 @@ int32_t main(int32_t argc, char* argv[]) {
     if (socket_memoria_entradasalida) {liberar_conexion(socket_memoria_entradasalida);}
     if (socket_kernel_entradasalida) {liberar_conexion(socket_kernel_entradasalida);}
 
-
-
-
     return 0;
-
-
-
-
 }
 
 
@@ -353,7 +354,7 @@ void validar_argumentos(char* nombre_interfaz, char* config_interfaz)
 
 void notificar_kernel(uint32_t PID)
 {
-    t_paquete* paquete = crear_paquete(FINALIZA_IO);
+    t_paquete* paquete = crear_paquete(SOLICITUD_EXITOSA_IO);
     agregar_a_paquete_uint32(paquete, PID);
     enviar_paquete(paquete, socket_kernel_entradasalida);
     eliminar_paquete(paquete);
