@@ -28,6 +28,8 @@ bool validacion_de_ingreso_por_consola(char* leido){
     bool comando_validado=false;
     char** array_de_comando= string_split (leido, " ");
 
+    
+
     //log_trace(logger_debug,"El comando tiene: %d de algo.",string_array_size(array_de_comando));
 
     if(strcmp(array_de_comando[0],"EJECUTAR_SCRIPT")==0 && string_array_size(array_de_comando)==2 ){                   //string_array_size(char** array);

@@ -6,10 +6,12 @@ void atender_instruccion_validada(char* leido)
 
     if(strcmp(array_de_comando[0],"EJECUTAR_SCRIPT")==0)//---------------------------------/////////////
     {
+        leer_path_comandos(array_de_comando[1]);
         
 
     }else if (strcmp(array_de_comando[0],"INICIAR_PROCESO")==0)//---------------------------------/////////////
-    {
+    {   
+        log_trace(logger_debug,"Enviando a memoria el comando: %s %s", array_de_comando[0],array_de_comando[1]);
         iniciar_proceso(leido);        
 
 
@@ -87,7 +89,7 @@ void atender_instruccion_validada(char* leido)
         imprimir_listas_de_estados(lista_bloqueado,"BLOCKED");                                  //en bloqueados tambien imprimo los que estan esperando recursos
         imprimir_listas_de_estados(lista_bloqueado_prioritario,"BLOCKED_PRIORITARIO");
          
-         //////////////////////////////////////////////////////////////                       ///aca falta la lista de blocked prioritario para cuando vuelven de IO
+         
     }
 
 
@@ -298,5 +300,49 @@ void imprimir_listas_de_estados(t_list* lista,char* estado){
 
 
 
+void leer_path_comandos(char* path){
+    char* path_completo = string_new();
+    string_append(&path_completo,path_de_comandos_base);
+    string_append(&path_completo, path);
 
+    
+    FILE* archivo =  fopen(path_completo, "r");
+    
+    free(path_completo);
+
+    if (archivo == NULL) {
+        log_error(logger_debug, "No se pudo abrir archivo de comandos");
+        return;    
+    }
+    log_debug(logger_debug,"Leyendo archivo de comandos");
+
+    char linea[50];
+    memset(linea, 0, 50);
+    while (fgets(linea, 50, archivo) != NULL)
+    {
+        
+        if (validacion_de_ingreso_por_consola(linea)) 
+        {   
+            size_t len = strlen(linea);
+            if (len > 0 && linea[len - 1] == '\n') {
+            linea[len - 1] = '\0';
+        }
+        
+            atender_instruccion_validada(linea);
+            
+
+        }else{
+            log_error(logger_debug, "El archivo de pseudocodigo tiene errores/comandos invalidas");
+            fclose(archivo);
+            return;
+            
+        }
+        
+    }
+
+    fclose(archivo);
+    log_info(logger_debug, "Archivo de comandos leido");
+
+    
+}
     

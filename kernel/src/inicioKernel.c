@@ -49,7 +49,7 @@ void iniciar_configs(){
 	recursos						 = config_get_array_value(config,"RECURSOS");
 	instancias_recursos				 = config_get_array_value(config,"INSTANCIAS_RECURSOS");
 	grado_multiprogramacion			 = config_get_int_value(config,"GRADO_MULTIPROGRAMACION");
-
+	path_de_comandos_base			 = config_get_string_value(config,"PATH_COMANDOS");
 	instancias_recursos_int			 = convertir_a_enteros_la_lista_de_instancias(instancias_recursos);
 	
 

@@ -31,6 +31,7 @@
 	char** recursos;
 	char** instancias_recursos;
 	int32_t grado_multiprogramacion;
+    char*path_de_comandos_base;
     uint32_t* instancias_recursos_int=NULL;
 
 

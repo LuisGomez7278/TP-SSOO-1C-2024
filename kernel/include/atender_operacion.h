@@ -21,7 +21,7 @@
 
 void imprimir_listas_de_estados(t_list* lista,char* estado);
 bool detener_planificacion=false;
-
+void leer_path_comandos(char* path);
 
 
 #endif //ATENDER_OPERACION_H

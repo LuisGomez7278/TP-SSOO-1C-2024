@@ -35,6 +35,7 @@ extern char** recursos;
 extern char** instancias_recursos;
 extern int32_t grado_multiprogramacion;
 extern uint32_t* instancias_recursos_int;
+extern char*path_de_comandos_base;
 extern t_recurso* lista_de_recursos;
 
 extern int32_t socket_kernel_cpu_dispatch;
