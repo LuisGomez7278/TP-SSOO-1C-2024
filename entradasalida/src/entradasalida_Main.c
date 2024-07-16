@@ -89,9 +89,17 @@ int32_t main(int32_t argc, char* argv[]) {
     op_code error_io = ERROR_SOLICITUD_IO;
 
     
+<<<<<<< HEAD
     while (continuarIterando) {
         verificacion = recibir_operacion(socket_kernel_entradasalida);
         log_debug(logger_debug, "Cod verificar: %d", verificacion);
+=======
+        op_code cod_op = recibir_operacion(socket_kernel_entradasalida);
+        
+        uint32_t desplazamiento = 0;
+        void* buffer;
+        
+>>>>>>> 1f3d7e7 (merggeo)
         
         cod_op = recibir_operacion(socket_kernel_entradasalida);
         log_debug(logger_debug, "Cod operacion: %d", cod_op);

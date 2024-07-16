@@ -136,6 +136,8 @@ void gestionar_envio_cola_nueva_interfaz(void* interfaz){
     pthread_mutex_lock(&semaforo_lista_interfaces);
     t_pid_paq* a_enviar= (t_pid_paq*)list_get(interfaz_puntero_hilo->cola_de_espera,0);
     pthread_mutex_unlock(&semaforo_lista_interfaces);
+    //char* imprimir=codigo_operacion_string(a_enviar->paquete_cola->codigo_operacion);
+    log_error(logger_debug,"Se envia a ejecutar la operacion ");
     enviar_paquete(a_enviar->paquete_cola,interfaz_puntero_hilo->socket_interfaz);
     log_trace(logger, "Se envia una nueva solicitud a la interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);
     free(a_enviar->paquete_cola);
@@ -226,21 +228,23 @@ bool validar_conexion_interfaz_y_operacion (char* nombre_interfaz, op_code opera
 
 void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paquete){
     IO_type* interfaz=buscar_interfaz_con_nombre (nombre_interfaz);
-    t_pid_paq* pidConPaq=malloc(sizeof(t_pid_paq));
-    
-    if (pidConPaq == NULL) {
-    log_error(logger_debug,"Fallo el malloc de agregar cola interfaz");
+    if(interfaz!=NULL){ 
+
+        t_pid_paq* pidConPaq=malloc(sizeof(t_pid_paq));
+
+        if (pidConPaq == NULL) {
+        log_error(logger_debug,"Fallo el malloc de agregar cola interfaz");
+        }
+
+        pidConPaq->paquete_cola=paquete;
+        pidConPaq->PID_cola=PID;
+
+        pthread_mutex_lock(&semaforo_lista_interfaces);
+        list_add(interfaz->cola_de_espera,pidConPaq);
+        pthread_mutex_unlock(&semaforo_lista_interfaces);
+
+        sem_post(&interfaz->control_envio_interfaz);   // Habilito a gestor de envio a mandar proceso
     }
-    
-    pidConPaq->paquete_cola=paquete;
-    pidConPaq->PID_cola=PID;
-
-    pthread_mutex_lock(&semaforo_lista_interfaces);
-    list_add(interfaz->cola_de_espera,pidConPaq);
-    pthread_mutex_unlock(&semaforo_lista_interfaces);
-
-    sem_post(&interfaz->control_envio_interfaz);
-
    
 }
 

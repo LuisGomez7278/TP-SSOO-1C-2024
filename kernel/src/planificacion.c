@@ -148,9 +148,12 @@ void gestionar_dispatch (){
     while(continuarIterando){    
 
         gestionando_dispatch=false;             ///GESTIONANDO DISPATCH Y OCUPACION CPU SON PARA SINCRONIZAR LA ENTRADA DE NUEVOS PROCESOS
-
+        //-----------------------------------------------------------------------
+        
         cod_op_dispatch = recibir_operacion(socket_kernel_cpu_dispatch);
-
+        
+        //-----------------------------------------------------------------------
+        
         ocupacion_cpu=false;
         gestionando_dispatch=true;    
         
@@ -203,12 +206,12 @@ void gestionar_dispatch (){
         
 
 
-    ///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION  ///////////////////////
+    ///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION  ///////////////////////////
 
 
         switch (cod_op_dispatch){
         case RETORNAR:
-
+        //Este caso es para cuando elimino un proceso
         break;
         case MENSAJE:
         //lo dejo vacio para que pegue la vuelta
@@ -335,7 +338,8 @@ void gestionar_dispatch (){
                     agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
                     
                     agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
-                    
+                    char* imprimir=codigo_operacion_string(paquete->codigo_operacion);
+                    log_error(logger_debug,"Se envia a ejecutar la operacion %s", imprimir);
                     
                     if(strcmp(algoritmo_planificacion,"VRR")==0) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
                     {
