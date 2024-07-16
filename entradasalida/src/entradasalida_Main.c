@@ -87,7 +87,6 @@ int32_t main(int32_t argc, char* argv[]) {
     //op_code exito_io = SOLICITUD_EXITOSA_IO;
     //op_code error_io = ERROR_SOLICITUD_IO;
 
-    
     while (continuarIterando) {
         
         cod_op = recibir_operacion(socket_kernel_entradasalida);
@@ -103,14 +102,15 @@ int32_t main(int32_t argc, char* argv[]) {
             recibir_mensaje(socket_kernel_entradasalida, logger);
             break;
         case DESALOJO_POR_IO_GEN_SLEEP:
-            uint32_t unidades_trabajo;
+            uint32_t nro_unidades_trabajo;
             buffer = recibir_buffer(&size, socket_kernel_entradasalida);
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-            unidades_trabajo = atoi(leer_de_buffer_string(buffer, &desplazamiento));
-            log_info(logger,"PID: %u - Operacion: IO_GEN_SLEEP unidades de trabajo %u", PID,unidades_trabajo);
+            char* string_unidades_trabajo = leer_de_buffer_string(buffer, &desplazamiento);
+            nro_unidades_trabajo = atoi(string_unidades_trabajo);
+            log_info(logger,"PID: %u - Operacion: IO_GEN_SLEEP unidades de trabajo %u", PID, nro_unidades_trabajo);
             
             
-            sleep(3);
+            sleep(nro_unidades_trabajo);
             notificar_kernel(PID);
             log_trace(logger, "PID: %u - Finaliza GEN_SLEEP", PID);
             free(buffer);
