@@ -125,6 +125,7 @@ void recibir_CE(int32_t socket, uint32_t* PID, t_contexto_ejecucion* contexto_co
 void agregar_a_paquete_uint8(t_paquete* paquete, uint8_t numero);
 void agregar_a_paquete_uint32(t_paquete* paquete, uint32_t numero);
 void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string);
+void agregar_a_paquete_resto_del_buffer(t_paquete* paquete, uint32_t tamanio_leido, uint32_t tamanio_restante, void* buffer);
 void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo);
 
 uint8_t leer_de_buffer_uint8(void* buffer, uint32_t* desplazamiento);
