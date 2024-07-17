@@ -22,11 +22,16 @@ void atender_instruccion_validada(char* leido)
                 
 
     }else if (strcmp(array_de_comando[0],"DETENER_PLANIFICACION")==0)//---------------------------------/////////////
-    {
-        detener_planificacion=true;
-        log_info(logger_debug,"Planificacion largo plazo detenida");
         
-
+    {   
+        detener_planificacion=true;
+        
+        if (detener_planificacion)
+        {
+            log_info(logger_debug,"Planificacion detenida");
+        }
+        
+        
     }else if (strcmp(array_de_comando[0],"INICIAR_PLANIFICACION")==0)//---------------------------------/////////////
     {   
         if (detener_planificacion)

@@ -64,7 +64,6 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
     if(strcmp(estado_nuevo_string, "READY_PRIORITARIO")==0 || strcmp(estado_nuevo_string, "READY")==0){
 
 
-
         if (!gestionando_dispatch && !ocupacion_cpu)            //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
         {   
                 if (pthread_cancel(hilo_CPU_dispatch) != 0) {
@@ -180,7 +179,7 @@ void gestionar_dispatch (){
             pthread_mutex_lock(&mutex_cont_pcp);
             cantidad_procesos_bloq_pcp++;
             pthread_mutex_unlock(&mutex_cont_pcp);
-            log_info(logger_debug,"Planificacion corto plazo detenida");
+            //log_info(logger_debug,"Planificacion corto plazo detenida");
             sem_wait(&semaforo_pcp);
         }
        
@@ -337,20 +336,25 @@ void gestionar_dispatch (){
                     agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
                     agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
                     
+                    //char* imprimir=codigo_operacion_string(paquete->codigo_operacion);
+                    //log_error(logger_debug,"Se envia a ejecutar la operacion %s(en planificacion)", imprimir);
+
                     agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
-                    char* imprimir=codigo_operacion_string(paquete->codigo_operacion);
-                    log_error(logger_debug,"Se envia a ejecutar la operacion %s", imprimir);
                     
                     if(strcmp(algoritmo_planificacion,"VRR")==0) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
                     {
                         ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
-                        log_info(logger,"PID: %u bloqueado esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
+                        log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
                     }else
                     {
                         ingresar_en_lista(pcb_dispatch, lista_bloqueado, &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);  
                         log_info(logger,"PID: %u bloqueado esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
 
                     }
+                }else{
+                    enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+                    eliminar_proceso_de_lista_recursos(pcb_dispatch->PID);
+                    sem_post(&control_multiprogramacion);
                 }
                 
                 

@@ -56,7 +56,6 @@ int32_t socket_kernel_entradasalida;
 
 t_log* logger;
 t_log* logger_debug;
-uint32_t TIEMPO_UNIDAD_TRABAJO;
 char* PATH_BASE_DIALFS;
 uint32_t BLOCK_SIZE;
 uint32_t BLOCK_COUNT;

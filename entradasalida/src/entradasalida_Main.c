@@ -66,9 +66,8 @@ int32_t main(int32_t argc, char* argv[]) {
 
     bool continuarIterando = true;
     op_code cod_op;
-    op_code verificacion;
     uint32_t size;
-    uint32_t desplazamiento = 0;
+    
     void* buffer;
 
     uint32_t PID;
@@ -85,24 +84,19 @@ int32_t main(int32_t argc, char* argv[]) {
     uint32_t bloque_inicial;
     uint32_t acumulador;
 
-    op_code exito_io = SOLICITUD_EXITOSA_IO;
-    op_code error_io = ERROR_SOLICITUD_IO;
+    //op_code exito_io = SOLICITUD_EXITOSA_IO;
+    //op_code error_io = ERROR_SOLICITUD_IO;
 
     
-<<<<<<< HEAD
     while (continuarIterando) {
-        verificacion = recibir_operacion(socket_kernel_entradasalida);
-        log_debug(logger_debug, "Cod verificar: %d", verificacion);
-=======
-        op_code cod_op = recibir_operacion(socket_kernel_entradasalida);
-        
-        uint32_t desplazamiento = 0;
-        void* buffer;
-        
->>>>>>> 1f3d7e7 (merggeo)
         
         cod_op = recibir_operacion(socket_kernel_entradasalida);
-        log_debug(logger_debug, "Cod operacion: %d", cod_op);
+        
+        char* operacion= codigo_operacion_string(cod_op);
+
+        log_debug(logger_debug, " A la interfaz se le solicito la operacion: %s", operacion);
+
+        uint32_t desplazamiento = 0;
 
         switch (cod_op) {
         case MENSAJE:
@@ -113,13 +107,13 @@ int32_t main(int32_t argc, char* argv[]) {
             buffer = recibir_buffer(&size, socket_kernel_entradasalida);
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             unidades_trabajo = atoi(leer_de_buffer_string(buffer, &desplazamiento));
-            log_info(logger,"PID: %u - Operacion: IO_GEN_SLEEP", PID);
+            log_info(logger,"PID: %u - Operacion: IO_GEN_SLEEP unidades de trabajo %u", PID,unidades_trabajo);
             
-            free(buffer);
-            sleep(unidades_trabajo);
-            // notificar_kernel(PID);
-            send(socket_kernel_entradasalida, &exito_io, sizeof(op_code), 0);
+            
+            sleep(3);
+            notificar_kernel(PID);
             log_trace(logger, "PID: %u - Finaliza GEN_SLEEP", PID);
+            free(buffer);
             break;
         case DESALOJO_POR_IO_STDIN:
             buffer = recibir_buffer(&size, socket_kernel_entradasalida);
@@ -144,11 +138,12 @@ int32_t main(int32_t argc, char* argv[]) {
                 agregar_a_paquete_string(paquete, tamanio_a_leer, string_leida+acumulador);
                 acumulador+=tamanio_a_leer;
             }
-            free(buffer);
+            
             free(string_leida);
 
             enviar_paquete(paquete, socket_memoria_entradasalida);
             eliminar_paquete(paquete);
+            free(buffer);
             // notificar_kernel(PID);
             break;
 
@@ -173,7 +168,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
             }
-            free(buffer);
+            
 
             enviar_paquete(paquete, socket_memoria_entradasalida);
             eliminar_paquete(paquete);
@@ -187,6 +182,7 @@ int32_t main(int32_t argc, char* argv[]) {
             // log_info(logger, "Se envio la string \'%s\', a kernel para que sea imprimida en pantalla", string_leida_memoria);
             // Imprimir por pantalla
             printf("%s", string_leida_memoria);
+            free(buffer);
             free(string_leida_memoria);
             break;
 
@@ -198,6 +194,7 @@ int32_t main(int32_t argc, char* argv[]) {
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
             crear_archivo(nombre_archivo);
+            free(buffer);
             free(nombre_archivo);
             break;
 
@@ -209,6 +206,7 @@ int32_t main(int32_t argc, char* argv[]) {
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Eliminar Archivo: %s", PID, nombre_archivo);
             eliminar_archivo(nombre_archivo);
+            free(buffer);
             free(nombre_archivo);
             break;
 
@@ -221,6 +219,7 @@ int32_t main(int32_t argc, char* argv[]) {
             int32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Truncar Archivo: %s", PID, nombre_archivo);
             truncar_archivo(PID, nombre_archivo, nuevo_tamanio);
+            free(buffer);
             free(nombre_archivo);
             break;
 
@@ -268,6 +267,7 @@ int32_t main(int32_t argc, char* argv[]) {
             }
             
             config_destroy(metadata);
+            free(buffer);
             free(nombre_archivo);
             free(string_leida_memoria);
             break;
@@ -316,17 +316,18 @@ int32_t main(int32_t argc, char* argv[]) {
             }
             enviar_paquete(paq, socket_memoria_entradasalida);
             eliminar_paquete(paq);
+            free(buffer);
             free(datos_leidos);
             free(nombre_archivo);
             break;
 
         case FALLO:
-            log_error(logger, "La ENTRADASALIDA SE DESCONECTO. Terminando servidor");
+            log_error(logger, "KERNEL SE DESCONECTO. Terminando PROCESO");
             continuarIterando=0;
             break;
 
         case VERIFICAR_CONEXION:
-            log_info(logger, "Kernel pide verificar la conexion");
+            //log_info(logger, "Kernel pide verificar la conexion");
             break;
 
         default:
@@ -335,7 +336,7 @@ int32_t main(int32_t argc, char* argv[]) {
         
         }
 
-    free(buffer);
+    
 
     }
 

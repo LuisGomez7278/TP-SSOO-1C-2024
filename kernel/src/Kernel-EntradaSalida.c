@@ -64,7 +64,7 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
         if(vieja_interfaz==NULL){
             nueva_interfaz->cola_de_espera=list_create();
             sem_init(&nueva_interfaz->control_envio_interfaz, 0, 0);
-            sem_init(&nueva_interfaz->utilizacion_interfaz,0,0);
+            sem_init(&nueva_interfaz->utilizacion_interfaz,0,1);
             pthread_mutex_lock(&semaforo_lista_interfaces);
             list_add(lista_de_interfaces,nueva_interfaz);  //-------------------------------------         //LO AGREGO A LA LISTA DE INTERFACES
             pthread_mutex_unlock(&semaforo_lista_interfaces);
@@ -91,22 +91,42 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
     t_pid_paq* elemento_lista_espera;
     log_trace(logger, "Se crea un hilo de escucha para la interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);
     while(continuarIterando){    
+    void* buffer;
+    uint32_t size;
         
         operacion = recibir_operacion(interfaz_puntero_hilo->socket_interfaz);
-        
+        uint32_t desplazamiento=0;
+
+
+        if (detener_planificacion)                             /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
+        {
+            
+            pthread_mutex_lock(&mutex_cont_pcp);
+            cantidad_procesos_bloq_pcp++;
+            pthread_mutex_unlock(&mutex_cont_pcp);
+            sem_wait(&semaforo_pcp);
+        }
+
+
         switch (operacion) 
         {
         case SOLICITUD_EXITOSA_IO:
+            buffer=recibir_buffer(&size,interfaz_puntero_hilo->socket_interfaz);
+            //uint32_t PID_recibido= 
+            leer_de_buffer_uint32(buffer,&desplazamiento);
+
             elemento_lista_espera= (t_pid_paq*) list_remove(interfaz_puntero_hilo->cola_de_espera,0);
             log_info(logger, "La interfaz: %s, realizo una operacion con exito para el proceso PID: %u.", interfaz_puntero_hilo->nombre_interfaz, elemento_lista_espera->PID_cola);
-            sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);           //cantidad de procesos en la cola 
-            cambiar_proceso_de_block_a_ready(elemento_lista_espera->PID_cola);
+                       //cantidad de procesos en la cola 
+            uint32_t PiD= elemento_lista_espera->PID_cola;
+            cambiar_proceso_de_block_a_ready(PiD);
             free(elemento_lista_espera);
             sem_post(&interfaz_puntero_hilo->utilizacion_interfaz);             //se desocupo la interfaz
+            free(buffer);
             break;
         case ERROR_SOLICITUD_IO:                                            //Como no solicita esta funcionalidad sigo enviando procesos y el que arrojo error queda bloqueado forever
             elemento_lista_espera= (t_pid_paq*)list_remove(interfaz_puntero_hilo->cola_de_espera,0);
-            sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
+            //sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
             log_error(logger_debug,"La interfaz: %s, no pudo realizar la operacion para el proceso PID: %u. Enviando proximo proceso.",interfaz_puntero_hilo->nombre_interfaz,elemento_lista_espera->PID_cola);
             free(elemento_lista_espera);
             break;
@@ -115,7 +135,7 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
             continuarIterando=false;
             break;
         default:
-            log_error(logger_debug,"Llegó una operacion desconocida");
+            log_error(logger_debug,"Llegó una operacion desconocida de IO");
             break;
         }
     
@@ -127,20 +147,18 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
 
 void gestionar_envio_cola_nueva_interfaz(void* interfaz){
     IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
+    log_info(logger_debug,"Gestionando interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);     
 
     while (interfaz_puntero_hilo->socket_interfaz>0)                            //sigo iterando hasta que se cierre el socket de esa interfaz
     {   
-    log_info(logger_debug,"Gestionando interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);     
     sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);                   //cantidad de procesos en la cola
     sem_wait(&interfaz_puntero_hilo->utilizacion_interfaz);                     //espero que se libere la interfaz
     pthread_mutex_lock(&semaforo_lista_interfaces);
     t_pid_paq* a_enviar= (t_pid_paq*)list_get(interfaz_puntero_hilo->cola_de_espera,0);
     pthread_mutex_unlock(&semaforo_lista_interfaces);
-    //char* imprimir=codigo_operacion_string(a_enviar->paquete_cola->codigo_operacion);
-    log_error(logger_debug,"Se envia a ejecutar la operacion ");
     enviar_paquete(a_enviar->paquete_cola,interfaz_puntero_hilo->socket_interfaz);
-    log_trace(logger, "Se envia una nueva solicitud a la interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);
-    free(a_enviar->paquete_cola);
+    log_trace(logger, "Se envia una nueva solicitud: %s a la interfaz: %s",codigo_operacion_string(a_enviar->paquete_cola->codigo_operacion) , interfaz_puntero_hilo->nombre_interfaz);
+    eliminar_paquete(a_enviar->paquete_cola);
     }
     log_error(logger_debug,"Gestor de cola de la INTERFAZ: '%s' terminado por cierre de socket",interfaz_puntero_hilo->nombre_interfaz);
  
@@ -250,20 +268,23 @@ void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paq
 
 
 void cambiar_proceso_de_block_a_ready(uint32_t PID){
-     t_pcb* pcb;
+     t_pcb* pcb=NULL;
 
 if (list_size(lista_bloqueado_prioritario)>0)
-{
-    pthread_mutex_lock(&semaforo_bloqueado_prioridad);
+{   //printf("Primer if camb proc de blok a R\n");
     pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario ,PID,&semaforo_bloqueado_prioridad);
+    pthread_mutex_lock(&semaforo_bloqueado_prioridad);
     list_remove_element(lista_bloqueado_prioritario,pcb);
     pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
 }
 if (pcb==NULL && list_size(lista_bloqueado)>0)
 {
-    pthread_mutex_lock(&semaforo_bloqueado);
+    //printf("Segundo if camb proc de blok a R\n");
     pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado,PID,&semaforo_bloqueado);
-    list_remove_element(lista_bloqueado,pcb);
+    pthread_mutex_lock(&semaforo_bloqueado);
+    if(list_remove_element(lista_bloqueado,pcb)){
+        log_info(logger_debug,"Eliminado de la lista de bloqueados");
+    };
     pthread_mutex_unlock(&semaforo_bloqueado);
 
 }
@@ -279,6 +300,7 @@ if (strcmp("VRR",algoritmo_planificacion)==0)
 {
     ingresar_en_lista(pcb,lista_ready_prioridad,&semaforo_ready_prioridad,&cantidad_procesos_en_algun_ready,READY_PRIORITARIO);
 }else{
+    //printf("Antes de ingresar en lista Ready");
     ingresar_en_lista(pcb,lista_ready,&semaforo_ready,&cantidad_procesos_en_algun_ready,READY);
 
 }

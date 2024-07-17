@@ -28,7 +28,7 @@
 //Entrada salida file system ---------------------------------------------------
 
 
-extern uint32_t TIEMPO_UNIDAD_TRABAJO;
+
 extern char* PATH_BASE_DIALFS;
 extern uint32_t BLOCK_SIZE;
 extern uint32_t BLOCK_COUNT;
@@ -76,8 +76,6 @@ void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t 
 
 extern int32_t socket_memoria_entradasalida;
  
-extern char* TIPO_INTERFAZ;
-extern uint32_t TIEMPO_UNIDAD_TRABAJO;
  
 extern char* PATH_BASE_DIALFS;
 extern uint32_t BLOCK_SIZE;

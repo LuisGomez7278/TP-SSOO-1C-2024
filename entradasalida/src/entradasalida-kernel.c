@@ -1,5 +1,5 @@
 #include "../include/entradasalida-kernel.h"
-
+/*
 
 void atender_conexion_entradasalida_KERNEL(){
     log_info(logger, "Inicio conexion entre IO y Kernel");
@@ -38,3 +38,4 @@ void atender_conexion_entradasalida_KERNEL(){
     
 
 }
+*/
