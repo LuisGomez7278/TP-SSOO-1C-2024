@@ -37,8 +37,7 @@ pthread_t hilo_de_desalojo_por_quantum;
 op_code cod_op_dispatch;
 
 void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar);
-void respuesta_CPU_recurso(op_code respuesta);
-
+void gestionar_solicitud_IO(t_pcb* pcb_dispatch, char* nombre_interfaz, op_code cod_op_dispatch, t_paquete* paquete);
 
 
 

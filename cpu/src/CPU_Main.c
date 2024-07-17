@@ -254,7 +254,8 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_GEN_SLEEP;
         // arg1: nombre_interfaz, arg2: unidades_trabajo
-        enviar_CE_con_2_arg(motivo_desalojo, ins_actual->arg1, ins_actual->arg2);
+        uint32_t unidades = atoi(ins_actual->arg2);
+        solicitar_IO_GEN_SLEEP(motivo_desalojo, ins_actual->arg1, unidades);
         break;
 
     case IO_STDIN_READ:

@@ -207,7 +207,8 @@ void gestionar_dispatch (){
 
     ///////////////////////////////   EJECUTO SEGUN EL CODIGO DE OPERACION  ///////////////////////////
 
-
+        char* nombre_interfaz;
+        char* nombre_archivo;
         switch (cod_op_dispatch){
         case RETORNAR:
         //Este caso es para cuando elimino un proceso
@@ -291,25 +292,24 @@ void gestionar_dispatch (){
                     
                     enviar_siguiente_proceso_a_ejecucion();
             }
-        break;
+            break;
 
         case DESALOJO_POR_QUANTUM:
-                log_info(logger, "PID: %u - Desalojado por fin de Quantum", pcb_dispatch->PID);
-                //RESETEO EL CONTADOR Y LO PONGO NUEVAMENTE EN READY
-                pcb_dispatch->quantum_ejecutado=0;
-                ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);
-                enviar_siguiente_proceso_a_ejecucion();
+            log_info(logger, "PID: %u - Desalojado por fin de Quantum", pcb_dispatch->PID);
+            //RESETEO EL CONTADOR Y LO PONGO NUEVAMENTE EN READY
+            pcb_dispatch->quantum_ejecutado=0;
+            ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);
+            enviar_siguiente_proceso_a_ejecucion();
             break;
 
         case DESALOJO_POR_FIN_PROCESO:
-                log_info(logger, "Finaliza el proceso PID: %u Motivo: SUCCESS", pcb_dispatch->PID);
-                log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
-                //ENVIO PID A MEMORIA PARA QUE ELIMINE EL PROCESO
-                enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
-                eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
-                sem_post(&control_multiprogramacion);
-                enviar_siguiente_proceso_a_ejecucion();
-
+            log_info(logger, "Finaliza el proceso PID: %u Motivo: SUCCESS", pcb_dispatch->PID);
+            log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
+            //ENVIO PID A MEMORIA PARA QUE ELIMINE EL PROCESO
+            enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+            eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
+            sem_post(&control_multiprogramacion);
+            enviar_siguiente_proceso_a_ejecucion();
             break;
 
         case DESALOJO_POR_CONSOLA:
@@ -318,48 +318,84 @@ void gestionar_dispatch (){
             sem_post(&control_multiprogramacion);
             enviar_siguiente_proceso_a_ejecucion();
             break;
+
         case DESALOJO_POR_IO_GEN_SLEEP:
+            nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
+            uint32_t unidades_trabajo = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
+            agregar_a_paquete_uint32(paquete, unidades_trabajo);
+            gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+            enviar_siguiente_proceso_a_ejecucion();
+            break;
+
         case DESALOJO_POR_IO_STDIN:        
         case DESALOJO_POR_IO_STDOUT:
+            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);           
+            nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
+            agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
+
+            uint32_t cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
+            agregar_a_paquete_uint32(paquete, cant_accesos);
+            for (int i = 0; i < cant_accesos; i++)
+            {
+                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// dir_fisica
+                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento)); //tamanio_acceso
+            }
+
+            gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+            enviar_siguiente_proceso_a_ejecucion();
+            break;
+
         case DESALOJO_POR_IO_FS_CREATE:
         case DESALOJO_POR_IO_FS_DELETE:
+            nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
+            nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+
+            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
+            agregar_a_paquete_string(paquete, string_length(nombre_archivo)+1, nombre_archivo);
+
+            gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+            enviar_siguiente_proceso_a_ejecucion();
+            break;
         case DESALOJO_POR_IO_FS_TRUNCATE:
+            nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
+            nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            uint32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
+            agregar_a_paquete_string(paquete, string_length(nombre_archivo)+1, nombre_archivo);
+            agregar_a_paquete_uint32(paquete, nuevo_tamanio);
+
+            gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+            enviar_siguiente_proceso_a_ejecucion();
+            break;
         case DESALOJO_POR_IO_FS_WRITE:
         case DESALOJO_POR_IO_FS_READ:
+            nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
+            nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
+            
+            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
+            agregar_a_paquete_string(paquete, nombre_archivo);
+            agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
+            agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// puntero
 
-                char* nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
-                log_info(logger, "PID: %u envia peticion a interfaz %s", pcb_dispatch->PID, nombre_interfaz);
-
-                if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op_dispatch)){
+            uint32_t cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
+            agregar_a_paquete_uint32(paquete, cant_accesos);
+            for (int i = 0; i < cant_accesos; i++)
+            {
+                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// dir_fisica
+                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento)); //tamanio_acceso
+            }
                 
-                    t_paquete *paquete = crear_paquete(cod_op_dispatch);
-                    agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
-                    agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
-                    
-                    //char* imprimir=codigo_operacion_string(paquete->codigo_operacion);
-                    //log_error(logger_debug,"Se envia a ejecutar la operacion %s(en planificacion)", imprimir);
-
-                    agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
-                    
-                    if(strcmp(algoritmo_planificacion,"VRR")==0) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
-                    {
-                        ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
-                        log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
-                    }else
-                    {
-                        ingresar_en_lista(pcb_dispatch, lista_bloqueado, &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);  
-                        log_info(logger,"PID: %u bloqueado esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
-
-                    }
-                }else{
-                    enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
-                    eliminar_proceso_de_lista_recursos(pcb_dispatch->PID);
-                    sem_post(&control_multiprogramacion);
-                }
-                
-                
-                enviar_siguiente_proceso_a_ejecucion();            
-                break;
+            gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+            enviar_siguiente_proceso_a_ejecucion();
+            break;
         case FALLO:
             log_error(logger_debug,"El modulo CPU se desconecto");
             continuarIterando=false;
@@ -373,6 +409,31 @@ void gestionar_dispatch (){
         free(pcb_dispatch);	
         free(buffer);
         
+    }
+}
+
+void gestionar_solicitud_IO(t_pcb* pcb_dispatch, char* nombre_interfaz, op_code cod_op_dispatch, t_paquete* paquete)
+{
+    if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op_dispatch)){
+        log_info(logger, "PID: %u envia peticion a interfaz %s", pcb_dispatch->PID, nombre_interfaz);
+
+        agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
+
+        if(string_equals_ignore_case(algoritmo_planificacion, "VRR")) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
+        {
+            ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
+            log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
+        }else
+        {
+            ingresar_en_lista(pcb_dispatch, lista_bloqueado, &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);  
+            log_info(logger,"PID: %u bloqueado esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
+
+        }
+    }else{
+        enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+        eliminar_proceso_de_lista_recursos(pcb_dispatch->PID);
+        sem_post(&control_multiprogramacion);
+        eliminar_paquete(paquete);
     }
 }
 

@@ -356,15 +356,6 @@ void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string
 	paquete->buffer->size += tamanio + sizeof(uint32_t);
 }
 
-void agregar_a_paquete_resto_del_buffer(t_paquete* paquete, uint32_t tamanio_leido, uint32_t tamanio_restante, void* buffer)
-{
-    paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + tamanio_restante + sizeof(uint32_t));
-    memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio_restante, sizeof(uint32_t));
-	memcpy(paquete->buffer->stream + paquete->buffer->size + sizeof(uint32_t), buffer+tamanio_leido, tamanio_restante);
-
-	paquete->buffer->size += sizeof(uint32_t) + tamanio_restante;
-}
-
 //-------------------------------------------------------------------------------------------
 
 
