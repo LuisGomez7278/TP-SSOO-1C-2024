@@ -209,6 +209,8 @@ void gestionar_dispatch (){
 
         char* nombre_interfaz;
         char* nombre_archivo;
+        t_paquete* paquete;
+        uint32_t cant_accesos;
         switch (cod_op_dispatch){
         case RETORNAR:
         //Este caso es para cuando elimino un proceso
@@ -323,7 +325,7 @@ void gestionar_dispatch (){
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             uint32_t unidades_trabajo = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            paquete = crear_paquete(cod_op_dispatch);
             agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
             agregar_a_paquete_uint32(paquete, unidades_trabajo);
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
@@ -332,12 +334,12 @@ void gestionar_dispatch (){
 
         case DESALOJO_POR_IO_STDIN:        
         case DESALOJO_POR_IO_STDOUT:
-            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            paquete = crear_paquete(cod_op_dispatch);
             agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);           
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
 
-            uint32_t cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
+            cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
             agregar_a_paquete_uint32(paquete, cant_accesos);
             for (int i = 0; i < cant_accesos; i++)
             {
@@ -354,7 +356,7 @@ void gestionar_dispatch (){
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
 
-            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            paquete = crear_paquete(cod_op_dispatch);
             agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
             agregar_a_paquete_string(paquete, string_length(nombre_archivo)+1, nombre_archivo);
 
@@ -366,7 +368,7 @@ void gestionar_dispatch (){
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             uint32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            paquete = crear_paquete(cod_op_dispatch);
             agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
             agregar_a_paquete_string(paquete, string_length(nombre_archivo)+1, nombre_archivo);
             agregar_a_paquete_uint32(paquete, nuevo_tamanio);
@@ -379,13 +381,13 @@ void gestionar_dispatch (){
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             
-            t_paquete *paquete = crear_paquete(cod_op_dispatch);
+            paquete = crear_paquete(cod_op_dispatch);
             agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
-            agregar_a_paquete_string(paquete, nombre_archivo);
+            agregar_a_paquete_string(paquete, string_length(nombre_archivo)+1, nombre_archivo);
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// puntero
 
-            uint32_t cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
+            cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
             agregar_a_paquete_uint32(paquete, cant_accesos);
             for (int i = 0; i < cant_accesos; i++)
             {
