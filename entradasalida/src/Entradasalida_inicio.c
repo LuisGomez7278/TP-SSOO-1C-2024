@@ -9,26 +9,27 @@ void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz)
 }
 
 void iniciar_logs( char* nombre_interfaz) {
-    // char* path_log = string_duplicate("log_");
-    // string_append(&path_log, nombre_interfaz);
-    // char* nombre_log = string_duplicate(path_log);
-    // string_append(&path_log, ".log");
+    char* path_log = string_duplicate("log_");
+    string_append(&path_log, nombre_interfaz);
+    char* nombre_log = string_duplicate(path_log);
+    string_append(&path_log, ".log");
 
-    logger = start_logger("log_Generica.log", "Logger_IO", LOG_LEVEL_TRACE);
+    logger = start_logger(path_log, nombre_log, LOG_LEVEL_TRACE);
 
     if (logger == NULL) {
         perror("No se pudo crear el logger");
         exit(EXIT_FAILURE);
     }
 
-    logger_debug = start_logger("log_debug_E-S.log", "log_debug_E-S", LOG_LEVEL_TRACE);
+    string_append(&nombre_log, "_debug.log");
+    logger_debug = start_logger(nombre_log, "log_debug_IO", LOG_LEVEL_TRACE);
 
     if (logger == NULL) {
         perror("No se pudo crear el logger debug");
         exit(EXIT_FAILURE);
     }
-    //free(path_log);
-    //free(nombre_log);
+    free(path_log);
+    free(nombre_log);
 }
 
 void iniciar_config(char* config_interfaz)
