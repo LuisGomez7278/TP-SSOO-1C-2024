@@ -24,12 +24,12 @@ void atender_instruccion_validada(char* leido)
     }else if (strcmp(array_de_comando[0],"DETENER_PLANIFICACION")==0)//---------------------------------/////////////
         
     {   
-        detener_planificacion=true;
         
-        if (detener_planificacion)
+        if (!detener_planificacion)
         {
             log_info(logger_debug,"Planificacion detenida");
         }
+        detener_planificacion=true;
         
         
     }else if (strcmp(array_de_comando[0],"INICIAR_PLANIFICACION")==0)//---------------------------------/////////////
@@ -227,13 +227,25 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                     pthread_mutex_unlock(&semaforo_new);
                 }
 
+        
+        if(eliminar_proceso_de_lista_asignaciones_recurso(pid_a_finalizar)){
+            encontrado=true;
+        }
+        
+        if(eliminar_proceso_de_lista_recursos (pid_a_finalizar)){
+            encontrado=true;
+        }
+
+
+        
+
         //printf("llegue al final\n");
         if (!encontrado)
         {
             log_error(logger_debug,"Proceso con PID: %u que se solicito finalizar NO existe.",pid_a_finalizar);
         }
         else{
-            eliminar_proceso_de_lista_recursos (pid_a_finalizar);
+
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pid_a_finalizar,socket_memoria_kernel);
 
         }
@@ -265,16 +277,21 @@ void imprimir_listas_de_estados(t_list* lista,char* estado){
             punteroLista=punteroLista->next;
 		}
 
+
         if (strcmp(estado,"BLOCKED")==0)                                    ///EN EL CASO BLOCKED IMPRIMO TAMBIEN LOS PROCESOS QUE ESTAN ESPERANDO RECURSOS
-        {   
+        {bool primer_ingreso=true;   
             t_recurso* auxiliar = lista_de_recursos;
             
             while (auxiliar!=NULL)
             {
                 if(list_size(auxiliar->lista_de_espera)!=0)
                 {   
-                    punteroLista=auxiliar->lista_de_espera->head;
+                    if(!primer_ingreso){
                     string_append(&log_lista, ", ");
+                    }
+                    primer_ingreso=false;
+
+                    punteroLista=auxiliar->lista_de_espera->head;
                     while (punteroLista!=NULL)
                     {
                         pcb = (t_pcb*) punteroLista->data;

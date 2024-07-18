@@ -34,7 +34,7 @@ extern int64_t quantum;
 extern char** recursos;
 extern char** instancias_recursos;
 extern int32_t grado_multiprogramacion;
-extern uint32_t* instancias_recursos_int;
+extern int32_t* instancias_recursos_int;
 extern char*path_de_comandos_base;
 extern t_recurso* lista_de_recursos;
 
@@ -138,11 +138,12 @@ extern bool barrera_activada;
     uint32_t asignar_pid();
 
 //recursos.h
-    uint32_t* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas);
+    int32_t* convertir_a_enteros_la_lista_de_instancias(char** array_de_cadenas);
     void construir_lista_de_recursos();
     void imprimir_recursos();
-    uint32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
-    uint32_t signal_recursos ( char*recurso_solicitado,uint32_t PID);
-    void eliminar_proceso_de_lista_recursos (uint32_t PID);
+    int32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante);
+    int32_t signal_recursos ( char*recurso_solicitado,uint32_t PID);
+    bool eliminar_proceso_de_lista_recursos (uint32_t PID);
+    bool eliminar_proceso_de_lista_asignaciones_recurso(uint32_t PID);
 
 #endif /*  VARIABLES_GLOBALES_H_ */

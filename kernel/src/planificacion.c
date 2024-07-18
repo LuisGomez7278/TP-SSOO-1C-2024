@@ -66,23 +66,27 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 
         if (!gestionando_dispatch && !ocupacion_cpu)            //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
         {   
-                if (pthread_cancel(hilo_CPU_dispatch) != 0) {
-                perror("Error cancelando el hilo");
-            }
+                int error;
+
+                 error = pthread_cancel(hilo_CPU_dispatch);
+                if (error != 0) {
+                    fprintf(stderr, "Error cancelando el hilo: %s\n", strerror(error));
+                }
     
-            if (pthread_join(hilo_CPU_dispatch, NULL) != 0) {
-                perror("Error haciendo join al hilo");
-            }
+                error = pthread_join(hilo_CPU_dispatch, NULL);
+                if (error != 0) {
+                    fprintf(stderr, "Error haciendo join al hilo: %s\n", strerror(error));
+                }
     
-            if (pthread_create(&hilo_CPU_dispatch, NULL,(void*) enviar_siguiente_proceso_a_ejecucion, NULL) != 0) {
-                perror("Error creando el hilo enviar_siguiente_proceso_a_ejecucion");
-            }
+                error = pthread_create(&hilo_CPU_dispatch, NULL, (void*) enviar_siguiente_proceso_a_ejecucion, NULL);
+                if (error != 0) {
+                    fprintf(stderr, "Error creando el hilo enviar_siguiente_proceso_a_ejecucion: %s\n", strerror(error));
+                }
 
         }
     }
 
 }
-
 
 
 void loggeo_de_cambio_estado(uint32_t pid, t_estado viejo, t_estado nuevo){
@@ -224,6 +228,7 @@ void gestionar_dispatch (){
             log_info(logger, "PID: %u - Cambio de estado EJECUCION-> EXIT", pcb_dispatch->PID);
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel); ///ELIMINO DE MEMORIA
             eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);                                           //ELIMINO DE LISTA DE RECURSOS ASIGNADOS  
+            eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
             sem_post(&control_multiprogramacion);
             
                                                                          //AGREGO UNA INSTANCIA A CANTIDAD DE PROCESOS  
@@ -244,7 +249,14 @@ void gestionar_dispatch (){
                 case 2: 
                     log_info(logger, "PID: %u hace WAIT de recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
                     //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
-                    enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch);
+                        pthread_mutex_lock(&semaforo_ready_prioridad);
+                        list_add_in_index(lista_ready_prioridad, 0, pcb_dispatch);
+                        pthread_mutex_unlock(&semaforo_ready_prioridad);
+
+                        sem_post(&cantidad_procesos_en_algun_ready);
+                        log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u", pcb_dispatch->PID);
+
+                        enviar_siguiente_proceso_a_ejecucion(pcb_dispatch);
 
                     break;
                 case -1:  
@@ -253,6 +265,7 @@ void gestionar_dispatch (){
                     //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
+                    eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion); 
                      
                                  
@@ -280,8 +293,8 @@ void gestionar_dispatch (){
                     //RECURSO NO ENCONTRADO, ENVIAR PROCESO A EXIT
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
+                    eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
-                    
                     enviar_siguiente_proceso_a_ejecucion();
                     break;
                 case -2:
@@ -290,11 +303,13 @@ void gestionar_dispatch (){
                     //SIGANL FALLIDO, NO TIENE ASIGNAOD EL RECURSO LIBERADO
                     enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
+                    eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
                     
                     enviar_siguiente_proceso_a_ejecucion();
             }
-            break;
+            
+        break;
 
         case DESALOJO_POR_QUANTUM:
             log_info(logger, "PID: %u - Desalojado por fin de Quantum", pcb_dispatch->PID);
@@ -317,6 +332,7 @@ void gestionar_dispatch (){
         case DESALOJO_POR_CONSOLA:
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
             eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
+            eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
             sem_post(&control_multiprogramacion);
             enviar_siguiente_proceso_a_ejecucion();
             break;
@@ -387,17 +403,37 @@ void gestionar_dispatch (){
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// puntero
 
-            cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
-            agregar_a_paquete_uint32(paquete, cant_accesos);
-            for (int i = 0; i < cant_accesos; i++)
-            {
-                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// dir_fisica
-                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento)); //tamanio_acceso
-            }
+                if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op_dispatch)){
                 
-            gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
-            enviar_siguiente_proceso_a_ejecucion();
-            break;
+                    t_paquete *paquete = crear_paquete(cod_op_dispatch);
+                    agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
+                    agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
+                    
+                    //char* imprimir=codigo_operacion_string(paquete->codigo_operacion);
+                    //log_error(logger_debug,"Se envia a ejecutar la operacion %s(en planificacion)", imprimir);
+
+                    agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
+                    
+                    if(strcmp(algoritmo_planificacion,"VRR")==0) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
+                    {
+                        ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
+                        log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
+                    }else
+                    {
+                        ingresar_en_lista(pcb_dispatch, lista_bloqueado, &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);  
+                        log_info(logger,"PID: %u bloqueado esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
+
+                    }
+                }else{
+                    enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
+                    eliminar_proceso_de_lista_recursos(pcb_dispatch->PID);
+                    eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
+                    sem_post(&control_multiprogramacion);
+                }
+                
+                
+                enviar_siguiente_proceso_a_ejecucion();            
+                break;
         case FALLO:
             log_error(logger_debug,"El modulo CPU se desconecto");
             continuarIterando=false;
@@ -533,6 +569,9 @@ void interruptor_de_QUANTUM(void* pcb)
 }
 
 
+
+
+
 void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar){                         //ESTA FUNCION ES PARA CUANDO SE SOLICITA UN RECURSO Y PUEDE SEGUIR EJECUTANDO
 
     ocupacion_cpu=true;
@@ -541,6 +580,8 @@ void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar){              
         perror("malloc");
         return;
     }
+
+
     *pcb_interrupt = *pcb_a_reenviar;
     pthread_t hilo_de_desalojo_por_quantum;                
     pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, pcb_interrupt); 
@@ -553,4 +594,5 @@ void enviar_nuevamente_proceso_a_ejecucion(t_pcb* pcb_a_reenviar){              
     gestionar_dispatch ();
     
 }
+
 

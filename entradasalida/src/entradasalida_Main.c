@@ -320,7 +320,7 @@ int32_t main(int32_t argc, char* argv[]) {
 
         case FALLO:
             log_error(logger, "KERNEL SE DESCONECTO. Terminando PROCESO");
-            continuarIterando=0;
+            continuarIterando=false;
             break;
 
         case VERIFICAR_CONEXION:
