@@ -75,7 +75,7 @@ void inicializar_bitmap()
     }
 }
 
-void crear_archivo(char* nombre_archivo)
+bool crear_archivo(char* nombre_archivo)
 {
     int32_t bloque = buscar_bloque_libre();
     if (bloque != -1)
@@ -83,10 +83,12 @@ void crear_archivo(char* nombre_archivo)
         crear_metadata(bloque, nombre_archivo);
         log_info(logger, "Se crea metadata del archivo: %s", nombre_archivo);
         list_add(archivos_existentes, nombre_archivo);
+        return true;
     }
     else
     {
         log_error(logger, "No hay espacio disponible para crear el archivo: %s", nombre_archivo);
+        return false;
     }
 }
 
@@ -122,7 +124,7 @@ void crear_metadata(int32_t bloque, char* nombre_archivo)
     free(path_archivo_metadata);
 }
 
-void eliminar_archivo(char* nombre_archivo)
+bool eliminar_archivo(char* nombre_archivo)
 {
     int32_t indice;
     if (existe_archivo(nombre_archivo, &indice))
@@ -136,10 +138,12 @@ void eliminar_archivo(char* nombre_archivo)
         remove(path_archivo_metadata); //Eliminar archivo de metadata
         free(path_archivo_metadata);
         log_info(logger, "Se elimino el archivo: %s con exito", nombre_archivo);
+        return true;
     }
     else
     {
         log_warning(logger, "Se trato de eliminar un archivo que no existe: %s", nombre_archivo);
+        return false;
     }
     
 }
@@ -172,12 +176,13 @@ void liberar_bloques(char* path_archivo_metadata)
     config_destroy(metadata);
 }
 
-void truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
+bool truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
 {
     int32_t indice;
     if (!existe_archivo(nombre_archivo, &indice))
     {
         log_error(logger, "PID: %u, trato de truncar un archivo que no existe: %s", PID, nombre_archivo);
+        return false;
     }
     else
     {
@@ -194,6 +199,7 @@ void truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
         {
             config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
             liberar_n_bloques(bloque_inicial+nueva_cant_bloques, 0-diferencia_cant_bloques);
+            return true;
         }
         else
         {
@@ -213,6 +219,7 @@ void truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
             if (!asignacion)
             {
                 log_warning(logger, "PID: %u - No se pudo truncar el archivo: %s por falta de espacio", PID, nombre_archivo);
+                return false;
             }
             else
             {
@@ -222,6 +229,7 @@ void truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
         }        
         config_save(metadata);
         free(path_archivo_metadata);
+        return true;
     }
 }
 

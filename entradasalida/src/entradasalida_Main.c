@@ -84,9 +84,6 @@ int32_t main(int32_t argc, char* argv[]) {
     uint32_t bloque_inicial;
     uint32_t acumulador;
 
-    //op_code exito_io = SOLICITUD_EXITOSA_IO;
-    //op_code error_io = ERROR_SOLICITUD_IO;
-
     while (continuarIterando) {
         
         cod_op = recibir_operacion(socket_kernel_entradasalida);
@@ -109,7 +106,7 @@ int32_t main(int32_t argc, char* argv[]) {
 
             sleep(unidades_trabajo);
             log_trace(logger, "PID: %u - Finaliza GEN_SLEEP", PID);
-            notificar_kernel(PID);
+            notificar_kernel(true);
             free(buffer);
             break;
         case DESALOJO_POR_IO_STDIN:
@@ -141,7 +138,7 @@ int32_t main(int32_t argc, char* argv[]) {
             enviar_paquete(paquete, socket_memoria_entradasalida);
             eliminar_paquete(paquete);
             free(buffer);
-            // notificar_kernel(PID);
+            notificar_kernel(true);
             break;
 
         case DESALOJO_POR_IO_STDOUT:
@@ -179,6 +176,7 @@ int32_t main(int32_t argc, char* argv[]) {
             // log_info(logger, "Se envio la string \'%s\', a kernel para que sea imprimida en pantalla", string_leida_memoria);
             // Imprimir por pantalla
             printf("%s", string_leida_memoria);
+            notificar_kernel(true);
             free(buffer);
             free(string_leida_memoria);
             break;
@@ -190,7 +188,8 @@ int32_t main(int32_t argc, char* argv[]) {
             log_info(logger,"PID: %u - Operacion: IO_FS_CREATE", PID);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
-            crear_archivo(nombre_archivo);
+            bool creado = crear_archivo(nombre_archivo);
+            notificar_kernel(creado);
             free(buffer);
             free(nombre_archivo);
             break;
@@ -202,7 +201,8 @@ int32_t main(int32_t argc, char* argv[]) {
             log_info(logger,"PID: %u - Operacion: IO_FS_DELETE", PID);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Eliminar Archivo: %s", PID, nombre_archivo);
-            eliminar_archivo(nombre_archivo);
+            bool eliminado = eliminar_archivo(nombre_archivo);
+            notificar_kernel(eliminado);
             free(buffer);
             free(nombre_archivo);
             break;
@@ -215,7 +215,8 @@ int32_t main(int32_t argc, char* argv[]) {
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             int32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Truncar Archivo: %s", PID, nombre_archivo);
-            truncar_archivo(PID, nombre_archivo, nuevo_tamanio);
+            bool truncado = truncar_archivo(PID, nombre_archivo, nuevo_tamanio);
+            notificar_kernel(truncado);
             free(buffer);
             free(nombre_archivo);
             break;
@@ -253,16 +254,20 @@ int32_t main(int32_t argc, char* argv[]) {
             tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
             bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
 
+            bool write;
             log_info(logger, "PID: %u - Escribir Archivo: %s - Tamaño a Escribir: %u - Puntero Archivo: %u", PID, nombre_archivo, tamanio_total, puntero);
             if (puntero+tamanio_total >= tamanio_archivo)
             {
                 log_error(logger, "PID: %u trato de escribir en disco al archivo: %s mas alla de su tamaño asignado", PID, nombre_archivo);
+                write = false;
             }
             else
             {
                 FS_WRITE(bloques, bloque_inicial, puntero, tamanio_total, string_leida_memoria);
-            }
-            
+                write = true;   
+            }            
+            notificar_kernel(write);
+
             config_destroy(metadata);
             free(buffer);
             free(nombre_archivo);
@@ -285,9 +290,11 @@ int32_t main(int32_t argc, char* argv[]) {
 
             log_info(logger, "PID: %u - Escribir Archivo: %s - Tamaño a Escribir: %u - Puntero Archivo: %u", PID, nombre_archivo, tamanio_total, puntero);
             void* datos_leidos = NULL;
+            bool read;
             if (puntero+tamanio_total >= tamanio_archivo)
             {
                 log_error(logger, "PID: %u trato de leer de disco al archivo: %s mas alla de su tamaño asignado", PID, nombre_archivo);
+                read = false;
             }
             else
             {
@@ -310,7 +317,9 @@ int32_t main(int32_t argc, char* argv[]) {
                 }
                 enviar_paquete(paq, socket_memoria_entradasalida);
                 eliminar_paquete(paq);
+                read = true;
             }
+            notificar_kernel(read);
             
             config_destroy(metadata);
             free(buffer);
@@ -332,13 +341,10 @@ int32_t main(int32_t argc, char* argv[]) {
             break;
         
         }
-
-    
-
     }
 
-    //if (bloques) {munmap(bloques, BLOCK_SIZE*BLOCK_COUNT);}
-    //if (array_bitmap) {munmap(array_bitmap, BLOCK_COUNT/8);}
+    if (bloques) {munmap(bloques, BLOCK_SIZE*BLOCK_COUNT);}
+    if (array_bitmap) {munmap(array_bitmap, BLOCK_COUNT/8);}
     if (socket_memoria_entradasalida) {liberar_conexion(socket_memoria_entradasalida);}
     if (socket_kernel_entradasalida) {liberar_conexion(socket_kernel_entradasalida);}
 
@@ -363,12 +369,10 @@ void validar_argumentos(char* nombre_interfaz, char* config_interfaz)
   //  }
 }
 
-void notificar_kernel(uint32_t PID)
+void notificar_kernel(bool exito)
 {
-    t_paquete* paquete = crear_paquete(SOLICITUD_EXITOSA_IO);
-    agregar_a_paquete_uint32(paquete, PID);
-    enviar_paquete(paquete, socket_kernel_entradasalida);
-    eliminar_paquete(paquete);
+    op_code codigo = exito ? SOLICITUD_EXITOSA_IO : ERROR_SOLICITUD_IO;
+    send(socket_kernel_entradasalida, &codigo, sizeof(op_code), 0);
 }
 
 char* leer_de_teclado(uint32_t tamanio_a_leer)

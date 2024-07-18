@@ -50,15 +50,15 @@ void inicializar_FS();
 void inicializar_bloques();
 void inicializar_bitmap();
 
-void crear_archivo(char* nombre_archivo);
+bool crear_archivo(char* nombre_archivo);
 int32_t buscar_bloque_libre();
 void crear_metadata(int32_t bloque, char* nombre_archivo);
 
-void eliminar_archivo(char* nombre_archivo);
+bool eliminar_archivo(char* nombre_archivo);
 bool existe_archivo(char* nombre_archivo, int32_t* indice);
 void liberar_bloques(char* path_archivo_metadata);
 
-void truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio);
+bool truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio);
 int32_t cantidad_de_bloques(int32_t tamanio_archivo);
 void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar);
 bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar);
@@ -124,7 +124,7 @@ extern char* nombre_interfaz;
 extern char* config_interfaz;
 
 void validar_argumentos(char* nombre_interfaz, char* config_interfaz);
-void notificar_kernel(uint32_t PID);
+void notificar_kernel(bool exito);
 char* leer_de_teclado(uint32_t tamanio_a_leer);
 
 

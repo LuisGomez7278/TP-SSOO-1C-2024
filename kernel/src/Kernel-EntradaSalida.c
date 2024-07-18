@@ -111,10 +111,6 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
         switch (operacion) 
         {
         case SOLICITUD_EXITOSA_IO:
-            buffer=recibir_buffer(&size,interfaz_puntero_hilo->socket_interfaz);
-            //uint32_t PID_recibido= 
-            leer_de_buffer_uint32(buffer,&desplazamiento);
-
             elemento_lista_espera= (t_pid_paq*) list_remove(interfaz_puntero_hilo->cola_de_espera,0);
             log_info(logger, "La interfaz: %s, realizo una operacion con exito para el proceso PID: %u.", interfaz_puntero_hilo->nombre_interfaz, elemento_lista_espera->PID_cola);
                        //cantidad de procesos en la cola 

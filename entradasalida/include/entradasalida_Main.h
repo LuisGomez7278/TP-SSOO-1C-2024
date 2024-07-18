@@ -15,6 +15,8 @@
 #include <stdbool.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 #include "../../utils/include/utils.h"
 #include "../../utils/include/conexiones.h"
