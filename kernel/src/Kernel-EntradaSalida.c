@@ -90,13 +90,9 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
     op_code operacion;
     t_pid_paq* elemento_lista_espera;
     log_trace(logger, "Se crea un hilo de escucha para la interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);
-    while(continuarIterando){    
-    void* buffer;
-    uint32_t size;
-        
+    
+    while(continuarIterando){        
         operacion = recibir_operacion(interfaz_puntero_hilo->socket_interfaz);
-        uint32_t desplazamiento=0;
-
 
         if (detener_planificacion)                             /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
         {
@@ -113,12 +109,10 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
         case SOLICITUD_EXITOSA_IO:
             elemento_lista_espera= (t_pid_paq*) list_remove(interfaz_puntero_hilo->cola_de_espera,0);
             log_info(logger, "La interfaz: %s, realizo una operacion con exito para el proceso PID: %u.", interfaz_puntero_hilo->nombre_interfaz, elemento_lista_espera->PID_cola);
-                       //cantidad de procesos en la cola 
             uint32_t PiD= elemento_lista_espera->PID_cola;
             cambiar_proceso_de_block_a_ready(PiD);
             free(elemento_lista_espera);
             sem_post(&interfaz_puntero_hilo->utilizacion_interfaz);             //se desocupo la interfaz
-            free(buffer);
             break;
         case ERROR_SOLICITUD_IO:                                            //Como no solicita esta funcionalidad sigo enviando procesos y el que arrojo error queda bloqueado forever
             elemento_lista_espera= (t_pid_paq*)list_remove(interfaz_puntero_hilo->cola_de_espera,0);
