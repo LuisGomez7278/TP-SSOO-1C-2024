@@ -88,16 +88,23 @@ int32_t wait_recursos(char* recurso_solicitado,t_pcb* pcb_solicitante){
     if (auxiliar->instancias_del_recurso - auxiliar->instancias_solicitadas_del_recurso <=0)             //RECURSO ENCONTRADO SIN INSTANCIAS DISPONIBLES
     {
         log_info(logger, "PID: %d - Cambio de estado READY -> BLOQUEADO", pcb_solicitante->PID);        //PCB QUEDO EN COLA DE ESPERA DEL RECURSO
+        pcb_solicitante->estado= BLOCKED,
         pthread_mutex_lock(&semaforo_recursos);
         list_add(auxiliar->lista_de_espera,pcb_solicitante);
+        uint32_t *Pid=malloc(sizeof(uint32_t));
+        *Pid=pcb_solicitante->PID;
+        list_add(auxiliar->lista_de_asignaciones,Pid);                                                                                                   // //RECURSO ENCONTRADO CON INSTANCIAS DISPONIBLES
         pthread_mutex_unlock(&semaforo_recursos);
-        auxiliar->instancias_solicitadas_del_recurso+=1;
+        auxiliar->instancias_solicitadas_del_recurso+=1; 
+        
         return 1;
         
     }else{
         uint32_t *Pid=malloc(sizeof(uint32_t));
         *Pid=pcb_solicitante->PID;
-        list_add(auxiliar->lista_de_asignaciones,Pid);                                                                                                   // //RECURSO ENCONTRADO CON INSTANCIAS DISPONIBLES
+        pthread_mutex_lock(&semaforo_recursos);
+        list_add(auxiliar->lista_de_asignaciones,Pid);
+        pthread_mutex_unlock(&semaforo_recursos);                                                                                                   // //RECURSO ENCONTRADO CON INSTANCIAS DISPONIBLES
         auxiliar->instancias_solicitadas_del_recurso+=1;                                                    //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
         return 2;
     }
@@ -236,7 +243,8 @@ bool eliminar_proceso_de_lista_asignaciones_recurso(uint32_t PID){
                             t_pcb *pcb_liberado=list_remove(auxiliar->lista_de_espera,0);
                             log_debug(logger_debug,"Se libero el proceso PID: %d de la cola de espera del recurso %s",pcb_liberado->PID,auxiliar->nombre_recurso);
                             ingresar_en_lista(pcb_liberado, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);
-                        }   
+                        }
+                           
                         
                     }else{
                         log_error(logger_debug,"Se encontro el proceso en lista de asignaciones pero no se pudo eliminar");

@@ -285,7 +285,15 @@ void gestionar_dispatch (){
                 case 1:
                     log_info(logger, "PID: %u hace SIGNAL a un recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
                     //SIGNAL EXITOSO, DEVUELVO EL PROCESO A EJECUCION
-                    enviar_nuevamente_proceso_a_ejecucion(pcb_dispatch);
+                    pthread_mutex_lock(&semaforo_ready_prioridad);
+                    list_add_in_index(lista_ready_prioridad, 0, pcb_dispatch);
+                    pthread_mutex_unlock(&semaforo_ready_prioridad);
+
+                    sem_post(&cantidad_procesos_en_algun_ready);
+                    log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u", pcb_dispatch->PID);
+
+                    enviar_siguiente_proceso_a_ejecucion(pcb_dispatch);
+
                     break;
                 case -1:
                     log_info(logger, "Finaliza el proceso PID: %u Motivo: INVALID_RESOURCE: %s", pcb_dispatch->PID, recurso_solicitado);

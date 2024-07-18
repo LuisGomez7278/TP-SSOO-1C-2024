@@ -94,6 +94,35 @@ void atender_instruccion_validada(char* leido)
         imprimir_listas_de_estados(lista_bloqueado,"BLOCKED");                                  //en bloqueados tambien imprimo los que estan esperando recursos
         imprimir_listas_de_estados(lista_bloqueado_prioritario,"BLOCKED_PRIORITARIO");
          
+    
+    t_recurso* auxiliar = lista_de_recursos;
+        
+      printf("\n\nImprimiendo lista asignaciones de recurso %s\n",auxiliar->nombre_recurso);
+        
+        while(auxiliar!=NULL){
+
+        if(list_size(auxiliar->lista_de_asignaciones)>0){
+            
+            printf("Cantidad de procesos en espera= %d\n",list_size(auxiliar->lista_de_espera));
+        
+            for(int32_t i=0; i<list_size(auxiliar->lista_de_asignaciones); i++){
+                uint32_t *pid_auxiliar = (uint32_t*)list_get(auxiliar->lista_de_asignaciones, i);   //Busco el PID en la lista de instancias asignadas a procesos
+                
+                if (pid_auxiliar==NULL)
+                {
+                    log_error(logger_debug,"Pid es igual a null");
+                
+                }
+                    
+                    printf(" %u\n",*pid_auxiliar);
+
+        }
+            
+        auxiliar = auxiliar->siguiente_recurso;
+       
+    }
+
+}
          
     }
 
@@ -368,3 +397,9 @@ void leer_path_comandos(char* path){
     
 }
     
+
+
+
+
+
+
