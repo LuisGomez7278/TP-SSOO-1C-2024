@@ -284,7 +284,7 @@ int32_t main(int32_t argc, char* argv[]) {
             bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
 
             log_info(logger, "PID: %u - Escribir Archivo: %s - Tamaño a Escribir: %u - Puntero Archivo: %u", PID, nombre_archivo, tamanio_total, puntero);
-            void* datos_leidos;
+            void* datos_leidos = NULL;
             if (puntero+tamanio_total >= tamanio_archivo)
             {
                 log_error(logger, "PID: %u trato de leer de disco al archivo: %s mas alla de su tamaño asignado", PID, nombre_archivo);
@@ -293,26 +293,26 @@ int32_t main(int32_t argc, char* argv[]) {
             {
                 datos_leidos = malloc(tamanio_total);
                 FS_READ(bloques, bloque_inicial, puntero, tamanio_total, datos_leidos);
+
+                t_paquete* paq = crear_paquete(DESALOJO_POR_IO_FS_READ);
+                agregar_a_paquete_uint32(paq, tamanio_total);
+                agregar_a_paquete_uint32(paq, cant_accesos);
+
+                acumulador = 0;
+                for (int i = 0; i < cant_accesos; i++)
+                {
+                    dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
+                    tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+                    
+                    agregar_a_paquete_uint32(paq, dir_fisica);
+                    agregar_a_paquete_string(paq, tamanio_a_leer, datos_leidos+acumulador);
+                    acumulador+=tamanio_a_leer;
+                }
+                enviar_paquete(paq, socket_memoria_entradasalida);
+                eliminar_paquete(paq);
             }
             
             config_destroy(metadata);
-
-            t_paquete* paq = crear_paquete(DESALOJO_POR_IO_FS_READ);
-            agregar_a_paquete_uint32(paq, tamanio_total);
-            agregar_a_paquete_uint32(paq, cant_accesos);
-
-            acumulador = 0;
-            for (int i = 0; i < cant_accesos; i++)
-            {
-                dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
-                tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
-                
-                agregar_a_paquete_uint32(paquete, dir_fisica);
-                agregar_a_paquete_string(paquete, tamanio_a_leer, datos_leidos+acumulador);
-                acumulador+=tamanio_a_leer;
-            }
-            enviar_paquete(paq, socket_memoria_entradasalida);
-            eliminar_paquete(paq);
             free(buffer);
             free(datos_leidos);
             free(nombre_archivo);
