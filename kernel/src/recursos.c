@@ -213,33 +213,34 @@ bool eliminar_proceso_de_lista_asignaciones_recurso(uint32_t PID){
     
     pthread_mutex_lock(&semaforo_lista_interfaces);
     
-    while(auxiliar!=NULL){
+    while(auxiliar!=NULL){                                  //avanzo recurso
 
         if(list_size(auxiliar->lista_de_asignaciones)>0){
 
         
-            for(int32_t i=0; i<list_size(auxiliar->lista_de_asignaciones); i++){
+            for(int32_t i=0; i<list_size(auxiliar->lista_de_asignaciones); i++){                    //avanzo lista pid asignados
                 uint32_t *pid_auxiliar = (uint32_t*)list_get(auxiliar->lista_de_asignaciones, i);   //Busco el PID en la lista de instancias asignadas a procesos
-                printf("marca1\n");
+                //printf("marca1\n");
                 if (pid_auxiliar==NULL)
                 {
                     log_error(logger_debug,"Pid es igual a null");
                 
                 }else if (*pid_auxiliar == PID){
-                    printf("marca2\n");
+                    //printf("marca2\n");
                     if (list_remove_element(auxiliar->lista_de_asignaciones,pid_auxiliar))
                     {   
-                        printf("marca3\n");
+                        //printf("marca3\n");
                         eliminado=true;
                         log_debug(logger_debug,"Se elimino el proceso de la lista de asignaciones");
                         auxiliar->instancias_solicitadas_del_recurso-=1;
                         printf("Intancias del recurso= %d\n",auxiliar->instancias_del_recurso);
                         printf("Intancias solicitadas del recurso= %d\n",auxiliar->instancias_solicitadas_del_recurso);
                         printf("Cantidad de procesos en espera= %d\n",list_size(auxiliar->lista_de_espera));
-                        
-                        if (auxiliar->instancias_del_recurso - auxiliar->instancias_solicitadas_del_recurso >=0 && list_size(auxiliar->lista_de_espera)>0)//VERIFICO SI HABIA UN PROCESO ESPERANDO EL RECURSO Y LO LIBERO
+                         t_pcb *pcb_auxiliar = (t_pcb *)list_get(auxiliar->lista_de_espera,0);
+                        if (auxiliar->instancias_del_recurso - auxiliar->instancias_solicitadas_del_recurso >=0 && list_size(auxiliar->lista_de_espera)>0 && *pid_auxiliar!=pcb_auxiliar->PID)//VERIFICO SI HABIA UN PROCESO ESPERANDO EL RECURSO Y LO LIBERO si no es el que stoy eliminando
                         {   
-                            printf("marca4\n");
+                                                       
+                            //printf("marca4\n");
                             t_pcb *pcb_liberado=list_remove(auxiliar->lista_de_espera,0);
                             log_debug(logger_debug,"Se libero el proceso PID: %d de la cola de espera del recurso %s",pcb_liberado->PID,auxiliar->nombre_recurso);
                             ingresar_en_lista(pcb_liberado, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);
@@ -251,7 +252,7 @@ bool eliminar_proceso_de_lista_asignaciones_recurso(uint32_t PID){
                        
                     }
                 }
-                log_debug(logger_debug,"El valor de pid extraido es: %u",*pid_auxiliar);
+                //log_debug(logger_debug,"El valor de pid extraido es: %u",*pid_auxiliar);
             }
 
         }

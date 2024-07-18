@@ -94,13 +94,12 @@ void atender_instruccion_validada(char* leido)
         imprimir_listas_de_estados(lista_bloqueado,"BLOCKED");                                  //en bloqueados tambien imprimo los que estan esperando recursos
         imprimir_listas_de_estados(lista_bloqueado_prioritario,"BLOCKED_PRIORITARIO");
          
-    
+  /*  
     t_recurso* auxiliar = lista_de_recursos;
-        
-      printf("\n\nImprimiendo lista asignaciones de recurso %s\n",auxiliar->nombre_recurso);
+
         
         while(auxiliar!=NULL){
-
+        printf("\n\nImprimiendo lista asignaciones de recurso %s\n",auxiliar->nombre_recurso);
         if(list_size(auxiliar->lista_de_asignaciones)>0){
             
             printf("Cantidad de procesos en espera= %d\n",list_size(auxiliar->lista_de_espera));
@@ -123,7 +122,7 @@ void atender_instruccion_validada(char* leido)
     }
 
 }
-         
+ */       
     }
 
 
