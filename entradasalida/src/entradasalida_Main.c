@@ -104,7 +104,7 @@ int32_t main(int32_t argc, char* argv[]) {
             uint32_t unidades_trabajo = leer_de_buffer_uint32(buffer, &desplazamiento);
             log_info(logger,"PID: %u - Operacion: IO_GEN_SLEEP unidades de trabajo %u", PID, unidades_trabajo);
 
-            sleep(unidades_trabajo*TIEMPO_UNIDAD_TRABAJO);
+            usleep(unidades_trabajo*TIEMPO_UNIDAD_TRABAJO);
             log_trace(logger, "PID: %u - Finaliza GEN_SLEEP", PID);
             notificar_kernel(true);
             free(buffer);

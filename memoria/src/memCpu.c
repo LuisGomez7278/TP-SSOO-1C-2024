@@ -61,9 +61,8 @@ void fetch(int socket_cpu_memoria){
     recibir_fetch(socket_cpu_memoria, &PID, &PC);
     log_info(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     
-
-pthread_mutex_unlock(&mutex_listaDeinstrucciones);
-
+    pthread_mutex_unlock(&mutex_listaDeinstrucciones);
+    
     pthread_mutex_lock(&mutex_listaDeinstrucciones);
     
     t_list* lista_instrucciones = obtener_instrs(PID);
@@ -73,13 +72,16 @@ pthread_mutex_unlock(&mutex_listaDeinstrucciones);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
     }
-    t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
-    pthread_mutex_unlock(&mutex_listaDeinstrucciones);
-    
-    usleep(retardo*1000);
+    else
+    {
+        t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
+        pthread_mutex_unlock(&mutex_listaDeinstrucciones);
+        
+        usleep(retardo*1000);
 
-    enviar_instruccion(socket_cpu_memoria, sig_ins);
-    log_info(logger_debug, "instruccion enviada");
+        enviar_instruccion(socket_cpu_memoria, sig_ins);
+        log_info(logger_debug, "instruccion enviada");
+    }
 }
 
 void frame(int socket_cpu_memoria){

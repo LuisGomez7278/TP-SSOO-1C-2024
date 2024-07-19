@@ -34,7 +34,8 @@ void eliminar_procesoM(uint32_t PID){
     if (proceso == NULL) {
         log_error(logger_debug, "Proceso con PID %d no encontrado para finalizar", PID);
     }
-
+    else
+    {    
     // Liberar los frames del proceso
     liberar_frames(proceso->paginas);
 
@@ -77,8 +78,8 @@ void eliminar_procesoM(uint32_t PID){
     free(proceso);
 
     log_info(logger_debug, "Proceso con PID %d finalizado y eliminado", PID);
+    }
 }
-
 
 uint32_t encontrar_frame(uint32_t PID, uint32_t pagina){
     tabla_pag_proceso* tabla_pid = obtener_tabla_pag_proceso(PID);
