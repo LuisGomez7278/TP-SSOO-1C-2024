@@ -215,15 +215,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorgrande1);
         }
         
-
-        // if (recibir_respuesta_MOV_OUT() != OK)
-        // {
-        //     log_info(logger,"PID: %u, No pudo realizar el MOV_OUT y va al EXIT", PID);
-        //     motivo_desalojo = DESALOJO_POR_FIN_PROCESO;
-        //     desalojar_proceso(motivo_desalojo);
-        // }
-        // else
-        // {log_info(logger,"PID: %u, realiza MOV_OUT con exito", PID);}
         contexto_interno->PC++;
         break;
 
