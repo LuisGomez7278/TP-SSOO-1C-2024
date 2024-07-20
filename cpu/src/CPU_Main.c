@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     pthread_create(&hilo_conexion_memoria, NULL, (void*) gestionar_conexion_memoria, NULL);
     pthread_detach(hilo_conexion_memoria);
         
-        while(true){
+    while(true){
         if (detener_ejecucion)
         {   
             log_trace(logger,"Esperando un proceso");

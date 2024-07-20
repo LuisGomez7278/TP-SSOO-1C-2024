@@ -22,7 +22,7 @@ void gestionar_conexion_dispatch()
             sem_wait(&espera_iterador);
             t_contexto_ejecucion contexto_espera;
             recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_espera);
-            log_info(logger, "Llega un proceso de PID: %u, esperando CPU", PID);            
+            log_info(logger, "Llega un proceso de PID: %u, esperando CPU", PID);
             
             interrupcion = INT_NO;
             detener_ejecucion=false;

@@ -438,8 +438,8 @@ void recibir_CE(int32_t socket, uint32_t* PID_contenedor, t_contexto_ejecucion* 
     void* buffer;
 
     buffer = recibir_buffer(&size, socket);
-
-    (*PID_contenedor) = leer_de_buffer_uint32(buffer, &desplazamiento);
+    uint32_t PID_aux = leer_de_buffer_uint32(buffer, &desplazamiento);
+    memcpy(PID_contenedor, &PID_aux, sizeof(uint32_t));
     leer_de_buffer_CE(buffer, &desplazamiento, contexto_contenedor);
 
     free(buffer);
