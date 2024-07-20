@@ -24,8 +24,8 @@ void gestionar_conexion_memoria()
 
         case FETCH:
             ins_actual = recibir_instruccion();
-            sem_post(&prox_instruccion);
             log_info(logger, "CPU recibe una instruccion de memoria, codigo: %s", codigo_instruccion_string(ins_actual->ins) );
+            sem_post(&prox_instruccion);
             break;
 
         case PROCESO_NO_CARGADO:
@@ -88,7 +88,7 @@ void gestionar_conexion_memoria()
 }
 
 void fetch(uint32_t PID, uint32_t PC){
-    log_info(logger_debug, "ID: %u - FETCH - Program Counter: %u", PID, PC);
+    log_info(logger_debug, "PID: %u - FETCH - Program Counter: %u", PID, PC);
     t_paquete* p = crear_paquete(FETCH);
     agregar_a_paquete_uint32(p, PID);
     agregar_a_paquete_uint32(p, PC);

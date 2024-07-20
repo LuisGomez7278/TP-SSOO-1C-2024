@@ -55,6 +55,7 @@ char* codigo_estado_string(t_estado codigo){  ////////////////////////// TRANSFO
 	if(codigo == EXEC) 	        	return "EJECUCION";
 	if(codigo == BLOCKED) 			return "BLOQUEO";
 	if(codigo == EXITT) 			return "EXIT";
+    if(codigo == BLOCKED_PRIORITARIO) 			return "BLOCKEO_PRIORITARIO";
 	else							return "ERROR";
 }
 

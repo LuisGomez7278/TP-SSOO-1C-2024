@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
         
         loggear_valores();
         
-        if (interrupcion != INT_NO && ins_actual->ins!=EXIT) {
+        if (interrupcion != INT_NO && !instruccion_de_IO_o_exit(ins_actual->ins)) {
             log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
             if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
             else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
@@ -570,4 +570,22 @@ void loggear_valores()
     contexto_interno.AX, contexto_interno.BX, contexto_interno.CX, contexto_interno.DX,
     contexto_interno.EAX, contexto_interno.EBX, contexto_interno.ECX, contexto_interno.EDX,
     contexto_interno.SI, contexto_interno.DI);
+}
+
+
+bool instruccion_de_IO_o_exit( cod_ins instruccion){
+
+	if (instruccion == IO_GEN_SLEEP)            return	true;
+    if (instruccion == IO_STDIN_READ)           return   true;
+    if (instruccion == IO_STDOUT_WRITE)         return   true;
+    if (instruccion == IO_FS_CREATE)            return   true;
+    if (instruccion == IO_FS_DELETE)            return   true;
+    if (instruccion == IO_FS_TRUNCATE)          return   true;
+    if (instruccion == IO_FS_WRITE)             return   true;
+    if (instruccion == IO_FS_READ)              return   true;
+    if (instruccion == EXIT)                    return   true;
+
+    return false;    
+
+
 }

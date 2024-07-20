@@ -14,7 +14,7 @@
 
 t_log* logger;
 t_log* logger_debug;
-char* path_base;
+char* path_base='\0';
 int tam_pagina;
 int tam_memoria;
 int retardo;

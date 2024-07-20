@@ -266,13 +266,17 @@ cod_ins hash_ins(char* ins){
     else return -1;
 }
 
-char* path_completo(char* path_base, char* path_parcial){
-    char* path = string_new();
-    string_append(&path, path_base);
-    string_append(&path, path_parcial);
 
+char* path_completo(char* path_base, char* path_parcial){
+
+   
+    char* path = string_duplicate(path_base);
+    string_append(&path, path_parcial);
     return path;
+   
 }
+
+
 
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
@@ -288,3 +292,8 @@ void enviar_tam_pag(){
     eliminar_paquete(paquete);            
     log_info(logger_debug, "Se envia el tamaño de pagina a CPU");
 }
+
+
+
+
+	

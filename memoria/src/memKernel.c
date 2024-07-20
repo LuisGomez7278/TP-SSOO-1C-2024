@@ -37,11 +37,25 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
 
     if (buffer != NULL) {
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        char* path_parcial = leer_de_buffer_string(buffer, &desplazamiento);
+        char* path_parcial="a ver";
+        path_parcial= (char*)leer_de_buffer_string(buffer, &desplazamiento);
+        char* path;
 
-        char* path = path_completo(path_base, path_parcial);
+        if (path_base!=NULL && path_parcial!= NULL)
+        {
+        path = path_completo(path_base, path_parcial);
 
+        }else{
+            log_error(logger_debug,"Error al obtener el path");
+        }
+        
+        
+        if (path!=NULL)
+        {
         log_info(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);
+        }
+        
+        
         
         bool creado = crear_procesoM(path, PID);
 

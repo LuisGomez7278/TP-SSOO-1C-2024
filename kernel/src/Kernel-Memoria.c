@@ -64,7 +64,7 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
     //estructura: codigo operacion, pid, path_para_memoria
     op_code codigo_de_operacion=CREAR_PROCESO;
     char* path_para_memoria=leido_array[1];
-    uint32_t tamanio=strlen(path_para_memoria);                      //--------------LO GUARDO EN UN uint32_t DE 32 BITS PORQUE EL STRLEN DEVUELVE 64 BITS 
+    uint32_t tamanio=strlen(path_para_memoria)+1;                      //--------------LO GUARDO EN UN uint32_t DE 32 BITS PORQUE EL STRLEN DEVUELVE 64 BITS 
 
 //PREAPARO EL STREAM DE DATOS, LOS SERIALIZO Y ENVIO
 

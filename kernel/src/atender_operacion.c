@@ -166,7 +166,7 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                 log_info(logger,"Proceso con PID:%u Estado Anterior: EJECUCION || Estado Actual: EXIT",pid_a_finalizar);
                 
 
-                if (list_size(lista_new)==0 )       //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
+                if (list_size(lista_new)==0 && !ocupacion_cpu )       //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
                 {   
                         if (pthread_cancel(hilo_CPU_dispatch) != 0) {
                         perror("Error cancelando el hilo");

@@ -141,6 +141,7 @@ void cambiar_grado_multiprogramacion(void* nuevoValor) {                        
 
 
 void gestionar_dispatch (){ 
+
     
     uint32_t desplazamiento;
     uint32_t size;
@@ -151,6 +152,7 @@ void gestionar_dispatch (){
     while(continuarIterando){    
 
         gestionando_dispatch=false;             ///GESTIONANDO DISPATCH Y OCUPACION CPU SON PARA SINCRONIZAR LA ENTRADA DE NUEVOS PROCESOS
+        
         //-----------------------------------------------------------------------
         
         cod_op_dispatch = recibir_operacion(socket_kernel_cpu_dispatch);
@@ -199,7 +201,12 @@ void gestionar_dispatch (){
         }else{
             pcb_dispatch->PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             leer_de_buffer_CE(buffer, &desplazamiento, &pcb_dispatch->CE);
+
+            if(strcmp(algoritmo_planificacion,"VRR")==0 ){
             pcb_dispatch->quantum_ejecutado=tiempo_recien_ejecutado+ backup_de_quantum_ejecutado;
+            }else{
+            pcb_dispatch->quantum_ejecutado=0;
+            }
             pcb_dispatch->estado=EXEC;
             backup_de_quantum_ejecutado=0;      ////    RESETEO BACKUP DE QUANTUM   
             tiempo_recien_ejecutado=0;          ////    RESETEO EL VALOR QUE OBTIENE EL TIEMPO DEL CONTADOR
@@ -465,9 +472,16 @@ void gestionar_solicitud_IO(t_pcb* pcb_dispatch, char* nombre_interfaz, op_code 
         agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
 
         if(string_equals_ignore_case(algoritmo_planificacion, "VRR")) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
-        {
-            ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
-            log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
+        {   
+            if(pcb_dispatch->quantum_ejecutado<quantum){
+                ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
+                log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);
+            }else
+            {   pcb_dispatch->quantum_ejecutado=0;
+                ingresar_en_lista(pcb_dispatch, lista_bloqueado , &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);
+                log_warning(logger,"PID: %u bloqueado esperando uso interfaz: %s (ademas de solicitar interfaz se acabo su quantum).",pcb_dispatch->PID,nombre_interfaz);
+            }
+              
         }else
         {
             ingresar_en_lista(pcb_dispatch, lista_bloqueado, &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);  
@@ -534,7 +548,7 @@ ocupacion_cpu=true;
             log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' \n", pcb_a_ejecutar->PID,algoritmo_planificacion);
         }else
         {
-            log_error(logger_debug,"El calculo de quantum del proceso PID: %u dio un numero negativo: %ld. Agregado a lista READY",pcb_a_ejecutar->PID, quantum - pcb_a_ejecutar->quantum_ejecutado);
+            log_warning(logger_debug,"El calculo de quantum del proceso PID: %u dio un numero negativo: %ld. Agregado a lista READY",pcb_a_ejecutar->PID, quantum - pcb_a_ejecutar->quantum_ejecutado);
             ingresar_en_lista(pcb_a_ejecutar,lista_ready,&semaforo_ready,&cantidad_procesos_en_algun_ready, READY);
             enviar_siguiente_proceso_a_ejecucion ();
         }
