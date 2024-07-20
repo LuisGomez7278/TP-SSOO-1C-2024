@@ -32,6 +32,7 @@ extern char* string_leida_de_memoria;
 
 extern sem_t respuesta_marco;
 extern uint32_t marco_pedido;
+extern op_code interrupcion;
 
 void gestionar_conexion_memoria();
 

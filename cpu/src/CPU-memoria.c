@@ -29,9 +29,15 @@ void gestionar_conexion_memoria()
             break;
 
         case PROCESO_NO_CARGADO:
-            ins_actual->ins = EXIT;
+            if ( interrupcion !=INT_CONSOLA){
+                log_warning(logger, "CPU pidio una instruccion de un proceso que no esta cargado en memoria, PID: %u", PID);
+            }else{
+
+                ins_actual->ins = 30;
+            }
+            
             sem_post(&prox_instruccion);
-            log_warning(logger, "CPU pidio una instruccion de un proceso que no esta cargado en memoria, PID: %u", PID);
+
             break;
         
         case SOLICITUD_COPY_STRING_READ:

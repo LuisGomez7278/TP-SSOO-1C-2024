@@ -364,7 +364,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         break;
         
     default:
-        log_error(logger, "el switch de ejecutar_instruccion() llego al default");
+        log_error(logger, "Proceso no cargado en memoria");
         break;
     }
 }

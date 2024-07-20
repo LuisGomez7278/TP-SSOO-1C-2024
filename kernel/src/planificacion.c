@@ -338,9 +338,7 @@ void gestionar_dispatch (){
             break;
 
         case DESALOJO_POR_CONSOLA:
-            enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
-            eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
-            eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
+
             sem_post(&control_multiprogramacion);
             enviar_siguiente_proceso_a_ejecucion();
             break;
