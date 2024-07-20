@@ -133,7 +133,7 @@ void gestionar_conexion_interrupt()
             recibir_de_buffer_solo_PID(socket_cpu_kernel_interrupt);
             if (!detener_ejecucion )
             {
-                log_info(logger, "El proceso PID: %u termino su quantum sera desalojado", PID);
+                log_debug(logger, "El proceso PID: %u termino su quantum sera desalojado", PID);
                 interrupcion = INT_QUANTUM;
             }else{
                 log_warning(logger_debug,"Llego una interrupcion de quantum mientras no se estaba ejecutando");
