@@ -12,18 +12,18 @@ void gestionar_conexion_dispatch()
     while (continuar_iterando)
     {
         operacion = recibir_operacion(socket_cpu_kernel_dispatch);
+        
         switch (operacion)
         {
         case MENSAJE:
             recibir_mensaje(socket_cpu_kernel_dispatch,logger_debug);
             break;
         case CONTEXTO:
+            sem_wait(&espera_iterador);
             t_contexto_ejecucion contexto_espera;
-            
             recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_espera);
             log_trace(logger, "Llega un proceso de PID: %u, esperando CPU", PID);
             
-            sem_wait(&espera_iterador);
             log_trace(logger, "Se carga nuevo contexto de ejecucion");
             
             interrupcion = INT_NO;

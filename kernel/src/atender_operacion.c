@@ -366,9 +366,9 @@ void leer_path_comandos(char* path){
     }
     log_debug(logger_debug,"Leyendo archivo de comandos");
 
-    char linea[50];
-    memset(linea, 0, 50);
-    while (fgets(linea, 50, archivo) != NULL)
+    char linea[60];
+    memset(linea, 0, 60);
+    while (fgets(linea, 60, archivo) != NULL)
     {
         
         if (validacion_de_ingreso_por_consola(linea)) 

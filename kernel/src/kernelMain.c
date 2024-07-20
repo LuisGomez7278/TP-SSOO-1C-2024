@@ -37,7 +37,7 @@ int32_t main(int32_t argc, char* argv[]) {
     // CREO HILO ESCUCHA DE CPU DISPATCH
         
         pthread_create(&hilo_CPU_dispatch,NULL,(void*)atender_conexion_CPU_DISPATCH_KERNEL,NULL);
-        pthread_detach(hilo_CPU_dispatch);    
+        //pthread_detach(hilo_CPU_dispatch);    
 
     
                   

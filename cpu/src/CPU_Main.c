@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         
         while(true){
         if (detener_ejecucion)
-        {
+        {   
             log_trace(logger,"Esperando un proceso");
             sem_post(&espera_iterador);
             sem_wait(&hay_proceso_ejecutando);
@@ -90,6 +90,11 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     switch (codigo)
     {
+    
+    case VOLVER:
+
+    break;
+
     case SET:
         log_info(logger,"PID: %u - Ejecutando: SET - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         contexto_interno->PC++;

@@ -32,8 +32,8 @@ void gestionar_conexion_memoria()
             if ( interrupcion !=INT_CONSOLA){
                 log_warning(logger, "CPU pidio una instruccion de un proceso que no esta cargado en memoria, PID: %u", PID);
             }else{
-
-                ins_actual->ins = 30;
+                ins_actual->ins = VOLVER;
+                log_debug(logger_debug,"Gestionando desalojo por consola del proceso");
             }
             
             sem_post(&prox_instruccion);

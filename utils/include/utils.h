@@ -41,7 +41,8 @@ typedef enum instrucciones
     IO_FS_READ,
 	WAIT,
 	SIGNAL,
-	EXIT
+	EXIT,
+    VOLVER
 } cod_ins;
 
 typedef struct instruccion
