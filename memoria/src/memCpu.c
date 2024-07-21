@@ -77,7 +77,7 @@ void fetch(int socket_cpu_memoria){
         t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
         pthread_mutex_unlock(&mutex_listaDeinstrucciones);
         
-        usleep(retardo*1000);
+        usleep(retardo);
 
         enviar_instruccion(socket_cpu_memoria, sig_ins);
         log_info(logger_debug, "instruccion enviada");
@@ -96,7 +96,7 @@ void frame(int socket_cpu_memoria){
 
         log_info(logger,"Acceso a Tabla de Páginas: PID: %u  Pagina: %u  Marco: %u", PID, pagina, marco);
 
-        usleep(retardo*1000);
+        usleep(retardo);
 
         t_paquete* paquete = crear_paquete(TLB_MISS);
         agregar_a_paquete_uint32(paquete, marco);
@@ -172,7 +172,7 @@ void movOut(int socket_cpu_memoria){
         ++i;
         }
 
-        usleep(retardo*1000);
+        usleep(retardo);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_OUT);
 
@@ -214,7 +214,7 @@ void copiar_string_read(int socket_cpu_memoria){
         ++i;
         }
 
-        usleep(retardo*1000);
+        usleep(retardo);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
         agregar_a_paquete_string(paquete, strlen(leido), leido);
@@ -251,7 +251,7 @@ void copiar_string_write(int socket_cpu_memoria){
         ++i;
         }
 
-        usleep(retardo*1000);
+        usleep(retardo);
         if(escrito){
             t_paquete* paquete = crear_paquete(OK);
             enviar_paquete(paquete, socket_cpu_memoria);
@@ -281,7 +281,7 @@ void ins_resize(int socket_cpu_memoria){
         uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         bool exito = resize(PID, bytes);
-        usleep(retardo*1000);
+        usleep(retardo);
 
         if(exito){
             t_paquete* paquete = crear_paquete(SOLICITUD_RESIZE);
