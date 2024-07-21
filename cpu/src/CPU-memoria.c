@@ -75,6 +75,7 @@ void gestionar_conexion_memoria()
             sem_post(&respuesta_MOV_IN);
             free(buffer);
             break;
+
         case SOLICITUD_MOV_OUT:
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);
@@ -84,6 +85,7 @@ void gestionar_conexion_memoria()
                 {log_info(logger_debug, "PID: %u - MOV_OUT exitoso", PID);}
             else
                 {log_error(logger_debug, "PID: %u - MOV_OUT fallido", PID);}
+            free(buffer);
             break;
 
         case TLB_MISS:

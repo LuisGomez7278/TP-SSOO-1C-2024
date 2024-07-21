@@ -38,36 +38,39 @@ uint32_t obtener_desplazamiento(uint32_t direccion_logica)
     return direccion_logica%tamanio_de_pagina;
 }
 
-uint32_t get_marco(uint32_t PID, uint32_t nro_pag)
+uint32_t get_marco(uint32_t PID_pedida, uint32_t nro_pag)
 {
+    char* tlb = usa_TLB ? "Usa TLB" : "No usa TLB";
+    log_debug(logger_debug, "PID: %u - Necesita la pagina nro: %u. %s", PID_pedida, nro_pag, tlb);
     uint32_t marco;
     if (usa_TLB)
     {
-        entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
+        entrada_TLB* entrada = buscar_en_tlb(PID_pedida, nro_pag);
         marco = marco_TLB(entrada);
     }
     else
     {
-        marco = pedir_marco_a_memoria(PID, nro_pag);
+        marco = pedir_marco_a_memoria(PID_pedida, nro_pag);
     }
     return marco;
 }
 
-entrada_TLB* buscar_en_tlb(uint32_t PID, uint32_t nro_pag)
+entrada_TLB* buscar_en_tlb(uint32_t PID_pedida, uint32_t nro_pag)
 {
     entrada_TLB* entrada;
     for (int i = 0; i < cant_entradas_TLB; i++)
     {
         entrada = list_get(tabla_TLB, i);
-        if (entrada->PID == PID && entrada->nro_pag == nro_pag) 
+        if (entrada->PID == PID_pedida && entrada->nro_pag == nro_pag) 
         {
-            log_info(logger, "ID: %u - TLB HIT - Pagina: %u", PID, nro_pag);
+            log_info(logger, "ID: %u - TLB HIT - Pagina: %u", PID_pedida, nro_pag);
             return entrada;
         }
     }
 
-    log_info(logger, "ID: %u - TLB MISS - Pagina: %u", PID, nro_pag);
-    return TLB_miss(PID, nro_pag);
+    log_info(logger, "ID: %u - TLB MISS - Pagina: %u", PID_pedida, nro_pag);
+    entrada = TLB_miss(PID_pedida, nro_pag);
+    return entrada;
 }
 
 uint32_t marco_TLB(entrada_TLB* entrada)
@@ -82,9 +85,9 @@ uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag)
     agregar_a_paquete_uint32(paquete, nro_pag);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
-    sem_wait(&respuesta_marco);
-    
+
     log_debug(logger_debug, "Esperando marco de memoria");
+    sem_wait(&respuesta_marco);    
     uint32_t marco = marco_pedido;
 
     log_info(logger, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", PID, nro_pag, marco);

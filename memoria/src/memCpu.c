@@ -1,18 +1,5 @@
 #include "../include/memCpu.h"
 
-/*
-void atender_conexion_CPU_MEMORIA(){
-    //ENVIAR MENSAJE A CPU
-    enviar_mensaje("MEMORIA manda mensaje a CPU", socket_cpu_memoria);
-    log_info(logger, "Se envio el primer mensaje a kernel");
-
-    // CREO HILO ESCUCHA CPU
-    pthread_t hilo_escucha_cpu_memoria;
-    pthread_create(&hilo_escucha_cpu_memoria,NULL,(void*)conexion_con_cpu,NULL);
-    pthread_detach(hilo_escucha_cpu_memoria);
-}
-*/
-
 void conexion_con_cpu(){
     enviar_mensaje("CONEXION CON MEMORIA OK", socket_cpu_memoria);
     log_info(logger, "Handshake enviado: CPU");
@@ -29,6 +16,7 @@ void conexion_con_cpu(){
             fetch(socket_cpu_memoria);
             break;
         case TLB_MISS:
+            log_debug(logger_debug, "CPU pide un marco a memoria");
             frame(socket_cpu_memoria);
             break;
         case SOLICITUD_MOV_IN: 
@@ -77,7 +65,7 @@ void fetch(int socket_cpu_memoria){
         t_instruccion* sig_ins = get_ins(lista_instrucciones, PC);
         pthread_mutex_unlock(&mutex_listaDeinstrucciones);
         
-        usleep(retardo);
+        usleep(retardo*1000);
 
         enviar_instruccion(socket_cpu_memoria, sig_ins);
         log_info(logger_debug, "instruccion enviada");
@@ -87,7 +75,8 @@ void fetch(int socket_cpu_memoria){
 void frame(int socket_cpu_memoria){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_kernel_memoria);
+    void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
+    
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer,&desplazamiento);
         uint32_t pagina = leer_de_buffer_uint32(buffer,&desplazamiento);
@@ -96,7 +85,7 @@ void frame(int socket_cpu_memoria){
 
         log_info(logger,"Acceso a Tabla de Páginas: PID: %u  Pagina: %u  Marco: %u", PID, pagina, marco);
 
-        usleep(retardo);
+        usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(TLB_MISS);
         agregar_a_paquete_uint32(paquete, marco);
@@ -134,7 +123,7 @@ void movIn(int socket_cpu_memoria){
 
         uint32_t num = (uint32_t)strtoul(leido, NULL, 10); //convierte el char* leido a un uint32_t
 
-        usleep(retardo);
+        usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
         agregar_a_paquete_uint32(paquete, tamanio_total);
@@ -159,10 +148,12 @@ void movOut(int socket_cpu_memoria){
     bool escrito = true;
     
     if(buffer != NULL){
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
+        log_debug(logger_debug, "PID: %u - Solicitud de MOV_OUT con %u accesos", PID, n);
+
         while(i<n && escrito){
-        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
         char* escribir = leer_de_buffer_string(buffer, &desplazamiento);
@@ -172,7 +163,7 @@ void movOut(int socket_cpu_memoria){
         ++i;
         }
 
-        usleep(retardo);
+        usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_OUT);
 
@@ -214,7 +205,7 @@ void copiar_string_read(int socket_cpu_memoria){
         ++i;
         }
 
-        usleep(retardo);
+        usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
         agregar_a_paquete_string(paquete, strlen(leido), leido);
@@ -251,7 +242,7 @@ void copiar_string_write(int socket_cpu_memoria){
         ++i;
         }
 
-        usleep(retardo);
+        usleep(retardo*1000);
         if(escrito){
             t_paquete* paquete = crear_paquete(OK);
             enviar_paquete(paquete, socket_cpu_memoria);
@@ -281,15 +272,16 @@ void ins_resize(int socket_cpu_memoria){
         uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         bool exito = resize(PID, bytes);
-        usleep(retardo);
+        usleep(retardo*1000);
+        t_paquete* paquete;
 
         if(exito){
-            t_paquete* paquete = crear_paquete(SOLICITUD_RESIZE);
+            paquete = crear_paquete(SOLICITUD_RESIZE);
             enviar_paquete(paquete, socket_cpu_memoria);
             eliminar_paquete(paquete);
             log_info(logger_debug, "Resize perfecto");
         }else{
-            t_paquete* paquete = crear_paquete(OUT_OF_MEMORY);
+            paquete = crear_paquete(OUT_OF_MEMORY);
             enviar_paquete(paquete, socket_cpu_memoria);
             eliminar_paquete(paquete);
             log_info(logger_debug, "Resize fallido");
