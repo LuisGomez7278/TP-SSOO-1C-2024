@@ -134,7 +134,7 @@ void movIn(int socket_cpu_memoria){
 
         uint32_t num = (uint32_t)strtoul(leido, NULL, 10); //convierte el char* leido a un uint32_t
 
-        usleep(retardo*1000);
+        usleep(retardo);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
         agregar_a_paquete_uint32(paquete, tamanio_total);
@@ -174,18 +174,19 @@ void movOut(int socket_cpu_memoria){
 
         usleep(retardo*1000);
 
+        t_paquete* paquete = crear_paquete(SOLICITUD_MOV_OUT);
+
         if(escrito){
-            t_paquete* paquete = crear_paquete(OK);
-            enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);            
+            agregar_a_paquete_op_code(paquete, OK);
             log_info(logger_debug, "Mov_Out perfecto");
         }else{
-            t_paquete* paquete = crear_paquete(FALLO);
-            enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);  
+            agregar_a_paquete_op_code(paquete, FALLO);
             log_info(logger_debug, "Mov_Out fallido");
-        }        
-    }else{
+        }
+        enviar_paquete(paquete, socket_cpu_memoria);
+        eliminar_paquete(paquete);
+    }
+    else{
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
@@ -274,6 +275,7 @@ void ins_resize(int socket_cpu_memoria){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
     void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
+
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -282,16 +284,16 @@ void ins_resize(int socket_cpu_memoria){
         usleep(retardo*1000);
 
         if(exito){
-            t_paquete* paquete = crear_paquete(OK);
+            t_paquete* paquete = crear_paquete(SOLICITUD_RESIZE);
             enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);            
+            eliminar_paquete(paquete);
             log_info(logger_debug, "Resize perfecto");
         }else{
             t_paquete* paquete = crear_paquete(OUT_OF_MEMORY);
             enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);  
+            eliminar_paquete(paquete);
             log_info(logger_debug, "Resize fallido");
-        }        
+        }
     }else{
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
