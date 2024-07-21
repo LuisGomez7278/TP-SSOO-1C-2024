@@ -128,22 +128,26 @@ void agregar_a_paquete_uint8(t_paquete* paquete, uint8_t numero);
 void agregar_a_paquete_uint32(t_paquete* paquete, uint32_t numero);
 void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string);
 void agregar_a_paquete_cod_ins(t_paquete* paquete, cod_ins codigo);
+void agregar_a_paquete_bytes(t_paquete* paquete, uint32_t tamanio, void* bytes);
 
 uint8_t leer_de_buffer_uint8(void* buffer, uint32_t* desplazamiento);
 uint32_t leer_de_buffer_uint32(void* buffer, uint32_t* desplazamiento);
 char* leer_de_buffer_string(void* buffer, uint32_t* desplazamiento);
 cod_ins leer_de_buffer_cod_ins(void* buffer, uint32_t* desplazamiento);
-void agregar_a_paquete_op_code(t_paquete* paquete, op_code codigo);
-void agregar_a_paquete_cod_interfaz(t_paquete* paquete, cod_interfaz interfaz);
-op_code leer_de_buffer_op_code(void* buffer, uint32_t* desplazamiento);
-void leer_de_buffer_CE(void* buffer, uint32_t* desplazamiento, t_contexto_ejecucion* contexto_contenedor);
+void* leer_de_buffer_bytes(void* buffer, uint32_t* desplazamiento);
 
+void agregar_a_paquete_op_code(t_paquete* paquete, op_code codigo);
+op_code leer_de_buffer_op_code(void* buffer, uint32_t* desplazamiento);
 
 void serializar_CE(t_paquete* paquete, t_contexto_ejecucion contexto);
+void leer_de_buffer_CE(void* buffer, uint32_t* desplazamiento, t_contexto_ejecucion* contexto_contenedor);
+
+void agregar_a_paquete_cod_interfaz(t_paquete* paquete, cod_interfaz interfaz);
+cod_interfaz leer_de_buffer_tipo_interfaz(void* buffer, uint32_t* desplazamiento);
 
 void enviar_instruccion_con_PID_por_socket(op_code codigo_operacion, uint32_t PID,int32_t socket_a_enviar);
 uint32_t recibir_de_buffer_solo_PID(int32_t socket_a_recibir);
-cod_interfaz leer_de_buffer_tipo_interfaz(void* buffer, uint32_t* desplazamiento);
+
 char* codigo_operacion_string(op_code codigo);
 
 /*----------Fin Serializacion----------*/

@@ -337,7 +337,7 @@ void agregar_a_paquete_uint8(t_paquete* paquete, uint8_t numero)
 }
 
 
-void agregar_a_paquete_uint32(t_paquete* paquete, uint32_t numero)     //ESTA FUNCION AGREGA SOLO UN UINT_32, NO AGREGA UN PREFIJO CON EL TAMAÑO
+void agregar_a_paquete_uint32(t_paquete* paquete, uint32_t numero)//ESTA FUNCION AGREGA SOLO UN UINT_32, NO AGREGA UN PREFIJO CON EL TAMAÑO
 {
     paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(uint32_t));
 
@@ -346,19 +346,27 @@ void agregar_a_paquete_uint32(t_paquete* paquete, uint32_t numero)     //ESTA FU
 	paquete->buffer->size += sizeof(uint32_t);
 }
 
-void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string)
+void agregar_a_paquete_string(t_paquete* paquete, uint32_t tamanio, char* string)//ESTA FUNCION AGREGA EL TAMANIO Y UN STRING = UINT_32||STRING
 {
     paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + tamanio + sizeof(uint32_t));
 
-	memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio, sizeof(uint32_t));                                //ESTA FUNCION AGREGA EL TAMANIO Y UN STRING=  UINT_32||STRING
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio, sizeof(uint32_t));
 	memcpy(paquete->buffer->stream + paquete->buffer->size + sizeof(uint32_t), string, tamanio);
 
 	paquete->buffer->size += tamanio + sizeof(uint32_t);
 }
 
+void agregar_a_paquete_bytes(t_paquete* paquete, uint32_t tamanio, void* bytes)
+{
+    paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + tamanio + sizeof(uint32_t));
+
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio, sizeof(uint32_t));
+	memcpy(paquete->buffer->stream + paquete->buffer->size + sizeof(uint32_t), bytes, tamanio);
+
+	paquete->buffer->size += tamanio + sizeof(uint32_t);
+}
+
 //-------------------------------------------------------------------------------------------
-
-
 
 uint8_t leer_de_buffer_uint8(void* buffer, uint32_t* desplazamiento)
 {
@@ -391,6 +399,17 @@ char* leer_de_buffer_string(void* buffer, uint32_t* desplazamiento)
     (*desplazamiento) += tamanio;
 
     return valor;
+};
+
+void* leer_de_buffer_bytes(void* buffer, uint32_t* desplazamiento)
+{
+    uint32_t tamanio = leer_de_buffer_uint32(buffer, desplazamiento);
+    void* bytes = malloc(tamanio);
+
+    memcpy(bytes, buffer + (*desplazamiento), tamanio);
+    (*desplazamiento) += tamanio;
+
+    return bytes;
 };
 
 void leer_de_buffer_CE(void* buffer, uint32_t* desplazamiento, t_contexto_ejecucion* contexto_contenedor){
