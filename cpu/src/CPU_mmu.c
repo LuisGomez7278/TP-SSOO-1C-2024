@@ -83,7 +83,8 @@ uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag)
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
     sem_wait(&respuesta_marco);
-
+    
+    log_debug(logger_debug, "Esperando marco de memoria");
     uint32_t marco = marco_pedido;
 
     log_info(logger, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", PID, nro_pag, marco);

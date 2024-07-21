@@ -24,6 +24,8 @@ extern sem_t espera_iterador;
 
 extern t_instruccion* ins_actual;
 extern sem_t prox_instruccion;
+extern sem_t respuesta_resize;
+extern bool resize_ok;
 extern sem_t respuesta_MOV_IN;
 extern uint8_t respuesta_mov_in_8;
 extern uint32_t respuesta_mov_in_32;

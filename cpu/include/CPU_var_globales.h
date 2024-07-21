@@ -38,6 +38,8 @@ sem_t espera_iterador;
 
 t_instruccion* ins_actual;
 sem_t prox_instruccion;
+sem_t respuesta_resize;
+bool resize_ok;
 sem_t respuesta_MOV_IN;
 uint8_t respuesta_mov_in_8;
 uint32_t respuesta_mov_in_32;

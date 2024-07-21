@@ -7,6 +7,7 @@
 #include "../../utils/include/conexiones.h"
 
 extern t_log* logger;
+extern t_log* logger_debug;
 
 extern uint32_t PID;
 extern int32_t socket_cpu_memoria;

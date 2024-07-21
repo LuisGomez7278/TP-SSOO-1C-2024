@@ -38,9 +38,20 @@ void gestionar_conexion_memoria()
             }
             
             sem_post(&prox_instruccion);
-
             break;
         
+        case SOLICITUD_RESIZE:
+            log_info(logger, "PID: %u, realizo resize con exito", PID);
+            resize_ok = true;
+            sem_post(&respuesta_resize);
+            break;
+        
+        case OUT_OF_MEMORY:
+            log_info(logger, "PID: %u, no pudo realizar resize por falta de espacio en memoria", PID);
+            resize_ok = false;
+            sem_post(&respuesta_resize);
+            break;
+
         case SOLICITUD_COPY_STRING_READ:
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);
@@ -64,7 +75,17 @@ void gestionar_conexion_memoria()
             sem_post(&respuesta_MOV_IN);
             free(buffer);
             break;
-        
+        case SOLICITUD_MOV_OUT:
+            desplazamiento = 0;
+            buffer = recibir_buffer(&size, socket_cpu_memoria);
+            op_code exito_mov_out = leer_de_buffer_op_code(buffer, &desplazamiento);
+            free(buffer);
+            if (exito_mov_out == OK)
+                {log_info(logger_debug, "PID: %u - MOV_OUT exitoso", PID);}
+            else
+                {log_error(logger_debug, "PID: %u - MOV_OUT fallido", PID);}
+            break;
+
         case TLB_MISS:
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);
@@ -88,7 +109,7 @@ void gestionar_conexion_memoria()
 }
 
 void fetch(uint32_t PID, uint32_t PC){
-    log_info(logger_debug, "PID: %u - FETCH - Program Counter: %u", PID, PC);
+    log_info(logger, "PID: %u - FETCH - Program Counter: %u", PID, PC);
     t_paquete* p = crear_paquete(FETCH);
     agregar_a_paquete_uint32(p, PID);
     agregar_a_paquete_uint32(p, PC);

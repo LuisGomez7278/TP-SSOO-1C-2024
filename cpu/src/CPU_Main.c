@@ -219,16 +219,21 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             dir_fisica_write = solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valorgrande1);
             log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorgrande1);
         }
-        
         contexto_interno->PC++;
         break;
 
     case RESIZE:
         log_info(logger,"PID: %u - Ejecutando: RESIZE - %s", PID, ins_actual->arg1);
         contexto_interno->PC++;
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valorgrande1 = *registro;
-        pedir_rezise(PID, valorgrande1);
+        uint32_t new_size = atoi(ins_actual->arg1);
+        pedir_rezise(PID, new_size);
+        sem_wait(&respuesta_resize);
+        if (!resize_ok)
+        {
+            motivo_desalojo = OUT_OF_MEMORY;
+            desalojar_proceso(motivo_desalojo);
+            log_warning(logger, "PID: %u, es desaojado por OUT_OF_MEMORY", PID);
+        }        
         break;
 
     case COPY_STRING:

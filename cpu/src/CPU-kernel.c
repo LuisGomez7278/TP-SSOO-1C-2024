@@ -62,8 +62,7 @@ void desalojar_proceso(op_code motivo_desalojo){
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
-    
-    
+        
 }
 
 void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
