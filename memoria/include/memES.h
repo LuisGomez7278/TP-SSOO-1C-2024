@@ -18,7 +18,7 @@
 #include "../include/extGlobales.h"
 
 void conexion_con_es();
-void read_es(int32_t socket);
+void read_es(int32_t socket, op_code motivo);
 void write_es(int32_t socket);
 void escuchar_nueva_Interfaz_mem(void* socket);
 

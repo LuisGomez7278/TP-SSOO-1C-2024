@@ -60,6 +60,16 @@ void gestionar_conexion_memoria()
             sem_post(&respuesta_copy_string);
             free(buffer);
             break;
+        case SOLICITUD_COPY_STRING_WRITE:
+            desplazamiento = 0;
+            buffer = recibir_buffer(&size, socket_cpu_memoria);
+            op_code codigo_respuesta = leer_de_buffer_op_code(buffer, &desplazamiento);
+            if (codigo_respuesta == OK)
+                {log_info(logger_debug, "COPY_STRING exitoso");}
+            else            
+                {log_info(logger_debug, "COPY_STRING fallido");}
+
+            break;;
 
         case SOLICITUD_MOV_IN:
             desplazamiento = 0;

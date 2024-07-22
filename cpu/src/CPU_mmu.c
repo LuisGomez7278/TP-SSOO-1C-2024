@@ -152,6 +152,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
     agregar_a_paquete_uint32(paquete, PID);
     agregar_a_paquete_uint32(paquete, cant_accesos);
+    agregar_a_paquete_uint32(paquete, bytes_a_copiar);
     
     marco = get_marco(PID, nro_pag);
 
@@ -165,7 +166,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     int i = 1;
     while (bytes_restantes>0)
     {
-        marco = get_marco(PID, nro_pag);
+        marco = get_marco(PID, nro_pag+i);
 
         dir_fisica = marco*tamanio_de_pagina;
 
@@ -189,7 +190,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
 
 void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WRITE, uint32_t bytes_a_copiar)
 {
-    uint32_t bytes_restantes = bytes_a_copiar;
+    uint32_t bytes_leidos = 0;
     
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica_WRITE);
     uint32_t offset = obtener_desplazamiento(direccion_logica_WRITE);
@@ -206,26 +207,31 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     uint32_t dir_fisica = (marco*tamanio_de_pagina)+offset;
     uint32_t tam_acceso = cant_accesos==1 ? bytes_a_copiar : (tamanio_de_pagina-offset);
 
-    agregar_a_paquete_string(paquete, tam_acceso, string_leida);
-    bytes_restantes-=tam_acceso;
+    agregar_a_paquete_uint32(paquete, dir_fisica);
+    agregar_a_paquete_uint32(paquete, tam_acceso);
+    agregar_a_paquete_bytes(paquete, tam_acceso, string_leida);
+    bytes_leidos+=tam_acceso;
 
     int i = 1;
-    while (bytes_restantes>0)
+    while (bytes_leidos<bytes_a_copiar)
     {
-        marco = get_marco(PID, nro_pag);
+        uint32_t bytes_restantes = bytes_a_copiar-bytes_leidos;
+        marco = get_marco(PID, nro_pag+i);
         
         dir_fisica = marco*tamanio_de_pagina;
 
         if (bytes_restantes>tamanio_de_pagina)
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
-            agregar_a_paquete_string(paquete, tamanio_de_pagina, string_leida + (tamanio_de_pagina * i));
-            bytes_restantes -= tamanio_de_pagina;
+            agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
+            agregar_a_paquete_bytes(paquete, tamanio_de_pagina, string_leida+bytes_leidos);
+            bytes_leidos+=tamanio_de_pagina;
         }
         else
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
-            agregar_a_paquete_string(paquete, bytes_restantes, string_leida + (tamanio_de_pagina * i));
+            agregar_a_paquete_uint32(paquete, bytes_restantes);
+            agregar_a_paquete_bytes(paquete, bytes_restantes, string_leida+bytes_leidos);
             bytes_restantes-=bytes_restantes; //aca sale del while
         }
         i++;
@@ -264,7 +270,7 @@ uint32_t solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
 
     if (cant_accesos>1)
     {
-        marco = get_marco(PID, nro_pag);
+        marco = get_marco(PID, nro_pag+1);
 
         dir_fisica = (marco*tamanio_de_pagina);
         agregar_a_paquete_uint32(paquete, dir_fisica);
@@ -305,7 +311,7 @@ uint32_t solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro,
     bytes_restantes -= (tamanio_de_pagina-offset);
     if (cant_accesos>1)
     {
-        marco = get_marco(PID, nro_pag);
+        marco = get_marco(PID, nro_pag+1);
 
         dir_fisica = (marco*tamanio_de_pagina);
         agregar_a_paquete_uint32(paquete, dir_fisica);

@@ -205,35 +205,41 @@ void copiar_string_read(int socket_cpu_memoria){
     uint32_t desplazamiento = 0;
     void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     int i=0;
-    char* str_leida = string_new();
     
     if(buffer != NULL){
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
+        uint32_t tamanio_total = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+        char* str_leida = malloc(tamanio_total+1);
+        int32_t bytes_leidos = 0;
 
         while(i<n){
-            uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
-            uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t tam_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-            char* leido = leer_memoria(dir_fisica_leer, bytes, PID);
-            string_append(&str_leida, leido);
+            void* leido = leer_memoria(dir_fisica_leer, tam_acceso, PID);
+            memcpy(str_leida+bytes_leidos, leido, tam_acceso);
+            bytes_leidos+=tam_acceso;
             free(leido);
             i++;
         }
+
+        str_leida[tamanio_total] = '\0';
+        log_info(logger_debug, "Copy String Read completado, string leida: %s", str_leida);
         usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
         agregar_a_paquete_string(paquete, strlen(str_leida)+1, str_leida);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
-        log_info(logger_debug, "Copy String Read completado");
+        free(str_leida);
 
     }else{
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
     free(buffer);
-    free(str_leida);
 }
 
 void copiar_string_write(int socket_cpu_memoria){
@@ -244,17 +250,17 @@ void copiar_string_write(int socket_cpu_memoria){
     bool escrito = true;
     
     if(buffer != NULL){
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n && escrito){
-        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
-        void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
+            uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
+            void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
 
-        escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
-        free(escribir);
-        i++;
+            escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
+            free(escribir);
+            i++;
         }
 
         usleep(retardo*1000);

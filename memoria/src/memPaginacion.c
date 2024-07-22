@@ -326,7 +326,7 @@ char* leer_memoria_string(uint32_t direccion_fisica, uint32_t size, uint32_t PID
     char* buffer = malloc(size+1);    
     memcpy(buffer, (char*)memoria_usuario + direccion_fisica, size);
 
-    log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_fisica, size);
+    log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %u - Tamaño %u bytes", PID, direccion_fisica, size);
 
     buffer[size] = '\0';
     return buffer;

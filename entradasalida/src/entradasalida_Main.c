@@ -120,7 +120,7 @@ int32_t main(int32_t argc, char* argv[]) {
             
             paquete = crear_paquete(SOLICITUD_IO_STDIN_READ);
             agregar_a_paquete_uint32(paquete, PID);
-            agregar_a_paquete_uint32(paquete, tamanio_total);
+            // agregar_a_paquete_uint32(paquete, tamanio_total);
             agregar_a_paquete_uint32(paquete, cant_accesos);
 
             acumulador = 0;
@@ -153,8 +153,8 @@ int32_t main(int32_t argc, char* argv[]) {
             // Pedir lectura de string a memoria
             paquete = crear_paquete(SOLICITUD_IO_STDOUT_WRITE);
             agregar_a_paquete_uint32(paquete, PID);
-            agregar_a_paquete_uint32(paquete, tamanio_total);
             agregar_a_paquete_uint32(paquete, cant_accesos);
+            agregar_a_paquete_uint32(paquete, tamanio_total);
             
             for (int i = 0; i < cant_accesos; i++)
             {
@@ -163,8 +163,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 
                 agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
-            }
-            
+            }            
 
             enviar_paquete(paquete, socket_memoria_entradasalida);
             eliminar_paquete(paquete);
@@ -177,7 +176,9 @@ int32_t main(int32_t argc, char* argv[]) {
             // eliminar_paquete(paquete);
             // log_info(logger, "Se envio la string \'%s\', a kernel para que sea imprimida en pantalla", string_leida_memoria);
             // Imprimir por pantalla
-            printf("%s", string_leida_memoria);
+            char* string_pedida = string_leida_memoria;
+            log_debug(logger_debug, "String para imprimir: %s", string_pedida);
+            printf("%s", string_pedida);
             notificar_kernel(true);
             free(buffer);
             free(string_leida_memoria);
