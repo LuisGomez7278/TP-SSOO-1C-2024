@@ -47,41 +47,40 @@ void escuchar_nueva_Interfaz_mem(void*  socket)
             write_es(socket_IO);
             break;
         case DESALOJO_POR_IO_FS_WRITE:
+            uint32_t sizeTotal;
+            uint32_t desplazamiento = 0;
+            void* buffer= recibir_buffer(&sizeTotal, socket_IO);
+            int i=0;
+            char* leido = string_new();
+            
+            if(buffer != NULL){
+                uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+                uint32_t tam_total = leer_de_buffer_uint32(buffer, &desplazamiento);
+                uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-    uint32_t sizeTotal;
-    uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket);
-    int i=0;
-    char* leido = string_new();
-    
-    if(buffer != NULL){
-        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t tam_total = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
+                while(i<n){
+                uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+                uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-        while(i<n){
-        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
+                char* leido2 = leer_memoria(dir_fisica_leer, bytes, PID);
+                string_append(&leido, leido2);
+                free(leido2);
+                ++i;
+                }
 
-        char* leido2 = leer_memoria(dir_fisica_leer, bytes, PID);
-        string_append(&leido, leido2);
-        free(leido2);
-        ++i;
-        }
+                usleep(retardo*1000);
 
-        usleep(retardo*1000);
-
-        t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_FS_WRITE);
-        agregar_a_paquete_string(paquete, strlen(leido)+1, leido);
-        enviar_paquete(paquete, socket_IO);
-        eliminar_paquete(paquete);            
-        log_info(logger_debug, "Solicitud de lectura de E/S completada");
-        }else{
-        // Manejo de error en caso de que recibir_buffer devuelva NULL
-        log_error(logger_debug,"Error al recibir el buffer");
-        }
-    free(buffer);
-    free(leido);
+                t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_FS_WRITE);
+                agregar_a_paquete_string(paquete, strlen(leido)+1, leido);
+                enviar_paquete(paquete, socket_IO);
+                eliminar_paquete(paquete);            
+                log_info(logger_debug, "Solicitud de lectura de E/S completada");
+                }else{
+                // Manejo de error en caso de que recibir_buffer devuelva NULL
+                log_error(logger_debug,"Error al recibir el buffer");
+                }
+            free(buffer);
+            free(leido);
 
             break;
         default:

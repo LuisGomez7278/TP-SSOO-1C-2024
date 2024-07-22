@@ -413,7 +413,7 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDIN);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
-    agregar_a_paquete_string(paquete, string_length(nombre_interfaz), nombre_interfaz);
+    agregar_a_paquete_string(paquete, string_length(nombre_interfaz)+1, nombre_interfaz);
     agregar_a_paquete_uint32(paquete, tamanio_a_leer);
 
     uint32_t bytes_restantes = tamanio_a_leer;
@@ -461,7 +461,7 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDOUT);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
-    agregar_a_paquete_string(paquete, string_length(nombre_interfaz), nombre_interfaz);
+    agregar_a_paquete_string(paquete, string_length(nombre_interfaz)+1, nombre_interfaz);
     agregar_a_paquete_uint32(paquete, tamanio_a_leer);
 
     uint32_t bytes_restantes = tamanio_a_leer;
