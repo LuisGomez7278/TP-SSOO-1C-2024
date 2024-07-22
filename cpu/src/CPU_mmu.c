@@ -64,6 +64,8 @@ entrada_TLB* buscar_en_tlb(uint32_t PID_pedida, uint32_t nro_pag)
         if (entrada->PID == PID_pedida && entrada->nro_pag == nro_pag) 
         {
             log_info(logger, "ID: %u - TLB HIT - Pagina: %u", PID_pedida, nro_pag);
+            temporal_destroy(entrada->t_ultimo_uso);
+            entrada->t_ultimo_uso = temporal_create();
             return entrada;
         }
     }
