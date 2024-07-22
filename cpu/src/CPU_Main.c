@@ -419,8 +419,7 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
     uint32_t bytes_restantes = tamanio_a_leer;
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
-    entrada_TLB* entrada = buscar_en_tlb(PID, nro_pag);
-    uint32_t marco = marco_TLB(entrada);
+    uint32_t marco = get_marco(PID, nro_pag);
     
     uint32_t cant_accesos = ceil((tamanio_a_leer + offset) / tamanio_de_pagina);
     agregar_a_paquete_uint32(paquete, cant_accesos);
