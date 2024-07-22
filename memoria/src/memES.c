@@ -75,6 +75,8 @@ void read_es(int32_t socket, op_code motivo)
             uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t tam_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
 
+            log_debug(logger_debug, "PID: %u - acceso de lectura - dir_fisica: %u, tamanio_acceso: %u", PID, dir_fisica_leer, tam_acceso);
+            
             void* leido = leer_memoria(dir_fisica_leer, tam_acceso, PID);
             memcpy(str_leida+bytes_leidos, leido, tam_acceso);
             bytes_leidos+=tam_acceso;
