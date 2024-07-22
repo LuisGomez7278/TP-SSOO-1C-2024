@@ -10,7 +10,7 @@ void gestionar_conexion_memoria()
     bool continuar_iterando = true;
     uint32_t size;
     uint32_t desplazamiento=0;
-    void* buffer=NULL;
+    void* buffer;
 
     while (continuar_iterando)
     {   
@@ -80,7 +80,6 @@ void gestionar_conexion_memoria()
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);
             op_code exito_mov_out = leer_de_buffer_op_code(buffer, &desplazamiento);
-            free(buffer);
             if (exito_mov_out == OK)
                 {log_info(logger_debug, "PID: %u - MOV_OUT exitoso", PID);}
             else
@@ -106,7 +105,6 @@ void gestionar_conexion_memoria()
             log_error(logger, "Llego una operacion desconocida por socket memoria, op_code: %d", operacion);
             break;
         }
-        free(buffer);
     }
 }
 
