@@ -119,6 +119,7 @@ int32_t main(int32_t argc, char* argv[]) {
             char* string_leida = leer_de_teclado(tamanio_total);
             
             paquete = crear_paquete(SOLICITUD_IO_STDIN_READ);
+            agregar_a_paquete_uint32(paquete, PID);
             agregar_a_paquete_uint32(paquete, tamanio_total);
             agregar_a_paquete_uint32(paquete, cant_accesos);
 
@@ -151,6 +152,7 @@ int32_t main(int32_t argc, char* argv[]) {
             
             // Pedir lectura de string a memoria
             paquete = crear_paquete(SOLICITUD_IO_STDOUT_WRITE);
+            agregar_a_paquete_uint32(paquete, PID);
             agregar_a_paquete_uint32(paquete, tamanio_total);
             agregar_a_paquete_uint32(paquete, cant_accesos);
             
@@ -231,6 +233,7 @@ int32_t main(int32_t argc, char* argv[]) {
             
             // Pedir lectura de string a memoria
             paquete = crear_paquete(DESALOJO_POR_IO_FS_WRITE);
+            agregar_a_paquete_uint32(paquete, PID);
             agregar_a_paquete_uint32(paquete, tamanio_total);
             agregar_a_paquete_uint32(paquete, cant_accesos);
             
@@ -302,6 +305,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 FS_READ(bloques, bloque_inicial, puntero, tamanio_total, datos_leidos);
 
                 t_paquete* paq = crear_paquete(DESALOJO_POR_IO_FS_READ);
+                agregar_a_paquete_uint32(paquete, PID);
                 agregar_a_paquete_uint32(paq, tamanio_total);
                 agregar_a_paquete_uint32(paq, cant_accesos);
 
