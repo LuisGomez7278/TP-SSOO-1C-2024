@@ -134,7 +134,7 @@ uint8_t leer_de_buffer_uint8(void* buffer, uint32_t* desplazamiento);
 uint32_t leer_de_buffer_uint32(void* buffer, uint32_t* desplazamiento);
 char* leer_de_buffer_string(void* buffer, uint32_t* desplazamiento);
 cod_ins leer_de_buffer_cod_ins(void* buffer, uint32_t* desplazamiento);
-void* leer_de_buffer_bytes(void* buffer, uint32_t* desplazamiento);
+void* leer_de_buffer_bytes(void* buffer, uint32_t* desplazamiento, uint32_t tamanio_leido);
 
 void agregar_a_paquete_op_code(t_paquete* paquete, op_code codigo);
 op_code leer_de_buffer_op_code(void* buffer, uint32_t* desplazamiento);

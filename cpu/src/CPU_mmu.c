@@ -259,9 +259,11 @@ uint32_t solicitar_MOV_IN(uint32_t direccion_logica, uint32_t tamanio_registro)
 
     dir_fisica = (marco*tamanio_de_pagina)+offset;
     agregar_a_paquete_uint32(paquete, dir_fisica);
-    agregar_a_paquete_uint32(paquete, (tamanio_de_pagina-offset));//n bytes, los faltantes hasta el fin del marco/pagina
+    uint32_t tam_acceso = cant_accesos==1 ? tamanio_registro : (tamanio_de_pagina-offset);
+    agregar_a_paquete_uint32(paquete, tam_acceso);//n bytes, los faltantes hasta el fin del marco/pagina
     
     dir_fisica_inicial = dir_fisica;
+    bytes_restantes-=tam_acceso;
 
     if (cant_accesos>1)
     {

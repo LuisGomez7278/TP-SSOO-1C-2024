@@ -401,13 +401,12 @@ char* leer_de_buffer_string(void* buffer, uint32_t* desplazamiento)
     return valor;
 };
 
-void* leer_de_buffer_bytes(void* buffer, uint32_t* desplazamiento)
+void* leer_de_buffer_bytes(void* buffer, uint32_t* desplazamiento, uint32_t tamanio_leido)
 {
-    uint32_t tamanio = leer_de_buffer_uint32(buffer, desplazamiento);
-    void* bytes = malloc(tamanio);
+    void* bytes = malloc(tamanio_leido);
 
-    memcpy(bytes, buffer + (*desplazamiento), tamanio);
-    (*desplazamiento) += tamanio;
+    memcpy(bytes, buffer + (*desplazamiento), tamanio_leido);
+    (*desplazamiento) += tamanio_leido;
 
     return bytes;
 };

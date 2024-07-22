@@ -20,10 +20,10 @@ void conexion_con_cpu(){
             frame(socket_cpu_memoria);
             break;
         case SOLICITUD_MOV_IN: 
-            movIn(socket_cpu_memoria);
+            movIn();
             break;
-        case SOLICITUD_MOV_OUT: 
-            movOut(socket_cpu_memoria);
+        case SOLICITUD_MOV_OUT:
+            movOut();
             break;
         case SOLICITUD_COPY_STRING_READ: 
             copiar_string_read(socket_cpu_memoria);
@@ -99,70 +99,86 @@ void frame(int socket_cpu_memoria){
     free(buffer);
 }
 
-void movIn(int socket_cpu_memoria){
+void movIn(){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
     void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     int i=0;
-    char* leido = string_new();
     
     if(buffer != NULL){
+        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t tamanio_total = leer_de_buffer_uint32(buffer, &desplazamiento);
 
+        uint32_t bytes_leidos = 0;
+        void* bytes_del_nro = malloc(tamanio_total);
+        memset(bytes_del_nro, 0, tamanio_total);
+        
         while(i<n){
-        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
+            void* leido = leer_memoria(dir_fisica_leer, tamanio_acceso, PID);
 
-        char* leido2 = leer_memoria(dir_fisica_leer, bytes, PID);
-        string_append(&leido, leido2);
-        free(leido2);
-        ++i;
+            memcpy(bytes_del_nro+bytes_leidos, leido, tamanio_acceso);
+            bytes_leidos+=tamanio_acceso;
+            free(leido);
+            i++;
         }
 
-        uint32_t num = (uint32_t)strtoul(leido, NULL, 10); //convierte el char* leido a un uint32_t
-
-        usleep(retardo*1000);
-
+        uint32_t num;
+        if (tamanio_total==sizeof(uint8_t))
+        {
+            uint8_t aux;// Crea un contenedor auxiliar
+            memcpy(&aux, bytes_del_nro, tamanio_total);// Le asigna al contenedor el valor
+            num = aux;// Hace la conversion de uint8 a uint32
+        }
+        else
+        {
+            memcpy(&num, bytes_del_nro, sizeof(uint32_t));
+        }
+        log_debug(logger_debug, "MOV_IN nro leido: %u", num);
+        free(bytes_del_nro);
+        
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
         agregar_a_paquete_uint32(paquete, tamanio_total);
         agregar_a_paquete_uint32(paquete, num);
-        enviar_paquete(paquete, socket_cpu_memoria);
-        eliminar_paquete(paquete);            
-        log_info(logger_debug, "Mov_In completado");
+        usleep(retardo*1000);
 
-    }else{
+        enviar_paquete(paquete, socket_cpu_memoria);
+        eliminar_paquete(paquete);
+        log_info(logger_debug, "Mov_In completado");
+    }
+    else
+    {
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
     free(buffer);
-    free(leido);
 }
 
-void movOut(int socket_cpu_memoria){
+void movOut(){
+    int32_t i=0;
     uint32_t sizeTotal;
+    void* buffer = recibir_buffer(&sizeTotal, socket_cpu_memoria);
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
-    int i=0;
     bool escrito = true;
     
     if(buffer != NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-        log_debug(logger_debug, "PID: %u - Solicitud de MOV_OUT con %u accesos", PID, n);
+        log_debug(logger_debug, "PID: %u - Solicitud de MOV_OUT con %u acceso(s)", PID, n);
 
         while(i<n && escrito){
-        uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
-        char* escribir = leer_de_buffer_string(buffer, &desplazamiento);
+            uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
+            void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
 
-        escrito = escribir_memoria(dir_fisica, bytes, escribir, PID);
-        free(escribir);
-        ++i;
+            log_debug(logger_debug, "PID: %u - acceso de escritura - dir_fisica: %u, tamanio_acceso: %u", PID, dir_fisica, tamanio_acceso);
+            escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
+            free(escribir);
+            i++;
         }
-
         usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_OUT);
@@ -189,26 +205,25 @@ void copiar_string_read(int socket_cpu_memoria){
     uint32_t desplazamiento = 0;
     void* buffer= recibir_buffer(&sizeTotal, socket_cpu_memoria);
     int i=0;
-    char* leido = string_new();
+    char* str_leida = string_new();
     
     if(buffer != NULL){
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
         while(i<n){
-        uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-        char* leido2 = leer_memoria(dir_fisica_leer, bytes, PID);
-        string_append(&leido, leido2);
-        free(leido2);
-        ++i;
+            char* leido = leer_memoria(dir_fisica_leer, bytes, PID);
+            string_append(&str_leida, leido);
+            free(leido);
+            i++;
         }
-
         usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
-        agregar_a_paquete_string(paquete, strlen(leido), leido);
+        agregar_a_paquete_string(paquete, strlen(str_leida)+1, str_leida);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
         log_info(logger_debug, "Copy String Read completado");
@@ -218,7 +233,7 @@ void copiar_string_read(int socket_cpu_memoria){
         log_error(logger_debug,"Error al recibir el buffer");
     }
     free(buffer);
-    free(leido);
+    free(str_leida);
 }
 
 void copiar_string_write(int socket_cpu_memoria){
@@ -234,27 +249,26 @@ void copiar_string_write(int socket_cpu_memoria){
         while(i<n && escrito){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
-        uint32_t bytes = leer_de_buffer_uint32(buffer, &desplazamiento);
-        char* escribir = leer_de_buffer_string(buffer, &desplazamiento);
+        uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
+        void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
 
-        escrito = escribir_memoria(dir_fisica, bytes, escribir, PID);
+        escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
         free(escribir);
-        ++i;
+        i++;
         }
 
         usleep(retardo*1000);
+        t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_WRITE);
         if(escrito){
-            t_paquete* paquete = crear_paquete(OK);
-            enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);  
+            agregar_a_paquete_op_code(paquete, OK);
             log_info(logger_debug, "Copy String Write completado");
 
         }else{
-            t_paquete* paquete = crear_paquete(FALLO);
-            enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete); 
+            agregar_a_paquete_op_code(paquete, FALLO);
             log_info(logger_debug, "Copy String Write fallido");
         }
+        enviar_paquete(paquete, socket_cpu_memoria);
+        eliminar_paquete(paquete);
     }else{
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
@@ -273,21 +287,19 @@ void ins_resize(int socket_cpu_memoria){
 
         bool exito = resize(PID, bytes);
         usleep(retardo*1000);
-        t_paquete* paquete;
 
+        op_code respuesta;
         if(exito){
-            paquete = crear_paquete(SOLICITUD_RESIZE);
-            enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);
+            respuesta = SOLICITUD_RESIZE;
+            send(socket_cpu_memoria, &respuesta, sizeof(op_code), 0);
             log_info(logger_debug, "Resize perfecto");
         }else{
-            paquete = crear_paquete(OUT_OF_MEMORY);
-            enviar_paquete(paquete, socket_cpu_memoria);
-            eliminar_paquete(paquete);
+            respuesta = OUT_OF_MEMORY;
+            send(socket_cpu_memoria, &respuesta, sizeof(op_code), 0);
             log_info(logger_debug, "Resize fallido");
         }
-    }else{
-        // Manejo de error en caso de que recibir_buffer devuelva NULL
+    }else
+    {// Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
     }
     free(buffer);
@@ -305,7 +317,7 @@ void recibir_fetch(int socket_cpu_memoria, uint32_t* PID, uint32_t* PC){
 
 void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
     t_paquete* paquete = crear_paquete(FETCH);
-    //log_info(logger, "Paquete creado");
+    
     agregar_a_paquete_cod_ins(paquete, instruccion->ins);
     agregar_a_paquete_string(paquete, strlen(instruccion->arg1) + 1, instruccion->arg1);
     agregar_a_paquete_string(paquete, strlen(instruccion->arg2) + 1, instruccion->arg2);
@@ -314,6 +326,5 @@ void enviar_instruccion(int socket_cpu_memoria, t_instruccion* instruccion){
     agregar_a_paquete_string(paquete, strlen(instruccion->arg5) + 1, instruccion->arg5);
 
     enviar_paquete(paquete, socket_cpu_memoria);
-    //log_info(logger, "Paquete enviado");
     eliminar_paquete(paquete);
 }

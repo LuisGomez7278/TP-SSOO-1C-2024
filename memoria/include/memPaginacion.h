@@ -47,10 +47,10 @@ bool resize(uint32_t PID, uint32_t size);
 bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, uint32_t PID);
 void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas);
 
-bool escribir_memoria(uint32_t direccion_fisica, uint32_t bytes, char* valor, uint32_t PID);
+bool escribir_memoria(uint32_t direccion_fisica, uint32_t bytes, void* valor, uint32_t PID);
 
-char* leer_memoria(uint32_t direccion_fisica, int bytes, uint32_t PID);
-
+void* leer_memoria(uint32_t direccion_fisica, uint32_t tamanio_acceso, uint32_t PID);
+char* leer_memoria_string(uint32_t direccion_fisica, uint32_t size, uint32_t PID);
 
 
 #endif //TP_MEMORIA_PAGINACION_H_

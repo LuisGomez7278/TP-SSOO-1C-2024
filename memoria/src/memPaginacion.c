@@ -292,35 +292,43 @@ int obtener_desplazamiento(int direccion_fisica) {
     return direccion_fisica % tam_pagina;
 }
 
-bool escribir_memoria(uint32_t direccion_fisica, uint32_t bytes, char* valor, uint32_t PID){
-
+bool escribir_memoria(uint32_t direccion_fisica, uint32_t tamanio_acceso, void* valor, uint32_t PID)
+{
     if (memoria_usuario == NULL || valor == NULL) {
         log_info(logger, "Error: memoria_usuario o valor es NULL.");
         return false;
     }
 
-    if (direccion_fisica + bytes > tam_memoria) {
+    if (direccion_fisica+tamanio_acceso > tam_memoria) {
         log_info(logger_debug, "Out of Memory");
         return false;
     }
 
-    memcpy((char*)memoria_usuario + direccion_fisica, valor, bytes);
+    memcpy(memoria_usuario+direccion_fisica, valor, tamanio_acceso);
     
-    log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_fisica, bytes);
+    log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: ESCRIBIR - Direccion fisica: %u - Tamaño %u bytes", PID, direccion_fisica, tamanio_acceso);
 
     return true;
 }
 
+void* leer_memoria(uint32_t direccion_fisica, uint32_t tamanio_acceso, uint32_t PID)
+{
+    void* buffer = malloc(tamanio_acceso);
+    memcpy(buffer, memoria_usuario+direccion_fisica, tamanio_acceso);
 
-char* leer_memoria(uint32_t direccion_fisica, int size, uint32_t PID){
-    char* buffer = malloc(size+1);
-    
+    log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %u - Tamaño %u bytes", PID, direccion_fisica, tamanio_acceso);
+
+    return buffer;
+}
+
+char* leer_memoria_string(uint32_t direccion_fisica, uint32_t size, uint32_t PID)
+{
+    char* buffer = malloc(size+1);    
     memcpy(buffer, (char*)memoria_usuario + direccion_fisica, size);
 
     log_info(logger, "Acceso a Espacio de Usuario: PID: %u - Accion: LEER - Direccion fisica: %d - Tamaño %d bytes", PID, direccion_fisica, size);
 
     buffer[size] = '\0';
-    //log_info(logger_debug, "%.*s", size, buffer);  
     return buffer;
 }
 
