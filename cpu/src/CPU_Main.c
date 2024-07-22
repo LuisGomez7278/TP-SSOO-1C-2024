@@ -260,10 +260,12 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case COPY_STRING:
         log_info(logger,"PID: %u - Ejecutando: COPY_STRING - %s", PID, ins_actual->arg1);
-        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
         uint32_t bytes_a_copiar = atoi(ins_actual->arg1);
-        uint32_t direccion_logica_READ = contexto_interno->SI;
-        uint32_t direccion_logica_WRITE = contexto_interno->DI;
+        uint32_t direccion_logica_READ;
+        memcpy(&direccion_logica_READ, &contexto_interno->SI, sizeof(uint32_t));
+        uint32_t direccion_logica_WRITE;
+        memcpy(&direccion_logica_WRITE, &contexto_interno->DI, sizeof(uint32_t));
+        log_debug(logger_debug, "COPY_STRING: Direcciones leidas - READ: %u, WRITE: %u", direccion_logica_READ, direccion_logica_WRITE);
 
         solicitar_lectura_string(direccion_logica_READ, bytes_a_copiar);
         sem_wait(&respuesta_copy_string);
