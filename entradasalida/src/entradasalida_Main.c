@@ -395,7 +395,7 @@ char* leer_de_teclado(uint32_t tamanio_a_leer)
     free(leido);
 
     //Si lo leido no ocupa todo el tamanio_a_leer sigue pidiendo datos hasta completar
-    while (string_length(string_a_memoria)<restante)
+    while (restante>0 && string_length(string_a_memoria)<restante)
     {
         mensaje_mostrado = malloc(25);
         sprintf(mensaje_mostrado, "Ingresar %d caracteres", restante);
