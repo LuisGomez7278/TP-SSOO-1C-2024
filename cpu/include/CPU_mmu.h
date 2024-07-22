@@ -22,7 +22,6 @@ extern sem_t respuesta_marco;
 extern uint32_t marco_pedido;
 typedef struct
 {
-    bool libre;
     uint32_t PID;
     uint32_t nro_pag;
     uint32_t marco;
@@ -39,8 +38,8 @@ entrada_TLB* buscar_en_tlb(uint32_t PID, uint32_t nro_pag);
 uint32_t marco_TLB(entrada_TLB* entrada);
 uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag);
 entrada_TLB* TLB_miss(uint32_t PID, uint32_t nro_pag);
-entrada_TLB* buscar_entrada_para_reemplazar(uint32_t PID, uint32_t nro_pag, uint32_t marco);
-entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* entrada_a_reemplazar);
+uint32_t buscar_entrada_para_reemplazar();
+uint32_t algoritmo_de_reemplazo(uint32_t indice_1, uint32_t indice_2);
 
 void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar);
 void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WRITE, uint32_t bytes_a_copiar);

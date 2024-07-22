@@ -11,20 +11,8 @@ void inicializar_TLB()
     {
         usa_TLB = true;
         log_info(logger, "TLB habilitada, cantidad de entradas: %u", cant_entradas_TLB);
-        tabla_TLB = list_create();
 
-        entrada_TLB* aux = malloc(sizeof(entrada_TLB));
-        for (int i = 0; i < cant_entradas_TLB; i++)
-        {
-            
-            aux->libre = true;
-            aux->PID = 0;
-            aux->nro_pag = 0;
-            aux->marco = 0;
-            aux->t_ingreso = temporal_create();
-            aux->t_ultimo_uso = temporal_create();
-            list_add(tabla_TLB, aux);
-        }
+        tabla_TLB = list_create();
     }    
 }
 
@@ -58,10 +46,10 @@ uint32_t get_marco(uint32_t PID_pedida, uint32_t nro_pag)
 entrada_TLB* buscar_en_tlb(uint32_t PID_pedida, uint32_t nro_pag)
 {
     entrada_TLB* entrada;
-    for (int i = 0; i < cant_entradas_TLB; i++)
+    for (int i = 0; i < list_size(tabla_TLB); i++)
     {
         entrada = list_get(tabla_TLB, i);
-        if (entrada->PID == PID_pedida && entrada->nro_pag == nro_pag) 
+        if (entrada->PID == PID_pedida && entrada->nro_pag == nro_pag)
         {
             log_info(logger, "ID: %u - TLB HIT - Pagina: %u", PID_pedida, nro_pag);
             temporal_destroy(entrada->t_ultimo_uso);
@@ -69,7 +57,6 @@ entrada_TLB* buscar_en_tlb(uint32_t PID_pedida, uint32_t nro_pag)
             return entrada;
         }
     }
-
     log_info(logger, "ID: %u - TLB MISS - Pagina: %u", PID_pedida, nro_pag);
     entrada = TLB_miss(PID_pedida, nro_pag);
     return entrada;
@@ -89,7 +76,7 @@ uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag)
     eliminar_paquete(paquete);
 
     log_debug(logger_debug, "Esperando marco de memoria");
-    sem_wait(&respuesta_marco);    
+    sem_wait(&respuesta_marco);
     uint32_t marco = marco_pedido;
 
     log_info(logger, "PID: %u - OBTENER MARCO - Página: %u - Marco: %u", PID, nro_pag, marco);
@@ -99,49 +86,57 @@ uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag)
 entrada_TLB* TLB_miss(uint32_t PID, uint32_t nro_pag)
 {
     uint32_t marco = pedir_marco_a_memoria(PID, nro_pag);
-    entrada_TLB* entrada = buscar_entrada_para_reemplazar(PID, nro_pag, marco);
-    entrada->libre = false;
-    entrada->marco = marco;
-    entrada->nro_pag = nro_pag;
+    entrada_TLB* entrada = malloc(sizeof(entrada_TLB));
     entrada->PID = PID;
-    temporal_destroy(entrada->t_ingreso);
+    entrada->nro_pag = nro_pag;
+    entrada->marco = marco;
     entrada->t_ingreso = temporal_create();
-    temporal_destroy(entrada->t_ultimo_uso);
     entrada->t_ultimo_uso = temporal_create();
+
+    if (list_size(tabla_TLB)==cant_entradas_TLB)
+    {
+        uint32_t entrada_a_eliminar = buscar_entrada_para_reemplazar();
+        entrada_TLB* entrada_removida = list_remove(tabla_TLB, entrada_a_eliminar);
+        log_info(logger, "PID: %u, nro_pag: %u - removida de tabla TLB", entrada_removida->PID, entrada_removida->nro_pag);
+        temporal_destroy(entrada_removida->t_ingreso);
+        temporal_destroy(entrada_removida->t_ingreso);
+        free(entrada_removida);
+    }    
+    list_add(tabla_TLB, entrada);
 
     return entrada;
 }
 
-entrada_TLB* buscar_entrada_para_reemplazar(uint32_t PID, uint32_t nro_pag, uint32_t marco)
+uint32_t buscar_entrada_para_reemplazar()
 {
-    entrada_TLB* entrada_actual = list_get(tabla_TLB, 0);
-    entrada_TLB* entrada_a_reemplazar = entrada_actual;
-    for (int i = 0; i < cant_entradas_TLB; i++)
+    uint32_t entrada_a_reemplazar = 0;
+    uint32_t entrada_actual;
+    
+    for (int i = 1; i < cant_entradas_TLB; i++)
     {
-        entrada_actual = list_get(tabla_TLB, i);
-        if (entrada_actual->libre) {return entrada_actual;}
-        else 
-        {
-            entrada_a_reemplazar = algoritmo_de_reemplazo(entrada_actual, entrada_a_reemplazar);
-        }
+        entrada_actual = i;
+        entrada_a_reemplazar = algoritmo_de_reemplazo(entrada_actual, entrada_a_reemplazar);
     }
     return entrada_a_reemplazar;
 }
 
-entrada_TLB* algoritmo_de_reemplazo(entrada_TLB* entrada_actual, entrada_TLB* entrada_a_reemplazar)
+uint32_t algoritmo_de_reemplazo(uint32_t indice_1, uint32_t indice_2)
 {
-    entrada_TLB* entrada;
+    entrada_TLB* entrada_1 = list_get(tabla_TLB, indice_1);
+    entrada_TLB* entrada_2 = list_get(tabla_TLB, indice_2);
+
+    uint32_t reemplazado;
     if (string_equals_ignore_case(algoritmo_TLB, "FIFO"))
     {
-        //si diff>0 entonces entrada_actual esta hace mas tiempo en TLB que entrada_a_reemplazar
-        entrada = temporal_diff(entrada_actual->t_ingreso, entrada_a_reemplazar->t_ingreso) > 0 ? entrada_actual : entrada_a_reemplazar;
+        //si diff>0 entonces entrada_1 esta hace mas tiempo en TLB que entrada_2
+        reemplazado = temporal_diff(entrada_1->t_ingreso, entrada_2->t_ingreso) > 0 ? indice_1 : indice_2;
     }
-    else //(string_equals_ignore_case(algoritmo_TLB, "LRU")) 
+    else //(string_equals_ignore_case(algoritmo_TLB, "LRU"))
     {
-        //si diff>0 entonces entrada_actual se uso hace mas tiempo que entrada_a_reemplazar
-        entrada = temporal_diff(entrada_actual->t_ultimo_uso, entrada_a_reemplazar->t_ultimo_uso) > 0 ? entrada_actual : entrada_a_reemplazar;
-    }    
-    return entrada;
+        //si diff>0 entonces entrada_1 se uso hace mas tiempo que entrada_2
+        reemplazado = temporal_diff(entrada_1->t_ultimo_uso, entrada_2->t_ultimo_uso) > 0 ? indice_1 : indice_2;
+    }
+    return reemplazado;
 }
 
 void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_copiar)
@@ -171,7 +166,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     while (bytes_restantes>0)
     {
         marco = get_marco(PID, nro_pag);
-        
+
         dir_fisica = marco*tamanio_de_pagina;
 
         if (bytes_restantes>tamanio_de_pagina)
@@ -236,7 +231,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
         i++;
     }
     enviar_paquete(paquete, socket_cpu_memoria);
-    eliminar_paquete(paquete); 
+    eliminar_paquete(paquete);
 }
 
 
@@ -320,9 +315,4 @@ uint32_t solicitar_MOV_OUT(uint32_t direccion_logica, uint32_t tamanio_registro,
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
     return dir_fisica_inicial;
-}
-
-op_code recibir_respuesta_MOV_OUT()
-{
-    return recibir_operacion(socket_cpu_memoria);
 }
