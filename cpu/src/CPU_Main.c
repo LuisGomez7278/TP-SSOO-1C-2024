@@ -77,9 +77,9 @@ int main(int argc, char* argv[]) {
 
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual){
     cod_ins codigo = ins_actual->ins;
-    int* registro_destino;
-    int* registro_origen;
-    int* registro;
+    int* registro_1;
+    int* registro_2;
+    int* registro_3;
 
     uint8_t valorchico1;
     uint8_t valorchico2;
@@ -98,49 +98,49 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
     case SET:
         log_info(logger,"PID: %u - Ejecutando: SET - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         contexto_interno->PC++;
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
         if(registro_chico(ins_actual->arg1))
         {
             valorchico1 = atoi(ins_actual->arg2);
-            memcpy(registro, &valorchico1, sizeof(uint8_t));
+            memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
         else
         {
             valorgrande1 = atoi(ins_actual->arg2); 
-            memcpy(registro, &valorgrande1, sizeof(uint32_t));
+            memcpy(registro_1, &valorgrande1, sizeof(uint32_t));
         }
         break;
 
     case SUM:
         log_info(logger,"PID: %u - Ejecutando: SUM - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         contexto_interno->PC++;
-        registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);
-        registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
+        registro_2 = direccion_registro(contexto_interno, ins_actual->arg2);
         if(registro_chico(ins_actual->arg1))
         {
-            valorchico1 = *registro_destino;
-            valorchico2 = *registro_origen;
+            valorchico1 = *registro_1;
+            valorchico2 = *registro_2;
             valorchico1 = valorchico1+valorchico2;
-            memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
+            memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
         else
         {
-            valorgrande1 = *registro_destino;
-            valorgrande2 = *registro_origen;
+            valorgrande1 = *registro_1;
+            valorgrande2 = *registro_2;
             valorgrande2 = valorgrande1+valorgrande2;
-            memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
+            memcpy(registro_1, &valorgrande1, sizeof(uint32_t));
         }
         break;
 
     case SUB:
         log_info(logger,"PID: %u - Ejecutando: SUB - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         contexto_interno->PC++;
-        registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);
-        registro_origen = direccion_registro(contexto_interno, ins_actual->arg2);
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
+        registro_2 = direccion_registro(contexto_interno, ins_actual->arg2);
         if(registro_chico(ins_actual->arg1))
         {
-            valorchico1 = *registro_destino;
-            valorchico2 = *registro_origen;
+            valorchico1 = *registro_1;
+            valorchico2 = *registro_2;
             if (valorchico2 > valorchico1)
             {
                 log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
@@ -148,12 +148,12 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             }
             else{valorchico1 = valorchico1 - valorchico2;}
             
-            memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
+            memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
         else
         {
-            valorgrande1 = *registro_destino;
-            valorgrande2 = *registro_origen;
+            valorgrande1 = *registro_1;
+            valorgrande2 = *registro_2;
             if (valorgrande2 > valorgrande1)
             {
                 log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
@@ -161,31 +161,42 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             }
             else{valorgrande1 = valorgrande1 - valorgrande2;}
             
-            memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
+            memcpy(registro_1, &valorgrande1, sizeof(uint32_t));
         }
         break;
         
     case JNZ:
         log_info(logger,"PID: %u - Ejecutando: JNZ - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valorgrande1 = *registro;
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
+        valorgrande1 = *registro_1;
         if (valorgrande1 != 0) {memcpy(&contexto_interno->PC, &valorgrande1, sizeof(uint32_t));}
         else {contexto_interno->PC++;}
         break;
 
     case MOV_IN:
         log_info(logger,"PID: %u - Ejecutando: MOV_IN - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
-        registro_destino = direccion_registro(contexto_interno, ins_actual->arg1); //puntero donde se guarda el dato
-        registro_origen = direccion_registro(contexto_interno ,ins_actual->arg2); //puntero que contiene la direccion logica de memoria 
-        direccion_logica = *registro_origen; // valor de la direccion logica
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1); //puntero donde se guarda el dato
+        registro_2 = direccion_registro(contexto_interno ,ins_actual->arg2); //puntero que contiene la direccion logica de memoria
         uint32_t dir_fisica_read;
+
+        if (registro_chico(ins_actual->arg2))
+        {
+            memcpy(&valorchico1, registro_2, sizeof(uint8_t));
+            direccion_logica = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_2, sizeof(uint32_t));
+            direccion_logica = valorgrande1;
+        }
+        log_debug(logger_debug, "MOV_IN direccion logica: %u, valor: %u", direccion_logica, valorgrande1);
 
         if (registro_chico(ins_actual->arg1))
         {
             dir_fisica_read = solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
             sem_wait(&respuesta_MOV_IN);
             valorchico1 = respuesta_mov_in_8;
-            memcpy(registro_destino, &valorchico1, sizeof(uint8_t));
+            memcpy(registro_2, &valorchico1, sizeof(uint8_t));
             log_info(logger, "PID: %u - Acción: LEER - Dirección Física: %u - Valor: %u", PID, dir_fisica_read, valorchico1);
         }
         else
@@ -193,7 +204,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             dir_fisica_read = solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
             sem_wait(&respuesta_MOV_IN);
             valorgrande1 = respuesta_mov_in_32;
-            memcpy(registro_destino, &valorgrande1, sizeof(uint32_t));
+            memcpy(registro_2, &valorgrande1, sizeof(uint32_t));
             log_info(logger, "PID: %u - Acción: LEER - Dirección Física: %u - Valor: %u", PID, dir_fisica_read, valorgrande1);
         }
 
@@ -202,22 +213,33 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case MOV_OUT:
         log_info(logger,"PID: %u - Ejecutando: MOV_OUT - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
-        registro_origen = direccion_registro(contexto_interno, ins_actual->arg2); //puntero donde esta almacenado el valor a escribir
-        registro_destino = direccion_registro(contexto_interno, ins_actual->arg1);//puntero que contiene la direccion logica de memoria 
-        direccion_logica = *registro_destino;//valor de la direccion logica
+        registro_2 = direccion_registro(contexto_interno, ins_actual->arg2); //puntero donde esta almacenado el valor a escribir
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);//puntero que contiene la direccion logica de memoria 
         uint32_t dir_fisica_write;
 
-        if (registro_chico(ins_actual->arg2))
+        if (registro_chico(ins_actual->arg1))
         {
-            valorchico1 = *registro_origen;
-            dir_fisica_write = solicitar_MOV_OUT(direccion_logica, sizeof(uint8_t), valorchico1);
-            log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorchico1);
+            memcpy(&valorchico1, registro_1, sizeof(uint8_t));
+            direccion_logica = valorchico1;
         }
         else
         {
-            valorgrande1 = *registro_origen;
-            dir_fisica_write = solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valorgrande1);
-            log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorgrande1);
+            memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
+            direccion_logica = valorgrande1;
+        }
+        log_debug(logger_debug, "MOV_OUT direccion logica: %u", direccion_logica);
+        
+        if (registro_chico(ins_actual->arg2))
+        {
+            memcpy(&valorchico2, registro_2, sizeof(uint8_t));
+            dir_fisica_write = solicitar_MOV_OUT(direccion_logica, sizeof(uint8_t), valorchico2);
+            log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorchico2);
+        }
+        else
+        {
+            memcpy(&valorgrande2, registro_2, sizeof(uint32_t));
+            dir_fisica_write = solicitar_MOV_OUT(direccion_logica, sizeof(uint32_t), valorgrande2);
+            log_info(logger, "PID: %u - Acción: ESCRIBIR - Dirección Física: %u - Valor: %u", PID, dir_fisica_write, valorgrande2);
         }
         contexto_interno->PC++;
         break;
@@ -238,15 +260,15 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
     case COPY_STRING:
         log_info(logger,"PID: %u - Ejecutando: COPY_STRING - %s", PID, ins_actual->arg1);
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        uint32_t bytes_a_copiar = *registro;
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
+        uint32_t bytes_a_copiar = atoi(ins_actual->arg1);
         uint32_t direccion_logica_READ = contexto_interno->SI;
-     //   uint32_t direccion_logica_WRITE = contexto_interno->DI;
+        uint32_t direccion_logica_WRITE = contexto_interno->DI;
 
         solicitar_lectura_string(direccion_logica_READ, bytes_a_copiar);
         sem_wait(&respuesta_copy_string);
-        //escribir_en_memoria_string(string_leida, direccion_logica_WRITE, bytes_a_copiar);
-        // recibir_respuesta_COPY_STRING();
+        char* str_leida = string_leida_de_memoria;
+        escribir_en_memoria_string(str_leida, direccion_logica_WRITE, bytes_a_copiar);
         contexto_interno->PC++;
         break;
         
@@ -264,11 +286,32 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_STDIN;
         
-        registro = direccion_registro(contexto_interno, ins_actual->arg2);
-        direccion_logica = *registro;
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg2);
+        if (registro_chico(ins_actual->arg2))
+        {
+            memcpy(&valorchico1, registro_1, sizeof(uint8_t));
+            direccion_logica = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
+            direccion_logica = valorgrande1;
+        }
+        log_debug(logger_debug, "IO_STDIN direccion logica: %u", direccion_logica);
 
-        registro = direccion_registro(contexto_interno, ins_actual->arg3);
-        uint32_t tamanio_a_leer = *registro;
+        registro_2 = direccion_registro(contexto_interno, ins_actual->arg3);
+        uint32_t tamanio_a_leer;
+        if (registro_chico(ins_actual->arg3))
+        {
+            memcpy(&valorchico2, registro_2, sizeof(uint8_t));
+            tamanio_a_leer =  valorchico2;
+        }
+        else
+        {
+            memcpy(&valorgrande2, registro_2, sizeof(uint32_t));
+            tamanio_a_leer =  valorgrande2;
+        }
+        log_debug(logger_debug, "IO_STDIN tamanio leido: %u", tamanio_a_leer);
         
         ejecutar_IO_STD_IN(ins_actual->arg1, direccion_logica, tamanio_a_leer);
         break;
@@ -278,11 +321,32 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_STDOUT;
 
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        direccion_logica = *registro;
-        
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        uint32_t tamanio_a_escribir = *registro;
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg2);
+        if (registro_chico(ins_actual->arg2))
+        {
+            memcpy(&valorchico1, registro_1, sizeof(uint8_t));
+            direccion_logica = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
+            direccion_logica = valorgrande1;
+        }
+        log_debug(logger_debug, "IO_STDOUT direccion logica: %u", direccion_logica);
+
+        registro_2 = direccion_registro(contexto_interno, ins_actual->arg3);
+        uint32_t tamanio_a_escribir;
+        if (registro_chico(ins_actual->arg3))
+        {
+            memcpy(&valorchico2, registro_2, sizeof(uint8_t));
+            tamanio_a_escribir =  valorchico2;
+        }
+        else
+        {
+            memcpy(&valorgrande2, registro_2, sizeof(uint32_t));
+            tamanio_a_escribir =  valorgrande2;
+        }
+        log_debug(logger_debug, "IO_STDOUT tamanio leido: %u", tamanio_a_escribir);
 
         ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);
         break;
@@ -308,11 +372,22 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_TRUNCATE;
 
-        registro = direccion_registro(contexto_interno, ins_actual->arg1);
-        valorgrande1 = *registro;
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg3);
+        uint32_t tamanio_truncar;
+        if (registro_chico(ins_actual->arg3))
+        {
+            memcpy(&valorchico1, registro_1, sizeof(uint8_t));
+            tamanio_truncar =  valorchico2;
+        }
+        else
+        {
+            memcpy(&valorgrande2, registro_1, sizeof(uint32_t));
+            tamanio_truncar =  valorgrande2;
+        }
+        log_debug(logger_debug, "Tamanio truncate leido: %u", tamanio_truncar);        
 
         // arg1: nombre_interfaz, arg2: nombre_archivo, valorgrande1 nuevo_tamaño
-        solicitar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, valorgrande1);
+        solicitar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, tamanio_truncar);
         break;
 
     case IO_FS_WRITE:
@@ -321,18 +396,48 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         motivo_desalojo = DESALOJO_POR_IO_FS_WRITE;
 
         // Direccion a leer
-        registro = direccion_registro(contexto_interno, ins_actual->arg3);
-        direccion_logica = *registro;
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg3);
+        if (registro_chico(ins_actual->arg3))
+        {
+            memcpy(&valorchico1, registro_1, sizeof(uint8_t));
+            direccion_logica = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
+            direccion_logica = valorgrande1;
+        }
         
         // Tamaño a leer
-        registro = direccion_registro(contexto_interno, ins_actual->arg4);
-        valorgrande1 = *registro;
+        uint32_t tamanio_write;
+        registro_2 = direccion_registro(contexto_interno, ins_actual->arg4);
+        if (registro_chico(ins_actual->arg4))
+        {
+            memcpy(&valorchico1, registro_2, sizeof(uint8_t));
+            tamanio_write = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_2, sizeof(uint32_t));
+            tamanio_write = valorgrande1;
+        }
         
         // Puntero escritura
-        registro = direccion_registro(contexto_interno, ins_actual->arg5);
-        valorgrande2 = *registro;
+        uint32_t puntero_write;
+        registro_3 = direccion_registro(contexto_interno, ins_actual->arg5);
+        if (registro_chico(ins_actual->arg4))
+        {
+            memcpy(&valorchico1, registro_3, sizeof(uint8_t));
+            puntero_write = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_3, sizeof(uint32_t));
+            puntero_write = valorgrande1;
+        }
 
-        solicitar_IO_FS_MEMORIA(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_logica, valorgrande1, valorgrande2);
+        log_debug(logger_debug, "FS_WRITE direccion logica: %u, tamanio: %u, puntero: %u", direccion_logica, tamanio_write, puntero_write);
+        solicitar_IO_FS_MEMORIA(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_logica, tamanio_write, puntero_write);
         break;
 
     case IO_FS_READ:
@@ -341,18 +446,48 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         motivo_desalojo = DESALOJO_POR_IO_FS_READ;
 
         // Direccion a leer
-        registro = direccion_registro(contexto_interno, ins_actual->arg3);
-        direccion_logica = *registro;
+        registro_1 = direccion_registro(contexto_interno, ins_actual->arg3);
+        if (registro_chico(ins_actual->arg3))
+        {
+            memcpy(&valorchico1, registro_1, sizeof(uint8_t));
+            direccion_logica = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
+            direccion_logica = valorgrande1;
+        }
         
         // Tamaño a leer
-        registro = direccion_registro(contexto_interno, ins_actual->arg4);
-        valorgrande1 = *registro;
+        uint32_t tamanio_read;
+        registro_2 = direccion_registro(contexto_interno, ins_actual->arg4);
+        if (registro_chico(ins_actual->arg4))
+        {
+            memcpy(&valorchico1, registro_2, sizeof(uint8_t));
+            tamanio_read = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_2, sizeof(uint32_t));
+            tamanio_read = valorgrande1;
+        }
         
         // Puntero escritura
-        registro = direccion_registro(contexto_interno, ins_actual->arg5);
-        valorgrande2 = *registro;
+        uint32_t puntero_read;
+        registro_3 = direccion_registro(contexto_interno, ins_actual->arg5);
+        if (registro_chico(ins_actual->arg4))
+        {
+            memcpy(&valorchico1, registro_3, sizeof(uint8_t));
+            puntero_read = valorchico1;
+        }
+        else
+        {
+            memcpy(&valorgrande1, registro_3, sizeof(uint32_t));
+            puntero_read = valorgrande1;
+        }
 
-        solicitar_IO_FS_MEMORIA(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_logica, valorgrande1, valorgrande2);
+        log_debug(logger_debug, "FS_READ direccion logica: %u, tamanio: %u, puntero: %u", direccion_logica, tamanio_read, puntero_read);
+        solicitar_IO_FS_MEMORIA(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_logica, tamanio_read, puntero_read);
         break;
 
     case WAIT:
