@@ -1,8 +1,5 @@
 #include "../include/entradasalida-memoria.h"
 
-void ejecutar_IO_STDIN(uint32_t marco, uint32_t offset, char* string_leida);
-
-
 void gestionar_conexion_memoria()
 {
     op_code operacion;
@@ -15,22 +12,32 @@ void gestionar_conexion_memoria()
         uint32_t size;
         uint32_t desplazamiento;
         void* buffer;
+        char* str_recibida;
+
         switch (operacion)
         {
         case MENSAJE:
             recibir_mensaje(socket_memoria_entradasalida, logger_debug);
             break;
 
-        case DESALOJO_POR_IO_STDOUT:
+        case SOLICITUD_IO_STDOUT_WRITE:
+            desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_memoria_entradasalida);
-            string_leida_memoria = leer_de_buffer_string(buffer, &desplazamiento);
+            str_recibida = leer_de_buffer_string(buffer, &desplazamiento);
+            string_leida_memoria = string_duplicate(str_recibida);
+            free(buffer);
+            free(str_recibida);
             log_info(logger, "Entrada-salida recibe una respuesta de memoria por STDOUT, string: %s", string_leida_memoria);
             sem_post(&respuesta_memoria);
             break;
 
         case DESALOJO_POR_IO_FS_WRITE:
+            desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_memoria_entradasalida);
-            string_leida_memoria = leer_de_buffer_string(buffer, &desplazamiento);
+            str_recibida = leer_de_buffer_string(buffer, &desplazamiento);
+            string_leida_memoria = string_duplicate(str_recibida);
+            free(buffer);
+            free(str_recibida);
             log_info(logger, "Entrada-salida recibe una respuesta de memoria por FS_WRITE, string: %s", string_leida_memoria);
             sem_post(&respuesta_memoria);
             break;

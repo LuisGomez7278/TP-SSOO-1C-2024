@@ -22,9 +22,9 @@ void conexion_con_es(){
     }
 }
 
-void escuchar_nueva_Interfaz_mem(void*  socket)
+void escuchar_nueva_Interfaz_mem(void* socket_hilo)
 {
-    int32_t socket_IO= *((int32_t*)socket);
+    int32_t socket_IO= *((int32_t*)socket_hilo);
 
     enviar_mensaje("CONEXION CON MEMORIA OK", socket_IO);
     log_info(logger, "Handshake enviado: IO");
@@ -37,15 +37,19 @@ void escuchar_nueva_Interfaz_mem(void*  socket)
             recibir_mensaje(socket_IO,logger_debug);
             break;
         case SOLICITUD_IO_STDIN_READ:
+            log_trace(logger_debug, "Llega una peticion de STDIN");
             write_es(socket_IO);
             break;
         case SOLICITUD_IO_STDOUT_WRITE:
+            log_trace(logger_debug, "Llega una peticion de STDOUT");
             read_es(socket_IO, SOLICITUD_IO_STDOUT_WRITE);
             break;
         case DESALOJO_POR_IO_FS_READ:
+            log_trace(logger_debug, "Llega una peticion de FS_READ");
             write_es(socket_IO);
             break;
         case DESALOJO_POR_IO_FS_WRITE:
+            log_trace(logger_debug, "Llega una peticion de FS_WRITE");
             read_es(socket_IO, DESALOJO_POR_IO_FS_WRITE);
             break;
         default:
@@ -56,11 +60,11 @@ void escuchar_nueva_Interfaz_mem(void*  socket)
     }
 }
 
-void read_es(int32_t socket, op_code motivo)
-{                                                                     
+void read_es(int32_t socket_hilo, op_code motivo)
+{
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket);
+    void* buffer= recibir_buffer(&sizeTotal, socket_hilo);
     int i=0;
     
     if(buffer != NULL){
@@ -81,7 +85,7 @@ void read_es(int32_t socket, op_code motivo)
             memcpy(str_leida+bytes_leidos, leido, tam_acceso);
             bytes_leidos+=tam_acceso;
             free(leido);
-            i++;
+            ++i;
         }
 
         str_leida[tam_total] = '\0';
@@ -89,8 +93,8 @@ void read_es(int32_t socket, op_code motivo)
 
         t_paquete* paquete = crear_paquete(motivo);
         agregar_a_paquete_string(paquete, strlen(str_leida)+1, str_leida);
-        enviar_paquete(paquete, socket);
-        eliminar_paquete(paquete);            
+        enviar_paquete(paquete, socket_hilo);
+        eliminar_paquete(paquete);
         log_info(logger_debug, "Solicitud de lectura de E/S completada, string leida: %s", str_leida);
         free(str_leida);
         }
@@ -101,10 +105,10 @@ void read_es(int32_t socket, op_code motivo)
     free(buffer);
 }
 
-void write_es(int32_t socket){                                                                   
+void write_es(int32_t socket_hilo){
     uint32_t sizeTotal;
     uint32_t desplazamiento = 0;
-    void* buffer= recibir_buffer(&sizeTotal, socket);
+    void* buffer= recibir_buffer(&sizeTotal, socket_hilo);
     int i=0;
     bool escrito = false;
     
@@ -137,7 +141,7 @@ void write_es(int32_t socket){
             log_info(logger_debug, "El pedido de escritura desde E/S resulto fallido");
         }   
         agregar_a_paquete_string(paquete, strlen(mensaje)+1, mensaje);
-        enviar_paquete(paquete, socket);
+        enviar_paquete(paquete, socket_hilo);
         eliminar_paquete(paquete);
     }
     else{

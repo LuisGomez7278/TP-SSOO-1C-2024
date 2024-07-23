@@ -2,37 +2,28 @@
 
 int32_t main(int32_t argc, char* argv[]) {
 
+    if (argc < 3) {
+    fprintf(stderr, "Uso: %s <nombre_interfaz> <config_interfaz>\n", argv[0]);
+    return 1;
+    }
 
-        if (argc < 3) {
-        fprintf(stderr, "Uso: %s <nombre_interfaz> <config_interfaz>\n", argv[0]);
-        return 1;
-        }
-
-        printf("Argumento 1: %s\n", argv[1]);
-        printf("Argumento 2: %s\n", argv[2]);
-    
-  
+    printf("Argumento 1: %s\n", argv[1]);
+    printf("Argumento 2: %s\n", argv[2]);
+      
     //VALIDO ARGUMENTOS
     validar_argumentos(argv[1],argv[2]);
     
-
     nombre_interfaz = argv[1];
     config_interfaz = argv[2];
 
-    //nombre_interfaz="INTFZ3";
-    //config_interfaz = "IO-GEN1";
-
-
     iniciar_entradasalida(nombre_interfaz, config_interfaz);
-
 
     socket_kernel_entradasalida = crear_conexion(IP_KERNEL,PUERTO_KERNEL);
     log_info(logger, "Se creo la conexion entre IO y Kernel");
 
     enviar_mensaje("CONEXION CON INTERFAZ OK", socket_kernel_entradasalida);
-    log_info(logger_debug, "Handshake enviado: KERNEL")    ;
+    log_info(logger_debug, "Handshake enviado: KERNEL");
 
-    
     recibir_operacion(socket_kernel_entradasalida);
     recibir_mensaje(socket_kernel_entradasalida, logger);
 
@@ -53,8 +44,11 @@ int32_t main(int32_t argc, char* argv[]) {
         log_info(logger, "Se creo la conexion entre IO y MEMORIA");
 
         enviar_mensaje("CONEXION CON INTERFAZ OK", socket_memoria_entradasalida);
-        log_info(logger_debug, "Handshake enviado: KERNEL")    ;
-        
+        log_info(logger_debug, "Handshake enviado: MEMORIA");
+
+        pthread_t hilo_conexion_memoria;
+        pthread_create(&hilo_conexion_memoria, NULL, (void*) gestionar_conexion_memoria, NULL);
+        pthread_detach(hilo_conexion_memoria);
     }
     
 
@@ -98,7 +92,7 @@ int32_t main(int32_t argc, char* argv[]) {
         case MENSAJE:
             recibir_mensaje(socket_kernel_entradasalida, logger);
             break;
-        case DESALOJO_POR_IO_GEN_SLEEP:        
+        case DESALOJO_POR_IO_GEN_SLEEP:
             buffer = recibir_buffer(&size, socket_kernel_entradasalida);
             PID = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t unidades_trabajo = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -161,6 +155,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                 tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
                 
+                log_debug(logger_debug, "Peticion de lectura enviada a memoria - dir_fisica: %u, tam_acceso: %u", dir_fisica, tamanio_a_leer);
                 agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
             }            
@@ -176,9 +171,9 @@ int32_t main(int32_t argc, char* argv[]) {
             // eliminar_paquete(paquete);
             // log_info(logger, "Se envio la string \'%s\', a kernel para que sea imprimida en pantalla", string_leida_memoria);
             // Imprimir por pantalla
-            char* string_pedida = string_leida_memoria;
-            log_debug(logger_debug, "String para imprimir: %s", string_pedida);
-            printf("%s", string_pedida);
+            
+            log_debug(logger_debug, "String para imprimir: %s", string_leida_memoria);
+            printf("%s", string_leida_memoria);
             notificar_kernel(true);
             free(buffer);
             free(string_leida_memoria);
@@ -269,7 +264,7 @@ int32_t main(int32_t argc, char* argv[]) {
             {
                 FS_WRITE(bloques, bloque_inicial, puntero, tamanio_total, string_leida_memoria);
                 write = true;   
-            }            
+            }
             notificar_kernel(write);
 
             config_destroy(metadata);
@@ -356,22 +351,12 @@ int32_t main(int32_t argc, char* argv[]) {
     return 0;
 }
 
-
-
-
-
-
 void validar_argumentos(char* nombre_interfaz, char* config_interfaz)
 {
     if(nombre_interfaz == NULL || config_interfaz == NULL){
         printf("Agregar argumentos 'nombre_interfaz' y 'config_interfaz'");
         exit(EXIT_FAILURE);
     }
-    //Verificar si puede venir otro nombre en las pruebas
-  //  if(strcmp(nombre_interfaz,"GENERICA") != 0 && strcmp(nombre_interfaz,"STDOUT") != 0 && strcmp(nombre_interfaz,"STDIN") !=0){
-  //       printf("Utilizar 'GENERICA', 'STDOUT' o 'STDIN' como nombre de interfaz");
-  //      exit(EXIT_FAILURE);
-  //  }
 }
 
 void notificar_kernel(bool exito)
