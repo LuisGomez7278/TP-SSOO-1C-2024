@@ -157,7 +157,9 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         log_info(logger,"PID: %u - Ejecutando: JNZ - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
         valorgrande1 = (uint32_t) *registro_1;
-        if (valorgrande1 != 0) {memcpy(&contexto_interno->PC, &valorgrande1, sizeof(uint32_t));}
+        uint32_t nuevo_pc = atoi(ins_actual->arg2);
+
+        if (valorgrande1 != 0) {memcpy(&contexto_interno->PC, &nuevo_pc, sizeof(uint32_t));}
         else {contexto_interno->PC++;}
         break;
 
