@@ -97,9 +97,9 @@ entrada_TLB* TLB_miss(uint32_t PID, uint32_t nro_pag)
     {
         uint32_t entrada_a_eliminar = buscar_entrada_para_reemplazar();
         entrada_TLB* entrada_removida = list_remove(tabla_TLB, entrada_a_eliminar);
-        log_info(logger, "PID: %u, nro_pag: %u - removida de tabla TLB", entrada_removida->PID, entrada_removida->nro_pag);
+        log_info(logger, "PID: %u, nro_pag: %u - Entrada removida de tabla TLB", entrada_removida->PID, entrada_removida->nro_pag);
         temporal_destroy(entrada_removida->t_ingreso);
-        temporal_destroy(entrada_removida->t_ingreso);
+        temporal_destroy(entrada_removida->t_ultimo_uso);
         free(entrada_removida);
     }    
     list_add(tabla_TLB, entrada);

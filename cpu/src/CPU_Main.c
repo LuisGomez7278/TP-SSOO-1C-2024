@@ -189,7 +189,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande1, registro_2, sizeof(uint32_t));
             direccion_logica = valorgrande1;
         }
-        log_debug(logger_debug, "MOV_IN direccion logica: %u, valor: %u", direccion_logica, valorgrande1);
 
         if (registro_chico(ins_actual->arg1))
         {
