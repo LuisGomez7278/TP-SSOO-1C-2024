@@ -334,8 +334,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
             direccion_logica = valorgrande1;
         }
-        log_debug(logger_debug, "IO_STDOUT direccion logica: %u", direccion_logica);
-
+        
         registro_2 = direccion_registro(contexto_interno, ins_actual->arg3);
         uint32_t tamanio_a_escribir;
         if (registro_chico(ins_actual->arg3))
@@ -348,7 +347,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande2, registro_2, sizeof(uint32_t));
             tamanio_a_escribir =  valorgrande2;
         }
-        log_debug(logger_debug, "IO_STDOUT tamanio leido: %u", tamanio_a_escribir);
+        log_debug(logger_debug, "IO_STDOUT parametros - direccion: %u, tamanio leido: %u", direccion_logica, tamanio_a_escribir);
 
         ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);
         break;
