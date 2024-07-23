@@ -557,8 +557,11 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
     uint32_t marco = get_marco(PID, nro_pag);
-    
-    uint32_t cant_accesos = ceil((tamanio_a_leer + offset) / tamanio_de_pagina);
+
+    float fin_lectura = (tamanio_a_leer + offset);
+    float cant_paginas = fin_lectura / tamanio_de_pagina;
+
+    uint32_t cant_accesos = ceil(cant_paginas);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
     uint32_t dir_fisica = (marco*tamanio_de_pagina)+offset;
@@ -577,7 +580,7 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
         agregar_a_paquete_uint32(paquete, dir_fisica);
         agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
         bytes_restantes -= tamanio_de_pagina;
-        i++;
+        ++i;
     }
     if (bytes_restantes>0)
     {
@@ -595,46 +598,53 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
 
 void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
 {
+    uint32_t bytes_restantes = tamanio_a_leer;
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDOUT);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
     agregar_a_paquete_string(paquete, string_length(nombre_interfaz)+1, nombre_interfaz);
     agregar_a_paquete_uint32(paquete, tamanio_a_leer);
 
-    uint32_t bytes_restantes = tamanio_a_leer;
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
+    uint32_t marco;
     
-    uint32_t cant_accesos = ceil((tamanio_a_leer + offset) / tamanio_de_pagina);
+    float fin_lectura = (tamanio_a_leer + offset);
+    float cant_paginas = fin_lectura / tamanio_de_pagina;
+
+    uint32_t cant_accesos = ceil(cant_paginas);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
-    uint32_t marco = get_marco(PID, nro_pag);
+    marco = get_marco(PID, nro_pag);
     uint32_t dir_fisica = (marco*tamanio_de_pagina)+offset;
     uint32_t tam_acceso = cant_accesos==1 ? tamanio_a_leer : (tamanio_de_pagina-offset);
 
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, tam_acceso);
+    log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
     bytes_restantes -= tam_acceso;
 
     int i = 1;
-    while (bytes_restantes>tamanio_de_pagina)
+    while (bytes_restantes>0)
     {
         marco = get_marco(PID, nro_pag+i);
-        dir_fisica = (marco*tamanio_de_pagina);
+        dir_fisica = marco*tamanio_de_pagina;
 
-        agregar_a_paquete_uint32(paquete, dir_fisica);
-        agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
-        bytes_restantes -= tamanio_de_pagina;
-        i++;
-    }
-    if (bytes_restantes>0)
-    {
-        marco = get_marco(PID, nro_pag+i);
-        dir_fisica = (marco*tamanio_de_pagina);
-
-        agregar_a_paquete_uint32(paquete, dir_fisica);
-        agregar_a_paquete_uint32(paquete, bytes_restantes);
-        bytes_restantes -= bytes_restantes;
+        if (bytes_restantes>tamanio_de_pagina)
+        {
+            agregar_a_paquete_uint32(paquete, dir_fisica);
+            agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
+            log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            bytes_restantes-=tamanio_de_pagina;
+        }
+        else
+        {
+            agregar_a_paquete_uint32(paquete, dir_fisica);
+            agregar_a_paquete_uint32(paquete, bytes_restantes);
+            log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            bytes_restantes-=bytes_restantes; //aca sale del while
+        }
+        ++i;
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
@@ -668,7 +678,10 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
 
-    uint32_t cant_accesos = ceil((tamanio_a_leer + offset) / tamanio_de_pagina);
+    float fin_lectura = (tamanio_a_leer + offset);
+    float cant_paginas = fin_lectura / tamanio_de_pagina;
+
+    uint32_t cant_accesos = ceil(cant_paginas);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
     uint32_t marco = get_marco(PID, nro_pag);
@@ -688,7 +701,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
         agregar_a_paquete_uint32(paquete, dir_fisica);
         agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
         bytes_restantes -= tamanio_de_pagina;
-        i++;
+        ++i;
     }
     if (bytes_restantes>0)
     {
@@ -714,7 +727,7 @@ void loggear_valores()
 }
 
 
-bool instruccion_de_IO_o_exit( cod_ins instruccion){
+bool instruccion_de_IO_o_exit(cod_ins instruccion){
 
 	if (instruccion == IO_GEN_SLEEP)            return	true;
     if (instruccion == IO_STDIN_READ)           return   true;

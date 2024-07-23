@@ -147,7 +147,10 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     uint32_t offset = obtener_desplazamiento(direccion_logica_READ);
     uint32_t marco;
     
-    uint32_t cant_accesos = ceil((bytes_a_copiar + offset) / tamanio_de_pagina);
+    float fin_lectura = (bytes_a_copiar + offset);
+    float cant_paginas = fin_lectura / tamanio_de_pagina;
+
+    uint32_t cant_accesos = ceil(cant_paginas);
 
     t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
     agregar_a_paquete_uint32(paquete, PID);
@@ -162,6 +165,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     uint32_t tam_acceso = cant_accesos==1 ? bytes_a_copiar : (tamanio_de_pagina-offset);
     agregar_a_paquete_uint32(paquete, tam_acceso);
     bytes_restantes-=tam_acceso;
+    log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
 
     int i = 1;
     while (bytes_restantes>0)
@@ -174,15 +178,17 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
+            log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_de_pagina);
             bytes_restantes-=tamanio_de_pagina;
         }
         else
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, bytes_restantes);
+            log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, bytes_restantes);
             bytes_restantes-=bytes_restantes; //aca sale del while
         }
-        i++;
+        ++i;
     }
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);  
@@ -196,7 +202,10 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     uint32_t offset = obtener_desplazamiento(direccion_logica_WRITE);
     uint32_t marco;
 
-    uint32_t cant_accesos = ceil((bytes_a_copiar + offset) / tamanio_de_pagina);
+    float fin_lectura = (bytes_a_copiar + offset);
+    float cant_paginas = fin_lectura / tamanio_de_pagina;
+
+    uint32_t cant_accesos = ceil(cant_paginas);
 
     t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_WRITE);
     agregar_a_paquete_uint32(paquete, PID);
@@ -207,15 +216,20 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     uint32_t dir_fisica = (marco*tamanio_de_pagina)+offset;
     uint32_t tam_acceso = cant_accesos==1 ? bytes_a_copiar : (tamanio_de_pagina-offset);
 
+    void* bytes_str = malloc(bytes_a_copiar);
+    memcpy(bytes_str, string_leida, bytes_a_copiar);
+
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, tam_acceso);
-    agregar_a_paquete_bytes(paquete, tam_acceso, string_leida);
+    agregar_a_paquete_bytes(paquete, tam_acceso, bytes_str);
     bytes_leidos+=tam_acceso;
+    uint32_t bytes_restantes = bytes_a_copiar-bytes_leidos;
+
+    log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
 
     int i = 1;
-    while (bytes_leidos<bytes_a_copiar)
+    while (bytes_restantes>0)
     {
-        uint32_t bytes_restantes = bytes_a_copiar-bytes_leidos;
         marco = get_marco(PID, nro_pag+i);
         
         dir_fisica = marco*tamanio_de_pagina;
@@ -224,17 +238,21 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
-            agregar_a_paquete_bytes(paquete, tamanio_de_pagina, string_leida+bytes_leidos);
+            agregar_a_paquete_bytes(paquete, tamanio_de_pagina, bytes_str+bytes_leidos);
+            log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_de_pagina);
             bytes_leidos+=tamanio_de_pagina;
+            bytes_restantes-=tamanio_de_pagina;
         }
         else
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, bytes_restantes);
-            agregar_a_paquete_bytes(paquete, bytes_restantes, string_leida+bytes_leidos);
+            agregar_a_paquete_bytes(paquete, bytes_restantes, bytes_str+bytes_leidos);
+            log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, bytes_restantes);
+            bytes_leidos+=bytes_restantes;
             bytes_restantes-=bytes_restantes; //aca sale del while
         }
-        i++;
+        ++i;
     }
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
