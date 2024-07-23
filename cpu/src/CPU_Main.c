@@ -116,19 +116,19 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
         registro_2 = direccion_registro(contexto_interno, ins_actual->arg2);
+
+        uint32_t suma = (uint32_t) *registro_1 + (uint32_t) *registro_2;// Castear todo a uint32 y trabajarlo asi
+
         if(registro_chico(ins_actual->arg1))
         {
-            valorchico1 = *registro_1;
-            valorchico2 = *registro_2;
-            valorchico1 = valorchico1+valorchico2;
+            valorchico1 = suma;// Convertirlo a uint8 si hace falta
+            log_debug(logger_valores, "Resultado suma: %u", valorchico1);
             memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
         else
         {
-            valorgrande1 = *registro_1;
-            valorgrande2 = *registro_2;
-            valorgrande2 = valorgrande1+valorgrande2;
-            memcpy(registro_1, &valorgrande1, sizeof(uint32_t));
+            log_debug(logger_valores, "Resultado suma: %u", suma);
+            memcpy(registro_1, &suma, sizeof(uint32_t));
         }
         break;
 
@@ -137,38 +137,26 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         contexto_interno->PC++;
         registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
         registro_2 = direccion_registro(contexto_interno, ins_actual->arg2);
+        
+        uint32_t resta = (uint32_t) *registro_1 - (uint32_t) *registro_2;// Castear todo a uint32 y trabajarlo asi
+
         if(registro_chico(ins_actual->arg1))
         {
-            valorchico1 = *registro_1;
-            valorchico2 = *registro_2;
-            if (valorchico2 > valorchico1)
-            {
-                log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
-                valorchico1 = 0;
-            }
-            else{valorchico1 = valorchico1 - valorchico2;}
-            
+            valorchico1 = suma;// Convertirlo a uint8 si hace falta
+            log_debug(logger_valores, "Resultado resta: %u", valorchico1);
             memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
         else
         {
-            valorgrande1 = *registro_1;
-            valorgrande2 = *registro_2;
-            if (valorgrande2 > valorgrande1)
-            {
-                log_warning(logger, "PID: %u trato de hacer una resta que dio negativo", PID);
-                valorgrande1 = 0;
-            }
-            else{valorgrande1 = valorgrande1 - valorgrande2;}
-            
-            memcpy(registro_1, &valorgrande1, sizeof(uint32_t));
+            log_debug(logger_valores, "Resultado resta: %u", resta);
+            memcpy(registro_1, &resta, sizeof(uint32_t));
         }
         break;
         
     case JNZ:
         log_info(logger,"PID: %u - Ejecutando: JNZ - %s %s", PID, ins_actual->arg1, ins_actual->arg2);
         registro_1 = direccion_registro(contexto_interno, ins_actual->arg1);
-        valorgrande1 = *registro_1;
+        valorgrande1 = (uint32_t) *registro_1;
         if (valorgrande1 != 0) {memcpy(&contexto_interno->PC, &valorgrande1, sizeof(uint32_t));}
         else {contexto_interno->PC++;}
         break;
@@ -554,41 +542,45 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
     uint32_t bytes_restantes = tamanio_a_leer;
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
-    uint32_t marco = get_marco(PID, nro_pag);
+    uint32_t marco;
 
     float fin_lectura = (tamanio_a_leer + offset);
     float cant_paginas = fin_lectura / tamanio_de_pagina;
-
     uint32_t cant_accesos = ceil(cant_paginas);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
+    marco = get_marco(PID, nro_pag);
     uint32_t dir_fisica = (marco*tamanio_de_pagina)+offset;
     uint32_t tam_acceso = cant_accesos==1 ? tamanio_a_leer : (tamanio_de_pagina-offset);
 
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, tam_acceso);
+    log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
     bytes_restantes -= tam_acceso;
 
     int i = 1;
-    while (bytes_restantes>tamanio_de_pagina)
+    while (bytes_restantes>0)
     {
         marco = get_marco(PID, nro_pag+i);
-        dir_fisica = (marco*tamanio_de_pagina);
+        dir_fisica = marco*tamanio_de_pagina;
 
-        agregar_a_paquete_uint32(paquete, dir_fisica);
-        agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
-        bytes_restantes -= tamanio_de_pagina;
+        if (bytes_restantes>tamanio_de_pagina)
+        {
+            agregar_a_paquete_uint32(paquete, dir_fisica);
+            agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
+            log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            bytes_restantes-=tamanio_de_pagina;
+        }
+        else
+        {
+            agregar_a_paquete_uint32(paquete, dir_fisica);
+            agregar_a_paquete_uint32(paquete, bytes_restantes);
+            log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            bytes_restantes-=bytes_restantes; //aca sale del while
+        }
         ++i;
     }
-    if (bytes_restantes>0)
-    {
-        marco = get_marco(PID, nro_pag+i);
-        dir_fisica = (marco*tamanio_de_pagina);
-
-        agregar_a_paquete_uint32(paquete, dir_fisica);
-        agregar_a_paquete_uint32(paquete, bytes_restantes);
-        bytes_restantes -= bytes_restantes;
-    }
+    
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     detener_ejecucion=true;
@@ -596,20 +588,19 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
 
 void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
 {
-    uint32_t bytes_restantes = tamanio_a_leer;
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDOUT);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
     agregar_a_paquete_string(paquete, string_length(nombre_interfaz)+1, nombre_interfaz);
     agregar_a_paquete_uint32(paquete, tamanio_a_leer);
 
+    uint32_t bytes_restantes = tamanio_a_leer;
     uint32_t nro_pag = obtener_nro_pagina(direccion_logica);
     uint32_t offset = obtener_desplazamiento(direccion_logica);
     uint32_t marco;
     
     float fin_lectura = (tamanio_a_leer + offset);
     float cant_paginas = fin_lectura / tamanio_de_pagina;
-
     uint32_t cant_accesos = ceil(cant_paginas);
     agregar_a_paquete_uint32(paquete, cant_accesos);
 
@@ -688,6 +679,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
 
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, tam_acceso);
+    log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
     bytes_restantes -= tam_acceso;
 
     int i = 1;
@@ -698,6 +690,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
 
         agregar_a_paquete_uint32(paquete, dir_fisica);
         agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
+        log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
         bytes_restantes -= tamanio_de_pagina;
         ++i;
     }
@@ -708,6 +701,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
 
         agregar_a_paquete_uint32(paquete, dir_fisica);
         agregar_a_paquete_uint32(paquete, bytes_restantes);
+        log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
         bytes_restantes -= bytes_restantes;
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
@@ -726,18 +720,22 @@ void loggear_valores()
 
 
 bool instruccion_de_IO_o_exit(cod_ins instruccion){
-
-	if (instruccion == IO_GEN_SLEEP)            return	true;
-    if (instruccion == IO_STDIN_READ)           return   true;
-    if (instruccion == IO_STDOUT_WRITE)         return   true;
-    if (instruccion == IO_FS_CREATE)            return   true;
-    if (instruccion == IO_FS_DELETE)            return   true;
-    if (instruccion == IO_FS_TRUNCATE)          return   true;
-    if (instruccion == IO_FS_WRITE)             return   true;
-    if (instruccion == IO_FS_READ)              return   true;
-    if (instruccion == EXIT)                    return   true;
-
-    return false;    
-
-
+    switch (instruccion)
+    {
+    case IO_GEN_SLEEP:
+    case IO_STDIN_READ:
+    case IO_STDOUT_WRITE:
+    case IO_FS_CREATE:
+    case IO_FS_DELETE:
+    case IO_FS_TRUNCATE:
+    case IO_FS_WRITE:
+    case IO_FS_READ:
+    case EXIT:
+        return	true;
+        break;
+    
+    default:
+        return false;
+        break;
+    }
 }
