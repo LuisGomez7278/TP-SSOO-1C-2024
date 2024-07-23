@@ -122,7 +122,7 @@ void movIn(){
             memcpy(bytes_del_nro+bytes_leidos, leido, tamanio_acceso);
             bytes_leidos+=tamanio_acceso;
             free(leido);
-            i++;
+            ++i;
         }
 
         uint32_t num;
@@ -177,7 +177,7 @@ void movOut(){
             log_debug(logger_debug, "PID: %u - acceso de escritura - dir_fisica: %u, tamanio_acceso: %u", PID, dir_fisica, tamanio_acceso);
             escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
             free(escribir);
-            i++;
+            ++i;
         }
         usleep(retardo*1000);
 
@@ -217,12 +217,13 @@ void copiar_string_read(int socket_cpu_memoria){
         while(i<n){
             uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t tam_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
+            log_debug(logger_debug, "COPY_STRING read acceso recibido - dir_fisica: %u, tamanio: %u", dir_fisica_leer, tam_acceso);
 
             void* leido = leer_memoria(dir_fisica_leer, tam_acceso, PID);
             memcpy(str_leida+bytes_leidos, leido, tam_acceso);
             bytes_leidos+=tam_acceso;
             free(leido);
-            i++;
+            ++i;
         }
 
         str_leida[tamanio_total] = '\0';
@@ -257,10 +258,11 @@ void copiar_string_write(int socket_cpu_memoria){
             uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
             void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
+            log_debug(logger_debug, "COPY_STRING write acceso recibido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_acceso);
 
             escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
             free(escribir);
-            i++;
+            ++i;
         }
 
         usleep(retardo*1000);
