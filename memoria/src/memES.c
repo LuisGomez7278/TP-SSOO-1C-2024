@@ -40,7 +40,7 @@ void escuchar_nueva_Interfaz_mem(void*  socket)
             write_es(socket_IO);
             break;
         case SOLICITUD_IO_STDOUT_WRITE:
-            read_es(socket_IO, SOLICITUD_IO_STDOUT_WRITE);
+            read_es(socket_IO, DESALOJO_POR_IO_STDOUT);
             break;
         case DESALOJO_POR_IO_FS_READ:
             write_es(socket_IO);
