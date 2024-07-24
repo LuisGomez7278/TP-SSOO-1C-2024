@@ -16,22 +16,27 @@ void conexion_con_cpu(){
             fetch(socket_cpu_memoria);
             break;
         case TLB_MISS:
-            log_debug(logger_debug, "CPU pide un marco a memoria");
+            log_trace(logger_debug, "CPU pide un marco a memoria");
             frame(socket_cpu_memoria);
             break;
         case SOLICITUD_MOV_IN: 
+            log_trace(logger_debug, "Llega una peticion de MOV_IN");
             movIn();
             break;
         case SOLICITUD_MOV_OUT:
+            log_trace(logger_debug, "Llega una peticion de MOV_OUT");
             movOut();
             break;
         case SOLICITUD_COPY_STRING_READ: 
+            log_trace(logger_debug, "Llega una peticion de COPY STRING READ");
             copiar_string_read(socket_cpu_memoria);
             break;
         case SOLICITUD_COPY_STRING_WRITE: 
+            log_trace(logger_debug, "Llega una peticion de COPY STRING WRITE");
             copiar_string_write(socket_cpu_memoria);
             break;
         case SOLICITUD_RESIZE:
+            log_trace(logger_debug, "Llega una peticion de RESIZE");
             ins_resize(socket_cpu_memoria);
             break;
         default:
@@ -47,7 +52,7 @@ void fetch(int socket_cpu_memoria){
     uint32_t PID; 
     uint32_t PC;
     recibir_fetch(socket_cpu_memoria, &PID, &PC);
-    log_info(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
+    log_trace(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     
     pthread_mutex_unlock(&mutex_listaDeinstrucciones);
     
@@ -68,7 +73,7 @@ void fetch(int socket_cpu_memoria){
         usleep(retardo*1000);
 
         enviar_instruccion(socket_cpu_memoria, sig_ins);
-        log_info(logger_debug, "instruccion enviada");
+        log_debug(logger_debug, "Instruccion enviada");
     }
 }
 
@@ -91,7 +96,7 @@ void frame(int socket_cpu_memoria){
         agregar_a_paquete_uint32(paquete, marco);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);            
-        log_info(logger_debug, "Se envia el marco: %d, asignado a la pagina: %d, a CPU", marco, pagina);
+        log_debug(logger_debug, "Se envia el marco: %d, asignado a la pagina: %d, a CPU", marco, pagina);
     }else{
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
@@ -146,7 +151,7 @@ void movIn(){
 
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
-        log_info(logger_debug, "Mov_In completado");
+        //log_info(logger_debug, "Mov_In completado");
     }
     else
     {
@@ -174,7 +179,7 @@ void movOut(){
             uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
             void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
 
-            log_debug(logger_debug, "PID: %u - acceso de escritura - dir_fisica: %u, tamanio_acceso: %u", PID, dir_fisica, tamanio_acceso);
+            //log_debug(logger_debug, "PID: %u - acceso de escritura - dir_fisica: %u, tamanio_acceso: %u", PID, dir_fisica, tamanio_acceso);
             escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
             free(escribir);
             ++i;
@@ -185,10 +190,10 @@ void movOut(){
 
         if(escrito){
             agregar_a_paquete_op_code(paquete, OK);
-            log_info(logger_debug, "Mov_Out perfecto");
+            //log_info(logger_debug, "Mov_Out perfecto");
         }else{
             agregar_a_paquete_op_code(paquete, FALLO);
-            log_info(logger_debug, "Mov_Out fallido");
+            log_debug(logger_debug, "Mov_Out **FALLIDO**");
         }
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
@@ -217,7 +222,7 @@ void copiar_string_read(int socket_cpu_memoria){
         while(i<n){
             uint32_t dir_fisica_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t tam_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
-            log_debug(logger_debug, "COPY_STRING read acceso recibido - dir_fisica: %u, tamanio: %u", dir_fisica_leer, tam_acceso);
+            //log_debug(logger_debug, "Copy String Read acceso recibido - Dir_fisica: %u, Tamanio: %u", dir_fisica_leer, tam_acceso);
 
             void* leido = leer_memoria(dir_fisica_leer, tam_acceso, PID);
             memcpy(str_leida+bytes_leidos, leido, tam_acceso);
@@ -227,7 +232,7 @@ void copiar_string_read(int socket_cpu_memoria){
         }
 
         str_leida[tamanio_total] = '\0';
-        log_info(logger_debug, "Copy String Read completado, string leida: %s", str_leida);
+        log_debug(logger_debug, "Copy String Read completado, string leida: %s", str_leida);
         usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);
@@ -258,7 +263,7 @@ void copiar_string_write(int socket_cpu_memoria){
             uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
             void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
-            log_debug(logger_debug, "COPY_STRING write acceso recibido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_acceso);
+            //log_debug(logger_debug, "Copy String Write acceso recibido - Dir_fisica: %u, Tamanio: %u", dir_fisica, tamanio_acceso);
 
             escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
             free(escribir);
@@ -269,11 +274,11 @@ void copiar_string_write(int socket_cpu_memoria){
         t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_WRITE);
         if(escrito){
             agregar_a_paquete_op_code(paquete, OK);
-            log_info(logger_debug, "Copy String Write completado");
+            //log_info(logger_debug, "Copy String Write completado");
 
         }else{
             agregar_a_paquete_op_code(paquete, FALLO);
-            log_info(logger_debug, "Copy String Write fallido");
+            log_debug(logger_debug, "Copy String Write **FALLIDO**");
         }
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
@@ -300,11 +305,11 @@ void ins_resize(int socket_cpu_memoria){
         if(exito){
             respuesta = SOLICITUD_RESIZE;
             send(socket_cpu_memoria, &respuesta, sizeof(op_code), 0);
-            log_info(logger_debug, "Resize perfecto");
+            //log_info(logger_debug, "Resize perfecto");
         }else{
             respuesta = OUT_OF_MEMORY;
             send(socket_cpu_memoria, &respuesta, sizeof(op_code), 0);
-            log_info(logger_debug, "Resize fallido");
+            //log_info(logger_debug, "Resize fallido");
         }
     }else
     {// Manejo de error en caso de que recibir_buffer devuelva NULL

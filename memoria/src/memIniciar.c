@@ -9,12 +9,6 @@ void inciarlogsYsemaforos(){
      pthread_mutex_init(&mutex_procesos, NULL);
      pthread_mutex_init(&mutex_listaDeinstrucciones, NULL);
      pthread_mutex_init(& mutex_bitmap,NULL);
-     
-     
-
-
-
-
 }
 
 void cargarConfig(){

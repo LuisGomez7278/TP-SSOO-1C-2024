@@ -23,7 +23,7 @@ bool crear_procesoM(char* path_instrucciones, uint32_t PID){
     pthread_mutex_unlock(&mutex_procesos);
    
     
-    log_info(logger_debug, "Proceso con PID %d creado", PID);
+    log_debug(logger_debug, "Proceso con PID %d creado", PID);
     return true;
 } 
 
@@ -77,7 +77,7 @@ void eliminar_procesoM(uint32_t PID){
     //list_destroy(proceso->paginas); (ya esta liberada ya que es la misma lista que en su tabla)
     free(proceso);
 
-    log_info(logger_debug, "Proceso con PID %d finalizado y eliminado", PID);
+    log_debug(logger_debug, "Proceso con PID %d finalizado y eliminado", PID);
     }
 }
 
@@ -159,7 +159,7 @@ void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas) {
             // Liberar el marco correspondiente si es necesario
             if (pagina_a_eliminar->presencia) {
                 bitarray_clean_bit(bitmap, pagina_a_eliminar->marco);  // Libera el marco en el bitmap
-                log_info(logger_debug, "Liberado el marco %d del proceso %d", pagina_a_eliminar->marco, tabla->pid);
+                log_debug(logger_debug, "Liberado el marco %d del proceso %d", pagina_a_eliminar->marco, tabla->pid);
             }
             free(pagina_a_eliminar);
         }
@@ -295,7 +295,7 @@ int obtener_desplazamiento(int direccion_fisica) {
 bool escribir_memoria(uint32_t direccion_fisica, uint32_t tamanio_acceso, void* valor, uint32_t PID)
 {
     if (memoria_usuario == NULL || valor == NULL) {
-        log_info(logger, "Error: memoria_usuario o valor es NULL.");
+        log_error(logger, "Error: memoria_usuario o valor es NULL.");
         return false;
     }
 

@@ -17,9 +17,11 @@ void conexion_con_kernel(){
             recibir_mensaje(socket_kernel_memoria,logger_debug);
             break;
         case CREAR_PROCESO:
+            log_trace(logger_debug, "Llega una peticion de CREAR PROCESO");
             crear_proceso();
             break;
         case ELIMINAR_PROCESO:
+            log_trace(logger_debug, "Llega una peticion de ELIMINAR PROCESO");
             eliminar_proceso();
             break;
         default:
@@ -52,7 +54,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         
         if (path!=NULL)
         {
-        log_info(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);
+        log_debug(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);
         }
         
         
@@ -64,7 +66,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         if(creado){
             enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID, socket_kernel_memoria);
         }else{
-            log_info(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
+            log_debug(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
             enviar_instruccion_con_PID_por_socket(ERROR_AL_CARGAR_EL_PROCESO, PID, socket_kernel_memoria);
         }  
 
@@ -83,7 +85,7 @@ void eliminar_proceso(){ // llega un pid
 
     if(buffer!=NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        log_info(logger_debug,"Llego un proceso para eliminar: PID: %u",PID);
+        log_debug(logger_debug,"Llego un proceso para eliminar: PID: %u",PID);
 
         eliminar_procesoM(PID);
         usleep(retardo*1000);
