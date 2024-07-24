@@ -470,7 +470,7 @@ void gestionar_solicitud_IO(t_pcb* pcb_dispatch, char* nombre_interfaz, op_code 
 void enviar_siguiente_proceso_a_ejecucion ()
 {
     // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
-    sem_wait(&cantidad_procesos_en_algun_ready
+    sem_wait(&cantidad_procesos_en_algun_ready);
     ocupacion_cpu=true;
 
     // Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
