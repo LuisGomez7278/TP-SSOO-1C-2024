@@ -51,7 +51,7 @@ void inicializar_bloques()
 
 void inicializar_bitmap()
 {
-    uint32_t tam_bitmap = BLOCK_COUNT/8;
+    uint32_t tam_bitmap = BLOCK_COUNT;
     
     int fd = open(path_bitmap, O_RDWR | O_CREAT, 0777);
     if (fd == -1)
