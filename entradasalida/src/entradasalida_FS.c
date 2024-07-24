@@ -11,7 +11,7 @@ void inicializar_FS()
     path_bitmap = string_duplicate(PATH_BASE_DIALFS);
     string_append(&path_bitmap, "bitmap.dat");
 
-    archivos_existentes = list_create();
+    archivos_existentes = string_array_new();
     // log_debug(logger_debug, "Paths - bloques: %s, bitmap:%s", path_bloques, path_bitmap);
 
     inicializar_bitmap();
@@ -89,7 +89,8 @@ bool crear_archivo(char* nombre_archivo)
     {
         crear_metadata(bloque, nombre_archivo);
         log_info(logger, "Se crea metadata del archivo: %s", nombre_archivo);
-        list_add(archivos_existentes, nombre_archivo);
+        string_array_push(&archivos_existentes, nombre_archivo);
+        log_trace(logger_debug, "Cantidad de archivos en el sistema: %d", string_array_size(archivos_existentes));
         return true;
     }
     else
@@ -119,6 +120,12 @@ void crear_metadata(int32_t bloque, char* nombre_archivo)
 {
     char* path_archivo_metadata = string_duplicate(path_metadata);
     string_append(&path_archivo_metadata, nombre_archivo);
+    int fd = open(path_archivo_metadata, O_RDWR | O_CREAT, 0777);
+    if (fd == -1)
+    {
+        perror("No se pudo crear metadata");
+        exit(1);
+    }
 
     t_config* metadata = config_create(path_archivo_metadata);
     char* bloque_inicial = string_itoa(bloque);
@@ -136,14 +143,16 @@ bool eliminar_archivo(char* nombre_archivo)
     int32_t indice;
     if (existe_archivo(nombre_archivo, &indice))
     {
-        list_remove(archivos_existentes, indice); //Eliminar de la lista de archivos existentes
+        char* archivo_eliminado = string_array_pop(archivos_existentes); //Eliminar de la lista de archivos existentes
+        log_debug(logger_debug, "Archivo a eliminar: %s", archivo_eliminado);
         char* path_archivo_metadata = string_duplicate(path_metadata);
-        string_append(&path_archivo_metadata, nombre_archivo);
+        string_append(&path_archivo_metadata, archivo_eliminado);
 
         liberar_bloques(path_archivo_metadata);
 
         remove(path_archivo_metadata); //Eliminar archivo de metadata
         free(path_archivo_metadata);
+        free(archivo_eliminado);
         log_info(logger, "Se elimino el archivo: %s con exito", nombre_archivo);
         return true;
     }
@@ -157,16 +166,19 @@ bool eliminar_archivo(char* nombre_archivo)
 
 bool existe_archivo(char* nombre_archivo, int32_t* indice)
 {
-    char* elem;
-    for (int i = 0; i < list_size(archivos_existentes); i++)
+    char* path_archivo_metadata = string_duplicate(path_metadata);
+    string_append(&path_archivo_metadata, nombre_archivo);
+    int fd = open(path_archivo_metadata, O_RDONLY);
+    if (fd == -1)
     {
-        elem = list_get(archivos_existentes, i);
-        if (string_equals_ignore_case(elem, nombre_archivo)){
-            *indice = i;
-            return true;
-            }
+        close(fd);
+        return false;
     }
-    return false;
+    else
+    {
+        close(fd);
+        return true;
+    }
 }
 
 void liberar_bloques(char* path_archivo_metadata)
@@ -336,15 +348,24 @@ void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloque
     log_info(logger, "PID: %u - Inicio Compactación.", PID);
     limpiar_bitmap();
     char* archivo_actual;
-    for (int32_t i = 0; i < list_size(archivos_existentes); i++)
+    char* archivo_final;
+    char** nueva_array = string_array_new();
+    for (int32_t i = 0; i < string_array_size(archivos_existentes); ++i)
     {
-        archivo_actual = list_get(archivos_existentes, i);
-        if (!string_equals_ignore_case(archivo_actual, nombre_archivo))
+        archivo_actual = string_array_pop(archivos_existentes);
+
+        if (string_equals_ignore_case(archivo_actual, nombre_archivo))
+        {
+            archivo_final = archivo_actual;
+        }
+        else
         {
             compactar_archivo(archivo_actual);
+            string_array_push(&nueva_array, archivo_actual);
         }
     }
-    compactar_archivo(nombre_archivo);// El archivo que se quiere truncar se ubica al final de los bloques
+    compactar_archivo(archivo_final);// El archivo que se quiere truncar se ubica al final de los bloques
+    string_array_push(&nueva_array, archivo_final);
 
     sleep(RETRASO_COMPACTACION);
     log_info(logger, "PID: %u - Fin Compactación.", PID);

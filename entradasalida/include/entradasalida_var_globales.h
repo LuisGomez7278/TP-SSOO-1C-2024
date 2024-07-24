@@ -42,7 +42,7 @@ extern void* array_bitmap;
 extern t_bitarray* bitmap_bloques;
 
 extern char* path_metadata;
-extern t_list* archivos_existentes;
+extern char** archivos_existentes;
 
 extern sem_t respuesta_memoria;
 

@@ -68,7 +68,7 @@ char* path_bitmap;
 void* array_bitmap;
 t_bitarray* bitmap_bloques;
 char* path_metadata;
-t_list* archivos_existentes;
+char** archivos_existentes;
 
 
  
