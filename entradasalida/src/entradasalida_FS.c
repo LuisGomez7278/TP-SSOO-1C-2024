@@ -12,6 +12,7 @@ void inicializar_FS()
     string_append(&path_bitmap, "bitmap.dat");
 
     archivos_existentes = list_create();
+    // log_debug(logger_debug, "Paths - bloques: %s, bitmap:%s", path_bloques, path_bitmap);
 
     inicializar_bitmap();
     inicializar_bloques();
@@ -21,11 +22,13 @@ void inicializar_bloques()
 {
     uint32_t tam_archivo_bloques = BLOCK_COUNT*BLOCK_SIZE;
 
-    int fd = open(path_bloques ,O_RDWR);
+    int fd = open(path_bloques, O_RDWR | O_CREAT, 0777);
 
     if (fd == -1)
     {
+        // perror("No se pudo abrir el archivo bloques.dat");
         log_error(logger, "No se pudo abrir el archivo bloques.dat");
+        printf("path bloques: %s\n", path_bloques);
     }
     else
     {
@@ -36,24 +39,27 @@ void inicializar_bloques()
     if (bloques == MAP_FAILED)
     {
         log_error(logger ,"No se pudo inicializar el archivo de bloques");
+        exit(1);
     }
-    else
-    {
-        char* dump_bloques = mem_hexstring(bloques, tam_archivo_bloques);
-        log_info(logger, "Archivo bloques.dat inicializado, hexdump: %s", dump_bloques);
-        free(dump_bloques);
-    }
-
+    // else
+    // {
+    //     char* dump_bloques = mem_hexstring(bloques, tam_archivo_bloques);
+    //     log_info(logger, "Archivo bloques.dat inicializado, hexdump: %s", dump_bloques);
+    //     free(dump_bloques);
+    // }
 }
 
 void inicializar_bitmap()
 {
     uint32_t tam_bitmap = BLOCK_COUNT/8;
     
-    int fd = open(path_bitmap ,O_RDWR);
+    int fd = open(path_bitmap, O_RDWR | O_CREAT, 0777);
     if (fd == -1)
     {
+        // perror("No se pudo abrir el archivo bitmap.dat");
         log_error(logger, "No se pudo abrir el archivo bitmap.dat");
+        printf("path bitmap: %s\n", path_bitmap);
+        exit(1);
     }
     else
     {
@@ -65,14 +71,15 @@ void inicializar_bitmap()
     bitmap_bloques = bitarray_create_with_mode(array_bitmap, tam_bitmap, MSB_FIRST);
     if (bitmap_bloques == NULL)
     {
-        log_error(logger ,"No se pudo inicializar el bitmap");
+        log_error(logger ,"No se pudo inicializar el bitarray");
+        exit(1);
     }
-    else
-    {
-        char* dump_bitmap = mem_hexstring(bitmap_bloques->bitarray, tam_bitmap);
-        log_info(logger, "Bitmap inicializado, hexdump: %s", dump_bitmap);
-        free(dump_bitmap);
-    }
+    // else
+    // {
+    //     char* dump_bitmap = mem_hexstring(bitmap_bloques->bitarray, tam_bitmap);
+    //     log_info(logger, "Bitmap inicializado, hexdump: %s", dump_bitmap);
+    //     free(dump_bitmap);
+    // }
 }
 
 bool crear_archivo(char* nombre_archivo)

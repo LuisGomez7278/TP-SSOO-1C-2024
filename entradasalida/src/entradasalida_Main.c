@@ -158,7 +158,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 log_debug(logger_debug, "Peticion de lectura enviada a memoria - dir_fisica: %u, tam_acceso: %u", dir_fisica, tamanio_a_leer);
                 agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
-            }            
+            }
 
             enviar_paquete(paquete, socket_memoria_entradasalida);
             eliminar_paquete(paquete);
@@ -187,6 +187,8 @@ int32_t main(int32_t argc, char* argv[]) {
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Crear Archivo: %s", PID, nombre_archivo);
             bool creado = crear_archivo(nombre_archivo);
+
+            usleep(TIEMPO_UNIDAD_TRABAJO*1000);
             notificar_kernel(creado);
             free(buffer);
             free(nombre_archivo);
@@ -200,6 +202,8 @@ int32_t main(int32_t argc, char* argv[]) {
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Eliminar Archivo: %s", PID, nombre_archivo);
             bool eliminado = eliminar_archivo(nombre_archivo);
+
+            usleep(TIEMPO_UNIDAD_TRABAJO*1000);
             notificar_kernel(eliminado);
             free(buffer);
             free(nombre_archivo);
@@ -214,6 +218,8 @@ int32_t main(int32_t argc, char* argv[]) {
             int32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
             log_info(logger, "PID: %u - Truncar Archivo: %s", PID, nombre_archivo);
             bool truncado = truncar_archivo(PID, nombre_archivo, nuevo_tamanio);
+
+            usleep(TIEMPO_UNIDAD_TRABAJO*1000);
             notificar_kernel(truncado);
             free(buffer);
             free(nombre_archivo);
@@ -263,8 +269,10 @@ int32_t main(int32_t argc, char* argv[]) {
             else
             {
                 FS_WRITE(bloques, bloque_inicial, puntero, tamanio_total, string_leida_memoria);
-                write = true;   
+                write = true;
             }
+
+            usleep(TIEMPO_UNIDAD_TRABAJO*1000);
             notificar_kernel(write);
 
             config_destroy(metadata);
@@ -319,6 +327,8 @@ int32_t main(int32_t argc, char* argv[]) {
                 eliminar_paquete(paq);
                 read = true;
             }
+
+            usleep(TIEMPO_UNIDAD_TRABAJO*1000);
             notificar_kernel(read);
             
             config_destroy(metadata);
