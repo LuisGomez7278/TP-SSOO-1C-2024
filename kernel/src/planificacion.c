@@ -359,6 +359,7 @@ void gestionar_dispatch (){
             agregar_a_paquete_uint32(paquete, unidades_trabajo);
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
             enviar_siguiente_proceso_a_ejecucion();
+            free(nombre_interfaz);
             break;
 
         case DESALOJO_POR_IO_STDIN:        
@@ -378,6 +379,7 @@ void gestionar_dispatch (){
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
             enviar_siguiente_proceso_a_ejecucion();
+            free(nombre_interfaz);
             break;
 
         case DESALOJO_POR_IO_FS_CREATE:
@@ -391,7 +393,10 @@ void gestionar_dispatch (){
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
             enviar_siguiente_proceso_a_ejecucion();
+            free(nombre_interfaz);
+            free(nombre_archivo);
             break;
+            
         case DESALOJO_POR_IO_FS_TRUNCATE:
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
@@ -404,7 +409,10 @@ void gestionar_dispatch (){
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
             enviar_siguiente_proceso_a_ejecucion();
+            free(nombre_interfaz);
+            free(nombre_archivo);
             break;
+
         case DESALOJO_POR_IO_FS_WRITE:
         case DESALOJO_POR_IO_FS_READ:
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
@@ -415,14 +423,26 @@ void gestionar_dispatch (){
             agregar_a_paquete_string(paquete, string_length(nombre_archivo)+1, nombre_archivo);
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// puntero
+            uint32_t cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+            int32_t i=0;
+            while (i<cant_accesos)
+            {
+                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// dir_fisica
+                agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tam_acceso
+            }
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
-            enviar_siguiente_proceso_a_ejecucion();            
+            enviar_siguiente_proceso_a_ejecucion();
+            free(nombre_interfaz);
+            free(nombre_archivo);
             break;
+            
         case FALLO:
             log_error(logger_debug,"El modulo CPU se desconecto");
             continuarIterando=false;
-            break;                
+            break;
+
         default:
             log_warning(logger_debug,"Operacion desconocida para Kernel al recibir de socket CPU-Dispatch.");
             break;
