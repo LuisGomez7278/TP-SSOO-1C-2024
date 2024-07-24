@@ -309,9 +309,13 @@ int32_t main(int32_t argc, char* argv[]) {
                 datos_leidos = malloc(tamanio_total);
                 FS_READ(bloques, bloque_inicial, puntero, tamanio_total, datos_leidos);
 
+                char* string_leida = mem_hexstring(datos_leidos, tamanio_total);
+
+                log_debug(logger_debug, "Datos leidos: %s", string_leida);
+
                 t_paquete* paq = crear_paquete(DESALOJO_POR_IO_FS_READ);
-                agregar_a_paquete_uint32(paquete, PID);
-                agregar_a_paquete_uint32(paq, tamanio_total);
+                agregar_a_paquete_uint32(paq, PID);
+                //agregar_a_paquete_uint32(paq, tamanio_total);
                 agregar_a_paquete_uint32(paq, cant_accesos);
 
                 acumulador = 0;

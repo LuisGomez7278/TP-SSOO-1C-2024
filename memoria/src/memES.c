@@ -120,7 +120,9 @@ void write_es(int32_t socket_hilo){
             uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
             uint32_t tamanio_acceso = leer_de_buffer_uint32(buffer, &desplazamiento);
             void* escribir = leer_de_buffer_bytes(buffer, &desplazamiento, tamanio_acceso);
-            log_debug(logger_debug, "acceso de escritura recibido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_acceso);
+            char* string_escrito = mem_hexstring(escribir, tamanio_acceso);
+            
+            log_debug(logger_debug, "acceso de escritura recibido - dir_fisica: %u, tamanio: %u, escrito: %s", dir_fisica, tamanio_acceso, string_escrito);
 
             escrito = escribir_memoria(dir_fisica, tamanio_acceso, escribir, PID);
             free(escribir);
