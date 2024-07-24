@@ -416,38 +416,9 @@ void gestionar_dispatch (){
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// puntero
 
-                if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op_dispatch)){
-                
-                    t_paquete *paquete = crear_paquete(cod_op_dispatch);
-                    agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
-                    agregar_a_paquete_string(paquete, size-desplazamiento, buffer+desplazamiento);//Serializa el resto del buffer en el nuevo paquete, lo probe y *PARECE* funcionar, sino hay que hacer otra funcion
-                    
-                    //char* imprimir=codigo_operacion_string(paquete->codigo_operacion);
-                    //log_error(logger_debug,"Se envia a ejecutar la operacion %s(en planificacion)", imprimir);
-
-                    agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
-                    
-                    if(strcmp(algoritmo_planificacion,"VRR")==0) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
-                    {
-                        ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
-                        log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
-                    }else
-                    {
-                        ingresar_en_lista(pcb_dispatch, lista_bloqueado, &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);  
-                        log_info(logger,"PID: %u bloqueado esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);  
-
-                    }
-                }else{
-                    log_error(logger,"Finalizando proceso PID: %u",pcb_dispatch->PID);
-                    enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
-                    eliminar_proceso_de_lista_recursos(pcb_dispatch->PID);
-                    eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
-                    sem_post(&control_multiprogramacion);
-                }
-                
-                
-                enviar_siguiente_proceso_a_ejecucion();            
-                break;
+            gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+            enviar_siguiente_proceso_a_ejecucion();            
+            break;
         case FALLO:
             log_error(logger_debug,"El modulo CPU se desconecto");
             continuarIterando=false;
@@ -455,10 +426,9 @@ void gestionar_dispatch (){
         default:
             log_warning(logger_debug,"Operacion desconocida para Kernel al recibir de socket CPU-Dispatch.");
             break;
-        }   
+        }
 
-
-        free(pcb_dispatch);	
+        free(pcb_dispatch);
         free(buffer);
         
     }
@@ -497,21 +467,20 @@ void gestionar_solicitud_IO(t_pcb* pcb_dispatch, char* nombre_interfaz, op_code 
 }
 
 
-void enviar_siguiente_proceso_a_ejecucion ()               
+void enviar_siguiente_proceso_a_ejecucion ()
 {
-sem_wait(&cantidad_procesos_en_algun_ready);                                 // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
-ocupacion_cpu=true;    
+    // SI NO HAY NINGUN PROCESO EN READY.... ESPERO QUE SE ENCOLE ALGUNO EN READY O READY PRIORIDAD
+    sem_wait(&cantidad_procesos_en_algun_ready
+    ocupacion_cpu=true;
 
-
-        if (detener_planificacion)                             /// Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
-        {
-            
-            pthread_mutex_lock(&mutex_cont_pcp);
-            cantidad_procesos_bloq_pcp++;
-            pthread_mutex_unlock(&mutex_cont_pcp);
-            sem_wait(&semaforo_pcp);
-        }
-
+    // Si la PLANIFICACION ESTA DETENIDA QUEDO BLOQEUADO EN WAIT
+    if (detener_planificacion)
+    {
+        pthread_mutex_lock(&mutex_cont_pcp);
+        cantidad_procesos_bloq_pcp++;
+        pthread_mutex_unlock(&mutex_cont_pcp);
+        sem_wait(&semaforo_pcp);
+    }
 
     t_pcb* pcb_a_ejecutar;
 
@@ -560,12 +529,9 @@ ocupacion_cpu=true;
         enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID, pcb_a_ejecutar->CE);  
         log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' \n", pcb_a_ejecutar->PID,algoritmo_planificacion);
     }
-    
-    
-     
+         
     free(pcb_a_ejecutar);
     gestionar_dispatch ();
-
 }
 
 
