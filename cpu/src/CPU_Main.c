@@ -415,7 +415,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         // Puntero escritura
         uint32_t puntero_write;
         registro_3 = direccion_registro(contexto_interno, ins_actual->arg5);
-        if (registro_chico(ins_actual->arg4))
+        if (registro_chico(ins_actual->arg5))
         {
             memcpy(&valorchico1, registro_3, sizeof(uint8_t));
             puntero_write = valorchico1;
@@ -644,6 +644,14 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
 
 void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint32_t tamanio)
 {
+    /*Paquete
+    op_code
+    uint32 PID
+    CE contexto
+    string nombre_interfaz
+    string nombre_archivo
+    uint32 nuevo_tam
+    */
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_FS_TRUNCATE);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -657,6 +665,19 @@ void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint3
 
 void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, char* nombre_archivo, uint32_t direccion_logica, uint32_t tamanio_a_leer, uint32_t puntero)
 {
+    /*Paquete
+    op_code
+    uint32 PID
+    ---CE contexto (no van para E/S)
+    ---string nombre_interfaz (no van para E/S)
+    string nombre_archivo
+    uint32 tam_total_a_leer
+    uint32 puntero
+    uint32 cant_accesos
+    uint32 dir_fisica (se repiten)
+    uint32 tam_acceso (se repiten)
+    */
+
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);

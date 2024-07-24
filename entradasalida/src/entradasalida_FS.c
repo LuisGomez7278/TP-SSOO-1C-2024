@@ -213,7 +213,8 @@ bool truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
 
         int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
         int32_t nueva_cant_bloques = cantidad_de_bloques(nuevo_tamanio);
-        int32_t diferencia_cant_bloques = cant_bloques - nueva_cant_bloques;
+        int32_t diferencia_cant_bloques = nueva_cant_bloques - cant_bloques;
+        log_debug(logger_debug, "cant bloques: %d, nueva cant bloques: %d, diferencia: %d", cant_bloques, nueva_cant_bloques, diferencia_cant_bloques);
         if (diferencia_cant_bloques<=0)
         {
             config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
@@ -254,7 +255,9 @@ bool truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
 
 int32_t cantidad_de_bloques(int32_t tamanio_archivo)
 {
-    return floor(tamanio_archivo / BLOCK_SIZE) + (tamanio_archivo%BLOCK_SIZE > 0); //Si la cuenta da redonda es +0 si no es +1
+    int32_t a = tamanio_archivo/BLOCK_SIZE;
+    int32_t b = tamanio_archivo%BLOCK_SIZE > 0 ? 1 : 0;//Si la cuenta da redonda es +0 si no es +1
+    return a + b;
 }
 
 void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar)

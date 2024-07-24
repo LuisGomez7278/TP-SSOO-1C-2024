@@ -236,14 +236,15 @@ int32_t main(int32_t argc, char* argv[]) {
             // Pedir lectura de string a memoria
             paquete = crear_paquete(DESALOJO_POR_IO_FS_WRITE);
             agregar_a_paquete_uint32(paquete, PID);
-            agregar_a_paquete_uint32(paquete, tamanio_total);
             agregar_a_paquete_uint32(paquete, cant_accesos);
+            agregar_a_paquete_uint32(paquete, tamanio_total);
             
-            for (int i = 0; i < cant_accesos; i++)
+            for (int i = 0; i < cant_accesos; ++i)
             {
                 dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                 tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
-                
+                log_debug(logger_debug, "acceso a memoria añadido - dir fisica: %u, tam acceso: %u", dir_fisica, tamanio_a_leer);
+
                 agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
             }
@@ -319,8 +320,10 @@ int32_t main(int32_t argc, char* argv[]) {
                     dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                     tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
                     
+                    log_debug(logger_debug, "acceso a memoria añadido - dir fisica: %u, tam acceso: %u", dir_fisica, tamanio_a_leer);
                     agregar_a_paquete_uint32(paq, dir_fisica);
-                    agregar_a_paquete_string(paq, tamanio_a_leer, datos_leidos+acumulador);
+                    agregar_a_paquete_uint32(paq, tamanio_a_leer);
+                    agregar_a_paquete_bytes(paq, tamanio_a_leer, datos_leidos+acumulador);
                     acumulador+=tamanio_a_leer;
                 }
                 enviar_paquete(paq, socket_memoria_entradasalida);

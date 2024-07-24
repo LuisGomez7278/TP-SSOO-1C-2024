@@ -423,6 +423,7 @@ void gestionar_dispatch (){
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// puntero
             uint32_t cant_accesos = leer_de_buffer_uint32(buffer, &desplazamiento);
+            agregar_a_paquete_uint32(paquete, cant_accesos);
 
             int32_t i=0;
             while (i<cant_accesos)
