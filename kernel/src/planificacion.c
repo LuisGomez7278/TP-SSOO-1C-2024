@@ -274,8 +274,7 @@ void gestionar_dispatch (){
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion); 
-                     
-                                 
+
                     enviar_siguiente_proceso_a_ejecucion();	    
                     break;
                 default:
@@ -362,7 +361,7 @@ void gestionar_dispatch (){
             free(nombre_interfaz);
             break;
 
-        case DESALOJO_POR_IO_STDIN:        
+        case DESALOJO_POR_IO_STDIN:
         case DESALOJO_POR_IO_STDOUT:
             paquete = crear_paquete(cod_op_dispatch);
             agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);           
@@ -430,6 +429,7 @@ void gestionar_dispatch (){
             {
                 agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// dir_fisica
                 agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tam_acceso
+                ++i;
             }
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
