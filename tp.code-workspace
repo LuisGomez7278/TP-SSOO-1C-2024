@@ -52,6 +52,13 @@
 			"typeinfo": "c"
 		},
 		"C_Cpp.errorSquiggles": "disabled",
+		"makefile.launchConfigurations": [
+			{
+				"cwd": "/home/utnso/tp-2024-1c-Grupo-para-TP/kernel/bin",
+				"binaryPath": "/home/utnso/tp-2024-1c-Grupo-para-TP/kernel/bin/kernel",
+				"binaryArgs": []
+			}
+		],
 	},
 	"folders": [
 		{

@@ -25,7 +25,7 @@ void inicializar_bloques()
 
     if (fd == -1)
     {
-        log_error(logger, "No se pudo abrir el archivo bloques.dat.");
+        log_error(logger, "No se pudo abrir el archivo bloques.dat");
     }
     else
     {
@@ -53,7 +53,7 @@ void inicializar_bitmap()
     int fd = open(path_bitmap ,O_RDWR);
     if (fd == -1)
     {
-        log_error(logger, "No se pudo abrir el archivo bitmap.dat.");
+        log_error(logger, "No se pudo abrir el archivo bitmap.dat");
     }
     else
     {
