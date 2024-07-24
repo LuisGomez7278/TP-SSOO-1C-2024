@@ -367,12 +367,12 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         if (registro_chico(ins_actual->arg3))
         {
             memcpy(&valorchico1, registro_1, sizeof(uint8_t));
-            tamanio_truncar =  valorchico2;
+            tamanio_truncar =  valorchico1;
         }
         else
         {
-            memcpy(&valorgrande2, registro_1, sizeof(uint32_t));
-            tamanio_truncar =  valorgrande2;
+            memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
+            tamanio_truncar =  valorgrande1;
         }
         log_debug(logger_debug, "Tamanio truncate leido: %u", tamanio_truncar);        
 
