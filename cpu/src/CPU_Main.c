@@ -357,7 +357,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         break;
 
     case IO_FS_TRUNCATE:
-        log_info(logger,"PID: %u - Ejecutando: IO_STDIN_READ - %s %s %s", PID, ins_actual->arg1, ins_actual->arg2, ins_actual->arg3);
+        log_info(logger,"PID: %u - Ejecutando: IO_FS_TRUNCATE - %s %s %s", PID, ins_actual->arg1, ins_actual->arg2, ins_actual->arg3);
         contexto_interno->PC++;
         motivo_desalojo = DESALOJO_POR_IO_FS_TRUNCATE;
 
