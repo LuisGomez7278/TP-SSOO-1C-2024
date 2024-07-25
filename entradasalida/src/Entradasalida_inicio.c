@@ -1,9 +1,9 @@
 #include "../include/entradasalida_inicio.h"
 
-void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz)
+void iniciar_entradasalida(char* nombre_interfaz)
 {
     iniciar_logs(nombre_interfaz);
-    iniciar_config(config_interfaz);
+    iniciar_config(nombre_interfaz);
 
     sem_init(&respuesta_memoria, 0, 0);
 }
@@ -34,7 +34,7 @@ void iniciar_logs( char* nombre_interfaz) {
 
 void iniciar_config(char* config_interfaz)
 {   
-    char* path_config = string_duplicate("./");
+    char* path_config = string_duplicate("./configs/");
     string_append(&path_config, config_interfaz);
     string_append(&path_config, ".config");
     log_debug(logger,"PATH CONFIG: %s",path_config);

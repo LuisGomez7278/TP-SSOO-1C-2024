@@ -111,7 +111,7 @@ extern uint32_t RETRASO_COMPACTACION;
 
 extern sem_t respuesta_memoria;
 
-void iniciar_entradasalida(char* nombre_interfaz, char* config_interfaz);
+void iniciar_entradasalida(char* nombre_interfaz);
 void iniciar_logs(char* nombre_interfaz);
 void iniciar_config(char* config_interfaz);
 cod_interfaz get_tipo_interfaz(char* TIPO_INTERFAZ);
@@ -122,7 +122,7 @@ cod_interfaz get_tipo_interfaz(char* TIPO_INTERFAZ);
 extern char* nombre_interfaz;
 extern char* config_interfaz;
 
-void validar_argumentos(char* nombre_interfaz, char* config_interfaz);
+void validar_argumentos(char* nombre_interfaz);
 void notificar_kernel(bool exito);
 char* leer_de_teclado(uint32_t tamanio_a_leer);
 

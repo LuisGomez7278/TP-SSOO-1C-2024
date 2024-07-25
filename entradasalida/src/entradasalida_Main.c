@@ -2,21 +2,21 @@
 
 int32_t main(int32_t argc, char* argv[]) {
 
-    if (argc < 3) {
-    fprintf(stderr, "Uso: %s <nombre_interfaz> <config_interfaz>\n", argv[0]);
+    if (argc < 2) {
+    fprintf(stderr, "Uso: %s <nombre_interfaz>\n", argv[0]);
     return 1;
     }
 
-    printf("Argumento 1: %s\n", argv[1]);
-    printf("Argumento 2: %s\n", argv[2]);
+    printf("Argumento : %s\n", argv[1]);
+   
       
     //VALIDO ARGUMENTOS
-    validar_argumentos(argv[1],argv[2]);
+    validar_argumentos(argv[1]);
     
     nombre_interfaz = argv[1];
-    config_interfaz = argv[2];
+    
 
-    iniciar_entradasalida(nombre_interfaz, config_interfaz);
+    iniciar_entradasalida(nombre_interfaz);
 
     socket_kernel_entradasalida = crear_conexion(IP_KERNEL,PUERTO_KERNEL);
     log_info(logger, "Se creo la conexion entre IO y Kernel");
@@ -368,10 +368,10 @@ int32_t main(int32_t argc, char* argv[]) {
     return 0;
 }
 
-void validar_argumentos(char* nombre_interfaz, char* config_interfaz)
+void validar_argumentos(char* nombre_interfaz)
 {
-    if(nombre_interfaz == NULL || config_interfaz == NULL){
-        printf("Agregar argumentos 'nombre_interfaz' y 'config_interfaz'");
+    if(nombre_interfaz == NULL ){
+        printf("Agregar argumentos 'nombre_interfaz");
         exit(EXIT_FAILURE);
     }
 }
