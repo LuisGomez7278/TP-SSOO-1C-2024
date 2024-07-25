@@ -60,9 +60,11 @@ void liberar_bloques(char* path_archivo_metadata);
 bool truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio);
 int32_t cantidad_de_bloques(int32_t tamanio_archivo);
 void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar);
+bool intentar_asignar_bloques(uint32_t PID, char* nombre_archivo, t_config* metadata, int32_t bloque_inicial, int32_t cant_bloques, int32_t nueva_cant_bloques);
 bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar);
 bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_cant_bloques);
 
+int32_t contar_bloques_libres();
 void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloques);
 void limpiar_bitmap();
 void compactar_archivo(char* nombre_archivo, void* nuevos_bloques);

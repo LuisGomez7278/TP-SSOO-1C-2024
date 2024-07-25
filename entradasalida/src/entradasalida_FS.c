@@ -3,7 +3,7 @@
 void inicializar_FS()
 {
     path_metadata = string_duplicate(PATH_BASE_DIALFS);
-    string_append(&path_metadata, "/metadata/");
+    string_append(&path_metadata, "metadata/");
 
     path_bloques = string_duplicate(PATH_BASE_DIALFS);
     string_append(&path_bloques, "bloques.dat");
@@ -67,7 +67,7 @@ void inicializar_bitmap()
         close(fd);
     }
     
-    bitmap_bloques = bitarray_create_with_mode(array_bitmap, tam_bitmap, LSB_FIRST);
+    bitmap_bloques = bitarray_create_with_mode(array_bitmap, tam_bitmap, MSB_FIRST);
     if (bitmap_bloques == NULL)
     {
         log_error(logger ,"No se pudo mapear el bitarray");
@@ -107,7 +107,7 @@ int32_t buscar_bloque_libre()
 {
     int32_t bloque_libre = -1;
 
-    for (int32_t i = 0; i < BLOCK_COUNT; i++) {
+    for (int32_t i = 0; i < BLOCK_COUNT; ++i) {
         if (!bitarray_test_bit(bitmap_bloques, i)) { // Si el bit está en 0, el bloque está libre
             bloque_libre = i;
             bitarray_set_bit(bitmap_bloques, i); // Marcar el bit como ocupado
@@ -159,7 +159,6 @@ bool eliminar_archivo(char* nombre_archivo)
         log_warning(logger, "Se trato de eliminar un archivo que no existe: %s", nombre_archivo);
         return false;
     }
-    
 }
 
 bool existe_archivo(char* nombre_archivo)
@@ -184,9 +183,11 @@ void liberar_bloques(char* path_archivo_metadata)
     int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
     int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
     int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
+    // log_debug(logger_debug, "archivo: %s, debe liberar %d bloques", path_archivo_metadata, cant_bloques);
 
-    for (int32_t i = 0; i < cant_bloques; i++)
+    for (int32_t i = 0; i < cant_bloques; ++i)
     {
+        // log_debug(logger_debug, "archivo: %s, libera 1 bloque", path_archivo_metadata);
         bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
     }
     config_destroy(metadata);
@@ -210,44 +211,88 @@ bool truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio)
         int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
         int32_t nueva_cant_bloques = cantidad_de_bloques(nuevo_tamanio);
         int32_t diferencia_cant_bloques = nueva_cant_bloques - cant_bloques;
-        log_debug(logger_debug, "cant bloques: %d, nueva cant bloques: %d, diferencia: %d", cant_bloques, nueva_cant_bloques, diferencia_cant_bloques);
+        // log_debug(logger_debug, "cant bloques: %d, nueva cant bloques: %d, diferencia: %d", cant_bloques, nueva_cant_bloques, diferencia_cant_bloques);
+
         if (diferencia_cant_bloques<=0)
         {
             config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
             liberar_n_bloques(bloque_inicial+nueva_cant_bloques, 0-diferencia_cant_bloques);
+            config_save(metadata);
             return true;
         }
         else
         {
-            bool asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);//Si hay bloques contiguos disponibles, los asigna
+            bool asignacion = intentar_asignar_bloques(PID, nombre_archivo, metadata, bloque_inicial, cant_bloques, nueva_cant_bloques);
 
-            if (!asignacion)
+            if (asignacion)
             {
-                asignacion = reasignar_bloques(metadata, cant_bloques, nueva_cant_bloques);//Si no, intenta reasignarle bloques al final del bitmap
-
-                if (!asignacion)
-                {
-                    compactacion(PID, nombre_archivo, nueva_cant_bloques);//Si no puede, hace compactacion y lo intenta de nuevo
-                    bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
-                    asignacion = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
-                }               
+                config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
+                config_save(metadata);
+                log_info(logger, "PID: %u - Se trunco con exito el archivo: %s, nuevo tamaño: %u", PID, nombre_archivo, nuevo_tamanio);
             }
-            if (!asignacion)
+            else
             {
                 log_warning(logger, "PID: %u - No se pudo truncar el archivo: %s por falta de espacio", PID, nombre_archivo);
                 return false;
             }
-            else
-            {
-                config_set_value(metadata, "TAMANIO_ARCHIVO", string_itoa(nuevo_tamanio));
-                log_info(logger, "PID: %u - Se trunco con exito el archivo: %s, nuevo tamaño: %u", PID, nombre_archivo, nuevo_tamanio);
-            }
-        }        
-        config_save(metadata);
+        }
         config_destroy(metadata);
         free(path_archivo_metadata);
         return true;
     }
+}
+
+bool intentar_asignar_bloques(uint32_t PID, char* nombre_archivo, t_config* metadata, int32_t bloque_inicial, int32_t cant_bloques, int32_t nueva_cant_bloques)
+{
+    int32_t diferencia_cant_bloques = nueva_cant_bloques - cant_bloques;
+
+    bool asignacion1 = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);//Si hay bloques contiguos disponibles, los asigna
+
+    if (asignacion1)
+    {
+        log_trace(logger_debug, "Exito en la primera asignacion");
+        return true;
+    }
+    else
+    {
+        log_trace(logger_debug, "Fallo primer intento de asignacion");
+        bool asignacion2 = reasignar_bloques(metadata, cant_bloques, nueva_cant_bloques);//Si no, intenta reasignarle bloques al final del bitmap
+
+        if (asignacion2)
+        {
+            log_trace(logger_debug, "Exito en la Segunda asignacion");
+            return true;
+        }
+        else
+        {
+            log_trace(logger_debug, "Fallo segundo intento de asignacion");
+            compactacion(PID, nombre_archivo, nueva_cant_bloques);//Si no puede, hace compactacion y lo intenta de nuevo
+            // int32_t n = contar_bloques_libres();
+            // log_debug(logger_debug, "Archivo: %s, necesita: %d bloques y hay: %d disponibles", nombre_archivo, diferencia_cant_bloques, n);
+
+            bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+            bool asignacion3 = asignar_n_bloques(bloque_inicial+cant_bloques, diferencia_cant_bloques);
+            if (asignacion3)
+            {
+                log_trace(logger_debug, "Exito en la Tercera asignacion");
+                return true;
+            }
+            {
+                log_trace(logger_debug, "Fallo tercer intento de asignacion");
+                return false;
+            }
+        }
+    }
+}
+
+int32_t contar_bloques_libres()
+{
+    int32_t c = 0;
+    for (int32_t i = 0; i < BLOCK_COUNT; ++i)
+    {if (!bitarray_test_bit(bitmap_bloques, i))
+        {++c;}
+    }
+    return c;    
 }
 
 int32_t cantidad_de_bloques(int32_t tamanio_archivo)
@@ -259,24 +304,30 @@ int32_t cantidad_de_bloques(int32_t tamanio_archivo)
 
 void liberar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_liberar)
 {
-    for (int32_t i = 0; i < bloques_a_liberar; i++)
+    log_info(logger_debug, "Se deben liberar %d bloques desde el bloque inicial: %d", bloques_a_liberar, bloque_inicial);
+    for (int32_t i = 0; i < bloques_a_liberar; ++i)
     {
+        // log_info(logger_debug, "Se libera 1 bloque del bitmap");
         bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
     }
-    log_info(logger_debug, "Se liberaron %d bloques del bitmap", bloques_a_liberar);
 }
 
 bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar)
 {
     int32_t bloques_disponibles = 0;
-
+    // log_trace(logger_debug, "Ultimo_bloque: %d", bloque_inicial);
     for (int32_t i = 1; i <= bloques_a_asignar; ++i)
     {
-        if (bitarray_test_bit(bitmap_bloques, bloque_inicial+i)) {break;}
-
-        else {++bloques_disponibles;}
+        // log_trace(logger_debug, "Probando el bit: %d", bloque_inicial+i);
+        if (bitarray_test_bit(bitmap_bloques, bloque_inicial+i)) 
+            {
+                break;
+            }
+        else 
+            {++bloques_disponibles;}
     }
-    if (bloques_disponibles<bloques_a_asignar) { return false;}
+    // log_trace(logger_debug, "disponibles: %d", bloques_disponibles);
+    if (bloques_disponibles<bloques_a_asignar) {return false;}
     else
     {
         for (int32_t i = 1; i <= bloques_a_asignar; ++i)
@@ -296,7 +347,7 @@ bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_c
     {
         if (!bitarray_test_bit(bitmap_bloques, i))
         {
-            bloques_disponibles++;
+            ++bloques_disponibles;
             if (bloques_disponibles>=nueva_cant_bloques)
                 {break;}
         }
@@ -347,6 +398,7 @@ void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloque
 {
     log_info(logger, "PID: %u - Inicio Compactación.", PID);
     limpiar_bitmap();
+    // log_debug(logger_debug, "Luego de limpiar el bitmap quedan: %d bloques disponibles", contar_bloques_libres());
 
     void* nuevos_bloques = malloc(BLOCK_COUNT*BLOCK_SIZE);
 
@@ -379,10 +431,12 @@ void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloque
 
 void limpiar_bitmap()
 {
-    for (int32_t i = 0; i < BLOCK_COUNT; i++)
+    for (int32_t i = 0; i < bitarray_get_max_bit(bitmap_bloques); ++i)
     {
         bitarray_clean_bit(bitmap_bloques, i);
-    }    
+    }
+    // char* dump = mem_hexstring(bitmap_bloques, BLOCK_COUNT/8);
+    // log_error(logger_debug, "bitmap luego de limpieza: %s", dump);
 }
 
 void compactar_archivo(char* nombre_archivo, void* nuevos_bloques)
@@ -397,12 +451,15 @@ void compactar_archivo(char* nombre_archivo, void* nuevos_bloques)
     int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
     int32_t nuevo_inicio = buscar_bloque_libre();
 
+    log_trace(logger_debug, "Nuevo inicio del archivo: %d, cant bloques: %d", nuevo_inicio, cant_bloques);
     // Se copian los datos en un contenedor, luego se los graba en un nuevo puntero de bloques (el cambio se hace en la funcion compactar)
     void* contenido = malloc(cant_bloques*BLOCK_SIZE);    
     FS_READ(bloques, bloque_inicial, 0, cant_bloques*BLOCK_SIZE, contenido);
     FS_WRITE(nuevos_bloques, nuevo_inicio, 0, cant_bloques*BLOCK_SIZE, contenido);
-
-    asignar_n_bloques(nuevo_inicio, cant_bloques);
+    
+    bitarray_set_bit(bitmap_bloques, nuevo_inicio);
+    asignar_n_bloques(nuevo_inicio, cant_bloques-1);
+    
     config_set_value(metadata, "BLOQUE_INICIAL", string_itoa(nuevo_inicio));
     config_save(metadata);
     config_destroy(metadata);
