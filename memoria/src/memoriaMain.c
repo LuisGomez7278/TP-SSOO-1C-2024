@@ -97,7 +97,7 @@ t_instruccion* parsear_instruccion(char* linea){
 
     char** tokens = string_split(linea, " ");
 
-    ins = tokens[0];    
+    ins = tokens[0];
     switch (hash_ins(ins))
     {
     // 5 argumentos
@@ -234,12 +234,14 @@ t_instruccion* parsear_instruccion(char* linea){
         instruccion->arg3 = a3;
         instruccion->arg4 = a4;
         instruccion->arg5 = a5;
-        break;   
+        break;
+
     default:
         log_error(logger_debug, "Instruccion no reconocida");
         return (t_instruccion* ) NULL;
         break;
     }
+
     return instruccion;
 }
 
@@ -267,20 +269,17 @@ cod_ins hash_ins(char* ins){
 }
 
 
-char* path_completo(char* path_base, char* path_parcial){
-
-   
+char* path_completo(char* path_base, char* path_parcial)
+{
     char* path = string_duplicate(path_base);
     string_append(&path, path_parcial);
     return path;
-   
 }
-
 
 
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
-    instruccion =  list_get(lista_instrucciones, PC);
+    instruccion = list_get(lista_instrucciones, PC);
     return instruccion;
 }
 

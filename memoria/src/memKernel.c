@@ -39,25 +39,16 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
 
     if (buffer != NULL) {
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        char* path_parcial="a ver";
-        path_parcial= (char*)leer_de_buffer_string(buffer, &desplazamiento);
+        char* path_parcial = leer_de_buffer_string(buffer, &desplazamiento);
         char* path;
 
         if (path_base!=NULL && path_parcial!= NULL)
-        {
-        path = path_completo(path_base, path_parcial);
-
-        }else{
-            log_error(logger_debug,"Error al obtener el path");
-        }
-        
-        
+            {path = path_completo(path_base, path_parcial);}
+        else
+            {log_error(logger_debug,"Error al obtener el path");}
+                
         if (path!=NULL)
-        {
-        log_debug(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);
-        }
-        
-        
+            {log_debug(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);}
         
         bool creado = crear_procesoM(path, PID);
 
@@ -68,7 +59,9 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         }else{
             log_debug(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
             enviar_instruccion_con_PID_por_socket(ERROR_AL_CARGAR_EL_PROCESO, PID, socket_kernel_memoria);
-        }  
+        }
+        free(path);
+        free(path_parcial);
 
     } else {
         // Manejo de error en caso de que recibir_buffer devuelva NULL
