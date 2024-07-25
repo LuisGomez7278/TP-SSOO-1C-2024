@@ -164,7 +164,6 @@ bool existe_archivo(char* nombre_archivo)
     int fd = open(path_archivo_metadata, O_RDONLY);
     if (fd == -1)
     {
-        close(fd);
         return false;
     }
     else
@@ -291,7 +290,7 @@ bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_c
     {
         if (!bitarray_test_bit(bitmap_bloques, i))
         {
-            ++bloques_disponibles;
+            bloques_disponibles++;
             if (bloques_disponibles>=nueva_cant_bloques)
                 {break;}
         }
