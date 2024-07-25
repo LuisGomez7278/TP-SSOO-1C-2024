@@ -82,9 +82,9 @@ int32_t main(int32_t argc, char* argv[]) {
         
         cod_op = recibir_operacion(socket_kernel_entradasalida);
         
-        char* operacion= codigo_operacion_string(cod_op);
+        // char* operacion= codigo_operacion_string(cod_op);
 
-        log_debug(logger_debug, " A la interfaz se le solicito la operacion: %s", operacion);
+        // log_debug(logger_debug, " A la interfaz se le solicito la operacion: %s", operacion);
 
         uint32_t desplazamiento = 0;
 
@@ -155,7 +155,7 @@ int32_t main(int32_t argc, char* argv[]) {
                 dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                 tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
                 
-                log_debug(logger_debug, "Peticion de lectura enviada a memoria - dir_fisica: %u, tam_acceso: %u", dir_fisica, tamanio_a_leer);
+                // log_debug(logger_debug, "Peticion de lectura enviada a memoria - dir_fisica: %u, tam_acceso: %u", dir_fisica, tamanio_a_leer);
                 agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
             }
@@ -243,7 +243,7 @@ int32_t main(int32_t argc, char* argv[]) {
             {
                 dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                 tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
-                log_debug(logger_debug, "acceso a memoria añadido - dir fisica: %u, tam acceso: %u", dir_fisica, tamanio_a_leer);
+                // log_debug(logger_debug, "acceso a memoria añadido - dir fisica: %u, tam acceso: %u", dir_fisica, tamanio_a_leer);
 
                 agregar_a_paquete_uint32(paquete, dir_fisica);
                 agregar_a_paquete_uint32(paquete, tamanio_a_leer);
@@ -309,9 +309,9 @@ int32_t main(int32_t argc, char* argv[]) {
                 datos_leidos = malloc(tamanio_total);
                 FS_READ(bloques, bloque_inicial, puntero, tamanio_total, datos_leidos);
 
-                char* string_leida = mem_hexstring(datos_leidos, tamanio_total);
+                // char* string_leida = mem_hexstring(datos_leidos, tamanio_total);
 
-                log_debug(logger_debug, "Datos leidos: %s", string_leida);
+                // log_debug(logger_debug, "Datos leidos: %s", string_leida);
 
                 t_paquete* paq = crear_paquete(DESALOJO_POR_IO_FS_READ);
                 agregar_a_paquete_uint32(paq, PID);
@@ -324,7 +324,7 @@ int32_t main(int32_t argc, char* argv[]) {
                     dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
                     tamanio_a_leer = leer_de_buffer_uint32(buffer, &desplazamiento);
                     
-                    log_debug(logger_debug, "acceso a memoria añadido - dir fisica: %u, tam acceso: %u", dir_fisica, tamanio_a_leer);
+                    // log_debug(logger_debug, "acceso a memoria añadido - dir fisica: %u, tam acceso: %u", dir_fisica, tamanio_a_leer);
                     agregar_a_paquete_uint32(paq, dir_fisica);
                     agregar_a_paquete_uint32(paq, tamanio_a_leer);
                     agregar_a_paquete_bytes(paq, tamanio_a_leer, datos_leidos+acumulador);

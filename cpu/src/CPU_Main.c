@@ -288,7 +288,6 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
             direccion_logica = valorgrande1;
         }
-        log_debug(logger_debug, "IO_STDIN direccion logica: %u", direccion_logica);
 
         registro_2 = direccion_registro(contexto_interno, ins_actual->arg3);
         uint32_t tamanio_a_leer;
@@ -302,7 +301,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande2, registro_2, sizeof(uint32_t));
             tamanio_a_leer =  valorgrande2;
         }
-        log_debug(logger_debug, "IO_STDIN tamanio leido: %u", tamanio_a_leer);
+        // log_debug(logger_debug, "IO_STDIN parametros - direccion logica: %u, tamanio leido: %u", direccion_logica, tamanio_a_leer);
         
         ejecutar_IO_STD_IN(ins_actual->arg1, direccion_logica, tamanio_a_leer);
         break;
@@ -336,7 +335,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande2, registro_2, sizeof(uint32_t));
             tamanio_a_escribir =  valorgrande2;
         }
-        log_debug(logger_debug, "IO_STDOUT parametros - direccion: %u, tamanio leido: %u", direccion_logica, tamanio_a_escribir);
+        // log_debug(logger_debug, "IO_STDOUT parametros - direccion: %u, tamanio leido: %u", direccion_logica, tamanio_a_escribir);
 
         ejecutar_IO_STD_OUT(ins_actual->arg1, direccion_logica, tamanio_a_escribir);
         break;
@@ -374,7 +373,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
             tamanio_truncar =  valorgrande1;
         }
-        log_debug(logger_debug, "Tamanio truncate leido: %u", tamanio_truncar);        
+        // log_debug(logger_debug, "Tamanio truncate leido: %u", tamanio_truncar);
 
         // arg1: nombre_interfaz, arg2: nombre_archivo, valorgrande1 nuevo_tamaño
         solicitar_IO_FS_TRUNCATE(ins_actual->arg1, ins_actual->arg2, tamanio_truncar);
@@ -426,7 +425,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             puntero_write = valorgrande1;
         }
 
-        log_debug(logger_debug, "FS_WRITE direccion logica: %u, tamanio: %u, puntero: %u", direccion_logica, tamanio_write, puntero_write);
+        // log_debug(logger_debug, "FS_WRITE direccion logica: %u, tamanio: %u, puntero: %u", direccion_logica, tamanio_write, puntero_write);
         solicitar_IO_FS_MEMORIA(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_logica, tamanio_write, puntero_write);
         break;
 
@@ -476,7 +475,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             puntero_read = valorgrande1;
         }
 
-        log_debug(logger_debug, "FS_READ direccion logica: %u, tamanio: %u, puntero: %u", direccion_logica, tamanio_read, puntero_read);
+        // log_debug(logger_debug, "FS_READ direccion logica: %u, tamanio: %u, puntero: %u", direccion_logica, tamanio_read, puntero_read);
         solicitar_IO_FS_MEMORIA(motivo_desalojo, ins_actual->arg1, ins_actual->arg2, direccion_logica, tamanio_read, puntero_read);
         break;
 
@@ -557,7 +556,7 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
 
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, tam_acceso);
-    log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+    // log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
     bytes_restantes -= tam_acceso;
 
     int i = 1;
@@ -570,14 +569,14 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
-            log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            // log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
             bytes_restantes-=tamanio_de_pagina;
         }
         else
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, bytes_restantes);
-            log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            // log_debug(logger_debug, "IO_STDIN acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
             bytes_restantes-=bytes_restantes; //aca sale del while
         }
         ++i;
@@ -612,7 +611,7 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
 
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, tam_acceso);
-    log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+    // log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
     bytes_restantes -= tam_acceso;
 
     int i = 1;
@@ -625,14 +624,14 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
-            log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            // log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
             bytes_restantes-=tamanio_de_pagina;
         }
         else
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, bytes_restantes);
-            log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+            // log_debug(logger_debug, "IO_STDOUT acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
             bytes_restantes-=bytes_restantes; //aca sale del while
         }
         ++i;
@@ -701,7 +700,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
 
     agregar_a_paquete_uint32(paquete, dir_fisica);
     agregar_a_paquete_uint32(paquete, tam_acceso);
-    log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+    // log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
     bytes_restantes -= tam_acceso;
 
     int i = 1;
@@ -712,7 +711,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
 
         agregar_a_paquete_uint32(paquete, dir_fisica);
         agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
-        log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+        // log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
         bytes_restantes -= tamanio_de_pagina;
         ++i;
     }
@@ -723,7 +722,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
 
         agregar_a_paquete_uint32(paquete, dir_fisica);
         agregar_a_paquete_uint32(paquete, bytes_restantes);
-        log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+        // log_debug(logger_debug, "IO_FS_MEMORIA acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
         bytes_restantes -= bytes_restantes;
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);

@@ -232,7 +232,7 @@ void copiar_string_read(int socket_cpu_memoria){
         }
 
         str_leida[tamanio_total] = '\0';
-        log_debug(logger_debug, "Copy String Read completado, string leida: %s", str_leida);
+        // log_debug(logger_debug, "Copy String Read completado, string leida: %s", str_leida);
         usleep(retardo*1000);
 
         t_paquete* paquete = crear_paquete(SOLICITUD_COPY_STRING_READ);

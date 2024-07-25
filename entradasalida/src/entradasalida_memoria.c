@@ -27,7 +27,7 @@ void gestionar_conexion_memoria()
             string_leida_memoria = string_duplicate(str_recibida);
             free(buffer);
             free(str_recibida);
-            log_info(logger, "Entrada-salida recibe una respuesta de memoria por STDOUT, string: %s", string_leida_memoria);
+            // log_info(logger, "Entrada-salida recibe una respuesta de memoria por STDOUT, string: %s", string_leida_memoria);
             sem_post(&respuesta_memoria);
             break;
 
@@ -38,7 +38,7 @@ void gestionar_conexion_memoria()
             string_leida_memoria = string_duplicate(str_recibida);
             free(buffer);
             free(str_recibida);
-            log_info(logger, "Entrada-salida recibe una respuesta de memoria por FS_WRITE, string: %s", string_leida_memoria);
+            // log_info(logger, "Entrada-salida recibe una respuesta de memoria por FS_WRITE, string: %s", string_leida_memoria);
             sem_post(&respuesta_memoria);
             break;
 
