@@ -216,7 +216,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             memcpy(&valorgrande1, registro_1, sizeof(uint32_t));
             direccion_logica = valorgrande1;
         }
-        log_debug(logger_debug, "MOV_OUT direccion logica: %u", direccion_logica);
+        // log_debug(logger_debug, "MOV_OUT direccion logica: %u", direccion_logica);
         
         if (registro_chico(ins_actual->arg2))
         {
@@ -254,7 +254,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         memcpy(&direccion_logica_READ, &contexto_interno->SI, sizeof(uint32_t));
         uint32_t direccion_logica_WRITE;
         memcpy(&direccion_logica_WRITE, &contexto_interno->DI, sizeof(uint32_t));
-        log_debug(logger_debug, "COPY_STRING: Direcciones leidas - READ: %u, WRITE: %u", direccion_logica_READ, direccion_logica_WRITE);
+        // log_debug(logger_debug, "COPY_STRING: Direcciones leidas - READ: %u, WRITE: %u", direccion_logica_READ, direccion_logica_WRITE);
 
         solicitar_lectura_string(direccion_logica_READ, bytes_a_copiar);
         sem_wait(&respuesta_copy_string);

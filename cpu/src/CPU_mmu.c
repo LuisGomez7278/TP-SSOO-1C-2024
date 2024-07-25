@@ -75,7 +75,7 @@ uint32_t pedir_marco_a_memoria(uint32_t PID, uint32_t nro_pag)
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
 
-    log_debug(logger_debug, "Esperando marco de memoria");
+    log_trace(logger_debug, "Esperando marco de memoria");
     sem_wait(&respuesta_marco);
     uint32_t marco = marco_pedido;
 
@@ -165,7 +165,7 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
     uint32_t tam_acceso = cant_accesos==1 ? bytes_a_copiar : (tamanio_de_pagina-offset);
     agregar_a_paquete_uint32(paquete, tam_acceso);
     bytes_restantes-=tam_acceso;
-    log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+    // log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
 
     int i = 1;
     while (bytes_restantes>0)
@@ -178,14 +178,14 @@ void solicitar_lectura_string(uint32_t direccion_logica_READ, uint32_t bytes_a_c
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
-            log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_de_pagina);
+            // log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_de_pagina);
             bytes_restantes-=tamanio_de_pagina;
         }
         else
         {
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, bytes_restantes);
-            log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, bytes_restantes);
+            // log_debug(logger_debug, "COPY_STRING read acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, bytes_restantes);
             bytes_restantes-=bytes_restantes; //aca sale del while
         }
         ++i;
@@ -225,7 +225,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     bytes_leidos+=tam_acceso;
     uint32_t bytes_restantes = bytes_a_copiar-bytes_leidos;
 
-    log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
+    // log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tam_acceso);
 
     int i = 1;
     while (bytes_restantes>0)
@@ -239,7 +239,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, tamanio_de_pagina);
             agregar_a_paquete_bytes(paquete, tamanio_de_pagina, bytes_str+bytes_leidos);
-            log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_de_pagina);
+            // log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, tamanio_de_pagina);
             bytes_leidos+=tamanio_de_pagina;
             bytes_restantes-=tamanio_de_pagina;
         }
@@ -248,7 +248,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
             agregar_a_paquete_uint32(paquete, dir_fisica);
             agregar_a_paquete_uint32(paquete, bytes_restantes);
             agregar_a_paquete_bytes(paquete, bytes_restantes, bytes_str+bytes_leidos);
-            log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, bytes_restantes);
+            // log_debug(logger_debug, "COPY_STRING write acceso añadido - dir_fisica: %u, tamanio: %u", dir_fisica, bytes_restantes);
             bytes_leidos+=bytes_restantes;
             bytes_restantes-=bytes_restantes; //aca sale del while
         }
