@@ -275,7 +275,7 @@ void gestionar_dispatch (){
                     eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion); 
 
-                    enviar_siguiente_proceso_a_ejecucion();	    
+                    enviar_siguiente_proceso_a_ejecucion();
                     break;
                 default:
                     log_error(logger_debug,"La funcion wait devolvio error");
@@ -345,11 +345,11 @@ void gestionar_dispatch (){
 
         case DESALOJO_POR_CONSOLA:
             
-            
             enviar_siguiente_proceso_a_ejecucion();
             break;
 
         case DESALOJO_POR_IO_GEN_SLEEP:
+            log_debug(logger_debug, "Gestionando IO_GEN_SLEEP");
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             uint32_t unidades_trabajo = leer_de_buffer_uint32(buffer, &desplazamiento);
 
@@ -363,8 +363,9 @@ void gestionar_dispatch (){
 
         case DESALOJO_POR_IO_STDIN:
         case DESALOJO_POR_IO_STDOUT:
+            log_debug(logger_debug, "Gestionando IO_STD");
             paquete = crear_paquete(cod_op_dispatch);
-            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);           
+            agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             agregar_a_paquete_uint32(paquete, leer_de_buffer_uint32(buffer, &desplazamiento));// tamanio_total
 
@@ -383,6 +384,7 @@ void gestionar_dispatch (){
 
         case DESALOJO_POR_IO_FS_CREATE:
         case DESALOJO_POR_IO_FS_DELETE:
+            log_debug(logger_debug, "Gestionando IO_FS CREATE/DELETE");
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
 
@@ -397,6 +399,7 @@ void gestionar_dispatch (){
             break;
             
         case DESALOJO_POR_IO_FS_TRUNCATE:
+            log_debug(logger_debug, "Gestionando IO_FS TRUNCATE");
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             uint32_t nuevo_tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -414,6 +417,7 @@ void gestionar_dispatch (){
 
         case DESALOJO_POR_IO_FS_WRITE:
         case DESALOJO_POR_IO_FS_READ:
+            log_debug(logger_debug, "Gestionando IO_FS READ/WRITE");
             nombre_interfaz = leer_de_buffer_string(buffer, &desplazamiento);
             nombre_archivo = leer_de_buffer_string(buffer, &desplazamiento);
             
