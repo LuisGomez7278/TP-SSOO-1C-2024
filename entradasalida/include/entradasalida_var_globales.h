@@ -42,7 +42,6 @@ extern void* array_bitmap;
 extern t_bitarray* bitmap_bloques;
 
 extern char* path_metadata;
-extern char** archivos_existentes;
 
 extern sem_t respuesta_memoria;
 
@@ -55,7 +54,7 @@ int32_t buscar_bloque_libre();
 void crear_metadata(int32_t bloque, char* nombre_archivo);
 
 bool eliminar_archivo(char* nombre_archivo);
-bool existe_archivo(char* nombre_archivo, int32_t* indice);
+bool existe_archivo(char* nombre_archivo);
 void liberar_bloques(char* path_archivo_metadata);
 
 bool truncar_archivo(uint32_t PID, char* nombre_archivo, uint32_t nuevo_tamanio);
@@ -66,7 +65,7 @@ bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_c
 
 void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloques);
 void limpiar_bitmap();
-void compactar_archivo(char* nombre_archivo);
+void compactar_archivo(char* nombre_archivo, void* nuevos_bloques);
 
 void FS_WRITE(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, char* datos_a_escribir);
 void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, void* datos_leidos);

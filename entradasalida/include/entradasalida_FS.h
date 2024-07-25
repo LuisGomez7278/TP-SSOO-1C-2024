@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/types.h>
+#include <dirent.h>
 
 
 #include <commons/bitarray.h>

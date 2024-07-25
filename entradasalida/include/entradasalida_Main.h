@@ -68,12 +68,5 @@ char* path_bitmap;
 void* array_bitmap;
 t_bitarray* bitmap_bloques;
 char* path_metadata;
-char** archivos_existentes;
-
-
- 
-
-
-
 
 #endif //TP_ENTRADASALIDA_MAIN_H_
