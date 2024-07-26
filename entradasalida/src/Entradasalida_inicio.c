@@ -47,7 +47,6 @@ void iniciar_config(char* config_interfaz)
 
     config = start_config(path_config);
 
-
     TIPO_INTERFAZ = config_get_string_value(config, "TIPO_INTERFAZ");
     cod_interfaz interfaz = get_tipo_interfaz(TIPO_INTERFAZ);
 

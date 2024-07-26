@@ -364,6 +364,12 @@ bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_c
     else
     {
         int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+
+        void* contenido = malloc(cant_bloques*BLOCK_SIZE);
+        FS_READ(bloques, bloque_inicial, 0, cant_bloques*BLOCK_SIZE, contenido);
+        FS_WRITE(bloques, nuevo_inicio, 0, cant_bloques*BLOCK_SIZE, contenido);
+        free(contenido);
+        
         for (int32_t i = 0; i < cant_bloques; ++i)
         {
             bitarray_clean_bit(bitmap_bloques, bloque_inicial+i);
@@ -453,7 +459,7 @@ void compactar_archivo(char* nombre_archivo, void* nuevos_bloques)
 
     log_trace(logger_debug, "Nuevo inicio del archivo: %d, cant bloques: %d", nuevo_inicio, cant_bloques);
     // Se copian los datos en un contenedor, luego se los graba en un nuevo puntero de bloques (el cambio se hace en la funcion compactar)
-    void* contenido = malloc(cant_bloques*BLOCK_SIZE);    
+    void* contenido = malloc(cant_bloques*BLOCK_SIZE);
     FS_READ(bloques, bloque_inicial, 0, cant_bloques*BLOCK_SIZE, contenido);
     FS_WRITE(nuevos_bloques, nuevo_inicio, 0, cant_bloques*BLOCK_SIZE, contenido);
     

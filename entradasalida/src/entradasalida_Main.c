@@ -37,7 +37,7 @@ int32_t main(int32_t argc, char* argv[]) {
     enviar_paquete(paquete,socket_kernel_entradasalida);
     eliminar_paquete(paquete);
     log_debug(logger_debug,"Se confirma a kernel la creacion de la IO");
-
+    
     if (interfaz!=GENERICA)
     {
         socket_memoria_entradasalida = crear_conexion(IP_MEMORIA,PUERTO_MEMORIA);
@@ -173,7 +173,7 @@ int32_t main(int32_t argc, char* argv[]) {
             // Imprimir por pantalla
             
             log_debug(logger_debug, "String para imprimir: %s", string_leida_memoria);
-            printf("%s", string_leida_memoria);
+            printf("\n%s\n", string_leida_memoria);
             notificar_kernel(true);
             free(buffer);
             free(string_leida_memoria);
@@ -398,7 +398,7 @@ char* leer_de_teclado(uint32_t tamanio_a_leer)
     free(leido);
 
     //Si lo leido no ocupa todo el tamanio_a_leer sigue pidiendo datos hasta completar
-    while (restante>0 && string_length(string_a_memoria)<restante)
+    while (restante>0)
     {
         mensaje_mostrado = malloc(25);
         sprintf(mensaje_mostrado, "Ingresar %d caracteres", restante);
@@ -406,12 +406,16 @@ char* leer_de_teclado(uint32_t tamanio_a_leer)
         string_append(&string_a_memoria, leido);
         restante-=string_length(leido);
 
+        if (string_equals_ignore_case(leido, "")) {break;}
+
         free(mensaje_mostrado);
         free(leido);
     }
     
     //Verifica que no se pase del tamaño pedido
-    string_substring_until(string_a_memoria, tamanio_a_leer+1);//Probar si hace falta el +1
+    char* string_resultado = string_substring_until(string_a_memoria, tamanio_a_leer);
+    free(string_a_memoria);
+    string_resultado[tamanio_a_leer] = '\0';
 
-    return string_a_memoria;
+    return string_resultado;
 }
