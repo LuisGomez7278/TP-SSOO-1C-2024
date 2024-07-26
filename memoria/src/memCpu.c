@@ -73,7 +73,7 @@ void fetch(int socket_cpu_memoria){
         usleep(retardo*1000);
 
         enviar_instruccion(socket_cpu_memoria, sig_ins);
-        log_debug(logger_debug, "Instruccion enviada");
+        //log_debug(logger_debug, "Instruccion enviada");
     }
 }
 
@@ -96,7 +96,7 @@ void frame(int socket_cpu_memoria){
         agregar_a_paquete_uint32(paquete, marco);
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);            
-        log_debug(logger_debug, "Se envia el marco: %d, asignado a la pagina: %d, a CPU", marco, pagina);
+        //log_debug(logger_debug, "Se envia el marco: %d, asignado a la pagina: %d, a CPU", marco, pagina);
     }else{
         // Manejo de error en caso de que recibir_buffer devuelva NULL
         log_error(logger_debug,"Error al recibir el buffer");
@@ -141,7 +141,7 @@ void movIn(){
         {
             memcpy(&num, bytes_del_nro, sizeof(uint32_t));
         }
-        log_debug(logger_debug, "MOV_IN nro leido: %u", num);
+        //log_debug(logger_debug, "MOV_IN nro leido: %u", num);
         free(bytes_del_nro);
         
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
@@ -172,7 +172,7 @@ void movOut(){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         uint32_t n = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-        log_debug(logger_debug, "PID: %u - Solicitud de MOV_OUT con %u acceso(s)", PID, n);
+        //log_debug(logger_debug, "PID: %u - Solicitud de MOV_OUT con %u acceso(s)", PID, n);
 
         while(i<n && escrito){
             uint32_t dir_fisica = leer_de_buffer_uint32(buffer, &desplazamiento);
@@ -193,7 +193,7 @@ void movOut(){
             //log_info(logger_debug, "Mov_Out perfecto");
         }else{
             agregar_a_paquete_op_code(paquete, FALLO);
-            log_debug(logger_debug, "Mov_Out **FALLIDO**");
+            //log_debug(logger_debug, "Mov_Out **FALLIDO**");
         }
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
@@ -278,7 +278,7 @@ void copiar_string_write(int socket_cpu_memoria){
 
         }else{
             agregar_a_paquete_op_code(paquete, FALLO);
-            log_debug(logger_debug, "Copy String Write **FALLIDO**");
+            //log_debug(logger_debug, "Copy String Write **FALLIDO**");
         }
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);

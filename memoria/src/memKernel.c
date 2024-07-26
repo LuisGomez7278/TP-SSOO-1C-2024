@@ -48,7 +48,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
             {log_error(logger_debug,"Error al obtener el path");}
                 
         if (path!=NULL)
-            {log_debug(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);}
+            {//log_debug(logger_debug,"Llego un proceso para cargar: PID: %u  Direccion: %s",PID,path);}
         
         bool creado = crear_procesoM(path, PID);
 
@@ -57,7 +57,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         if(creado){
             enviar_instruccion_con_PID_por_socket(CARGA_EXITOSA_PROCESO, PID, socket_kernel_memoria);
         }else{
-            log_debug(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
+            //log_debug(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
             enviar_instruccion_con_PID_por_socket(ERROR_AL_CARGAR_EL_PROCESO, PID, socket_kernel_memoria);
         }
         free(path);
@@ -78,7 +78,7 @@ void eliminar_proceso(){ // llega un pid
 
     if(buffer!=NULL){
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
-        log_debug(logger_debug,"Llego un proceso para eliminar: PID: %u",PID);
+        //log_debug(logger_debug,"Llego un proceso para eliminar: PID: %u",PID);
 
         eliminar_procesoM(PID);
         usleep(retardo*1000);

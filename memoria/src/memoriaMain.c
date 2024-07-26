@@ -81,7 +81,7 @@ t_list* leer_pseudocodigo(char* path){
     }
 
     fclose(archivo);
-    log_debug(logger_debug, "Archivo pseudocodigo leido, cantidad lineas leidas: [%d]", list_size(lista_instrucciones));
+    //log_debug(logger_debug, "Archivo pseudocodigo leido, cantidad lineas leidas: [%d]", list_size(lista_instrucciones));
 
     return lista_instrucciones;
 }
@@ -289,7 +289,7 @@ void enviar_tam_pag(){
     agregar_a_paquete_uint32(paquete, tam_pag);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);            
-    log_debug(logger_debug, "Se envia el tamaño de pagina a CPU");
+    //log_debug(logger_debug, "Se envia el tamaño de pagina a CPU");
 }
 
 
