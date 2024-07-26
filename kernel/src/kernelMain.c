@@ -23,7 +23,7 @@ int32_t main(int32_t argc, char* argv[]) {
 // ENTRADAS SALIDAS LAS CONECTO DENTRO DEL HILO, YA QUE PODRIA ACEPTAR UNA O MULTIPLES CONEXIONES
 
 
-  
+    //signal(SIGINT, signal_handler);
 
       /////////////////////////////////////                AHORA ATENDEMOS LAS CONEXIONES                        //////////////////////////////////////////////////////
     
@@ -62,7 +62,60 @@ int32_t main(int32_t argc, char* argv[]) {
     log_destroy(logger_debug);
     end_program(logger, config);
 
-   
-   
+
+    sem_destroy (&control_multiprogramacion);
+    sem_destroy (&cantidad_procesos_new);
+    sem_destroy (&cantidad_procesos_ready);
+    sem_destroy (&cantidad_procesos_ready_prioritario);
+    sem_destroy (&cantidad_procesos_en_algun_ready);
+    sem_destroy (&cantidad_procesos_bloqueados);
+    
+    sem_destroy (&semaforo_plp);
+    sem_destroy (&semaforo_pcp);
+    
+    pthread_mutex_destroy(&semaforo_new);
+    pthread_mutex_destroy(&semaforo_ready);
+    pthread_mutex_destroy(&semaforo_ready_prioridad);
+    pthread_mutex_destroy(&semaforo_bloqueado_prioridad);
+    pthread_mutex_destroy(&semaforo_bloqueado);
+    pthread_mutex_destroy(&semaforo_lista_interfaces);
+    pthread_mutex_destroy(&semaforo_recursos);
+
+
+
+
+
     return 0;
+}
+
+
+
+void signal_handler(int signum) {
+    printf("Interrupción recibida. Liberando recursos...\n");
+        if (socket_escucha) {liberar_conexion(socket_escucha);}
+    if (socket_kernel_cpu_dispatch) {liberar_conexion(socket_kernel_cpu_dispatch);}
+    if (socket_kernel_cpu_interrupt) {liberar_conexion(socket_kernel_cpu_interrupt);}
+    if (socket_memoria_kernel) {liberar_conexion(socket_memoria_kernel);}
+    if (socket_entradasalida_kernel) {liberar_conexion(socket_entradasalida_kernel);}
+    log_destroy(logger_debug);
+    end_program(logger, config);
+    
+    sem_destroy (&control_multiprogramacion);
+    sem_destroy (&cantidad_procesos_new);
+    sem_destroy (&cantidad_procesos_ready);
+    sem_destroy (&cantidad_procesos_ready_prioritario);
+    sem_destroy (&cantidad_procesos_en_algun_ready);
+    sem_destroy (&cantidad_procesos_bloqueados);
+    
+    sem_destroy (&semaforo_plp);
+    sem_destroy (&semaforo_pcp);
+    
+    pthread_mutex_destroy(&semaforo_new);
+    pthread_mutex_destroy(&semaforo_ready);
+    pthread_mutex_destroy(&semaforo_ready_prioridad);
+    pthread_mutex_destroy(&semaforo_bloqueado_prioridad);
+    pthread_mutex_destroy(&semaforo_bloqueado);
+    pthread_mutex_destroy(&semaforo_lista_interfaces);
+    pthread_mutex_destroy(&semaforo_recursos);
+
 }

@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
 // INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
     inicializarEspacioMem();                                                           
-   
+    
 // INICIO SERVIDOR MEMORIA
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
     pthread_join(hilo_kernel_memoria, NULL); 
+
 
 
 

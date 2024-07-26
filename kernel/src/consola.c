@@ -48,5 +48,16 @@ bool validacion_de_ingreso_por_consola(char* leido){
         comando_validado=true;
     }
 
+
+    liberar_array_de_comando(array_de_comando,string_array_size(array_de_comando));
+    
     return comando_validado;
+}
+
+
+void liberar_array_de_comando(char** array_de_comando, int tamanio) {
+    for (int i = 0; i < tamanio; ++i) {
+        free(array_de_comando[i]);
+    } 
+    free(array_de_comando);
 }

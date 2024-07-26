@@ -170,6 +170,9 @@ void gestionar_dispatch (){
             temporizador=NULL;
             pthread_cancel(hilo_de_desalojo_por_quantum);
             pthread_join(hilo_de_desalojo_por_quantum,NULL);
+        }else if(temporizador!=NULL){
+            temporal_destroy(temporizador);
+            temporizador=NULL;
         }
 
     ////////////////////////////////   EXTRAIGO DEL SOCKET LO COMUN A TODOS LOS PROCESOS //////////////////
@@ -239,6 +242,7 @@ void gestionar_dispatch (){
             sem_post(&control_multiprogramacion);
             
                                                                          //AGREGO UNA INSTANCIA A CANTIDAD DE PROCESOS  
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             break;
 
@@ -250,6 +254,7 @@ void gestionar_dispatch (){
                 case 1:
                     log_info(logger, "PID: %u - Bloqueado por recurso: %s", pcb_dispatch->PID, recurso_solicitado);
                     //PCB QUEDO EN COLA DE ESPERA DEL RECURSO
+                    //vengode_gestionarDispatch=true;
                     enviar_siguiente_proceso_a_ejecucion();	
 
                     break;
@@ -262,7 +267,7 @@ void gestionar_dispatch (){
 
                         sem_post(&cantidad_procesos_en_algun_ready);
                         log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u", pcb_dispatch->PID);
-
+                        //vengode_gestionarDispatch=true;
                         enviar_siguiente_proceso_a_ejecucion(pcb_dispatch);
 
                     break;
@@ -275,6 +280,7 @@ void gestionar_dispatch (){
                     eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion); 
 
+                    //vengode_gestionarDispatch=true;
                     enviar_siguiente_proceso_a_ejecucion();
                     break;
                 default:
@@ -297,7 +303,8 @@ void gestionar_dispatch (){
 
                     sem_post(&cantidad_procesos_en_algun_ready);
                     log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u", pcb_dispatch->PID);
-
+                    
+                    //vengode_gestionarDispatch=true;
                     enviar_siguiente_proceso_a_ejecucion(pcb_dispatch);
 
                     break;
@@ -309,6 +316,8 @@ void gestionar_dispatch (){
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
+
+                    //vengode_gestionarDispatch=true;
                     enviar_siguiente_proceso_a_ejecucion();
                     break;
                 case -2:
@@ -319,7 +328,8 @@ void gestionar_dispatch (){
                     eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
                     eliminar_proceso_de_lista_asignaciones_recurso(pcb_dispatch->PID);
                     sem_post(&control_multiprogramacion);
-                    
+
+                    //vengode_gestionarDispatch=true;                    
                     enviar_siguiente_proceso_a_ejecucion();
             }
             
@@ -330,6 +340,8 @@ void gestionar_dispatch (){
             //RESETEO EL CONTADOR Y LO PONGO NUEVAMENTE EN READY
             pcb_dispatch->quantum_ejecutado=0;
             ingresar_en_lista(pcb_dispatch, lista_ready, &semaforo_ready, &cantidad_procesos_en_algun_ready , READY);
+            
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             break;
 
@@ -340,11 +352,14 @@ void gestionar_dispatch (){
             enviar_instruccion_con_PID_por_socket(ELIMINAR_PROCESO,pcb_dispatch->PID,socket_memoria_kernel);
             eliminar_proceso_de_lista_recursos (pcb_dispatch->PID);
             sem_post(&control_multiprogramacion);
+
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             break;
 
         case DESALOJO_POR_CONSOLA:
             
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             break;
 
@@ -357,6 +372,8 @@ void gestionar_dispatch (){
             agregar_a_paquete_uint32(paquete, pcb_dispatch->PID);
             agregar_a_paquete_uint32(paquete, unidades_trabajo);
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             free(nombre_interfaz);
             break;
@@ -378,6 +395,8 @@ void gestionar_dispatch (){
             }
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             free(nombre_interfaz);
             break;
@@ -393,6 +412,8 @@ void gestionar_dispatch (){
             agregar_a_paquete_string(paquete, string_length(nombre_archivo)+1, nombre_archivo);
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             free(nombre_interfaz);
             free(nombre_archivo);
@@ -410,6 +431,8 @@ void gestionar_dispatch (){
             agregar_a_paquete_uint32(paquete, nuevo_tamanio);
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             free(nombre_interfaz);
             free(nombre_archivo);
@@ -438,6 +461,8 @@ void gestionar_dispatch (){
             }
 
             gestionar_solicitud_IO(pcb_dispatch, nombre_interfaz, cod_op_dispatch, paquete);
+
+            //vengode_gestionarDispatch=true;
             enviar_siguiente_proceso_a_ejecucion();
             free(nombre_interfaz);
             free(nombre_archivo);
@@ -556,9 +581,16 @@ void enviar_siguiente_proceso_a_ejecucion ()
         log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' \n", pcb_a_ejecutar->PID,algoritmo_planificacion);
          log_info(logger,"El proceso con PID:%u cambio su estado de READY -> EJECUCION\n",pcb_a_ejecutar->PID);
     }
-         
+        
     free(pcb_a_ejecutar);
     gestionar_dispatch ();
+/*
+    if(//vengode_gestionarDispatch){
+        //vengode_gestionarDispatch=false;
+    }else{
+        //vengode_gestionarDispatch=false;
+        gestionar_dispatch ();
+    }*/
 }
 
 

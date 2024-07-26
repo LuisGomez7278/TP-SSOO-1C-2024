@@ -95,6 +95,9 @@ extern int32_t cantidad_procesos_bloq_plp;
 extern int32_t cantidad_procesos_bloq_pcp;
 extern bool barrera_activada;
 
+//kernel-Main
+void signal_handler(int signum);
+
 //atender_operacion.h:
     void atender_instruccion_validada(char* leido);
     void iniciar_proceso(char*leido);
@@ -120,6 +123,7 @@ extern bool barrera_activada;
 //consola.h
     bool validacion_de_ingreso_por_consola (char* leido);
     void iniciar_consola_interactiva();
+    void liberar_array_de_comando(char** array_de_comando, int tamanio);
 
 //Kernel-EntradaSalida.h
     void atender_conexion_ENTRADASALIDA_KERNEL();

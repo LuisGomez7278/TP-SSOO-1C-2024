@@ -125,6 +125,7 @@ void atender_instruccion_validada(char* leido)
  */       
     }
 
+ liberar_array_de_comando(array_de_comando,string_array_size(array_de_comando));
 
 }
 

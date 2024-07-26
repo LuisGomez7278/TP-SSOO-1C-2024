@@ -74,7 +74,7 @@ void solicitud_de_creacion_proceso_a_memoria(uint32_t PID, char *leido){
     enviar_paquete(paquete,socket_memoria_kernel);              //--------------ESTA FUNCION SERIALIZA EL PAQUETE ANTES DE ENVIARLO --quedaria un void*= cod_op||SIZE TOTAL||size path|| path
     eliminar_paquete(paquete);
 
-
+liberar_array_de_comando(leido_array,string_array_size(leido_array));
 }
 
 void carga_exitosa_en_memoria(void* buffer){  

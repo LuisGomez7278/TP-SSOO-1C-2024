@@ -42,8 +42,7 @@ t_log *start_logger( char* fileName, char* processName, t_log_level logLevel) {
 
 void end_program(t_log* logger, t_config* config)
 {
-    /* Y por ultimo, hay que liberar lo que utilizamos (conexion, log y config)
-      con las funciones de las commons y del TP mencionadas en el enunciado */
+
     log_destroy(logger);
     config_destroy(config);
 }
