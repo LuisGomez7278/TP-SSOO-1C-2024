@@ -20,6 +20,7 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
 void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint32_t tamanio);
 void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, char* nombre_archivo, uint32_t direccion_logica, uint32_t tamanio, uint32_t puntero);
 bool instruccion_de_IO_o_exit( cod_ins instruccion);
+void destruir_instruccion(t_instruccion* instruccion);
 
 void loggear_valores();
  

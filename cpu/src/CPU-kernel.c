@@ -107,9 +107,14 @@ void gestionar_conexion_interrupt()
 {
     op_code operacion;
     bool continuar_iterando = true;
+    uint32_t size;
+    uint32_t desplazamiento;
+    void* buffer;
+    uint32_t PID_recibido;
 
     while (continuar_iterando)
     {
+        desplazamiento=0;
         operacion = recibir_operacion(socket_cpu_kernel_interrupt);
         switch (operacion)
         {
@@ -118,25 +123,29 @@ void gestionar_conexion_interrupt()
             break;
 
         case DESALOJO_POR_CONSOLA:
-            recibir_de_buffer_solo_PID(socket_cpu_kernel_interrupt);
+            buffer = recibir_buffer(&size, socket_cpu_kernel_interrupt);
+            PID_recibido = leer_de_buffer_uint32(buffer, &desplazamiento);
             if (!detener_ejecucion)
             {
-                log_info(logger, "El usuario finaliza el proceso PID: %u por consola", PID);
+                log_info(logger, "El usuario finaliza el proceso PID: %u por consola, proceso en ejecucion: %u", PID_recibido, PID);
                 interrupcion = INT_CONSOLA;                
             }else{
                 log_warning(logger_debug,"Llego una interrupcion por consola mientras no se estaba ejecutando");
             }
+            free(buffer);
             break;
 
         case DESALOJO_POR_QUANTUM:
-            recibir_de_buffer_solo_PID(socket_cpu_kernel_interrupt);
+            buffer = recibir_buffer(&size, socket_cpu_kernel_interrupt);
+            PID_recibido = leer_de_buffer_uint32(buffer, &desplazamiento);
             if (!detener_ejecucion )
             {
-                log_debug(logger, "El proceso PID: %u termino su quantum sera desalojado", PID);
+                log_debug(logger, "El proceso PID: %u termino su quantum sera desalojado, proceso en ejecucion: %u", PID_recibido, PID);
                 interrupcion = INT_QUANTUM;
             }else{
                 log_warning(logger_debug,"Llego una interrupcion de quantum mientras no se estaba ejecutando");
             }
+            free(buffer);
             break;
 
         case FALLO:

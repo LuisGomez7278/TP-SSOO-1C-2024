@@ -60,6 +60,7 @@ void gestionar_conexion_memoria()
             sem_post(&respuesta_copy_string);
             free(buffer);
             break;
+            
         case SOLICITUD_COPY_STRING_WRITE:
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);

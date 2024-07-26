@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
         
-        loggear_valores();
+        // loggear_valores();
         
         if (interrupcion != INT_NO && !instruccion_de_IO_o_exit(ins_actual->ins)) {
             log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
@@ -52,13 +52,9 @@ int main(int argc, char* argv[]) {
             else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
             desalojar_proceso(motivo_desalojo);
         };
-        free(ins_actual);
+        destruir_instruccion(ins_actual);
     }
 
-
-
-    // pthread_create(hilo_conexion_dispatch, NULL, (void*) gestionar_conexion_memoria, NULL);
-    // pthread_join(hilo_conexion_dispatch, NULL);
 
     if (socket_cpu_kernel_dispatch) {liberar_conexion(socket_cpu_kernel_dispatch);}
     if (socket_cpu_kernel_interrupt) {liberar_conexion(socket_cpu_kernel_interrupt);}
@@ -759,4 +755,14 @@ bool instruccion_de_IO_o_exit(cod_ins instruccion){
         return false;
         break;
     }
+}
+
+void destruir_instruccion(t_instruccion* instruccion)
+{
+    if (instruccion->arg1) {free(ins_actual->arg1);}
+    if (instruccion->arg2) {free(ins_actual->arg2);}
+    if (instruccion->arg3) {free(ins_actual->arg3);}
+    if (instruccion->arg4) {free(ins_actual->arg4);}
+    if (instruccion->arg5) {free(ins_actual->arg5);}
+    free(ins_actual);
 }
