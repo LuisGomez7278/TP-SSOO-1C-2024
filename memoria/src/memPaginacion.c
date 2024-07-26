@@ -27,6 +27,17 @@ bool crear_procesoM(char* path_instrucciones, uint32_t PID){
     return true;
 } 
 
+void destruir_instruccion(t_instruccion* instr)
+{
+    if (instr != NULL) {
+        free(instr->arg1);
+        free(instr->arg2);
+        free(instr->arg3);
+        free(instr->arg4);
+        free(instr->arg5);
+        free(instr);
+    }
+}
 
 void eliminar_procesoM(uint32_t PID){
     // Buscar el proceso en la lista de procesos
@@ -73,7 +84,9 @@ void eliminar_procesoM(uint32_t PID){
     pthread_mutex_unlock(&mutex_procesos);
 
     // Liberar la memoria asociada al proceso
-    list_destroy(proceso->instrs);
+
+    list_destroy_and_destroy_elements(proceso->instrs, (void*) destruir_instruccion);
+    
     //list_destroy(proceso->paginas); (ya esta liberada ya que es la misma lista que en su tabla)
     free(proceso);
 

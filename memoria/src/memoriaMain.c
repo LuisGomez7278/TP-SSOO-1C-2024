@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
 // INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
     inicializarEspacioMem();                                                           
-    /*
+   
 // INICIO SERVIDOR MEMORIA
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
@@ -40,10 +40,7 @@ int main(int argc, char* argv[]) {
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
     pthread_join(hilo_kernel_memoria, NULL); 
-*/
 
-crear_procesoM("/home/utnso/tp-2024-1c-Grupo-para-TP/pruebas/scripts_memoria/PLANI_1", 10);
-eliminar_procesoM(10);
 
 
     //--------------------------------------------
@@ -89,7 +86,17 @@ t_list* leer_pseudocodigo(char* path){
     return lista_instrucciones;
 }
 
+void free_tokens(char** tokens) {
+    if (tokens != NULL) {
+        for (int i = 0; tokens[i] != NULL; i++) {
+            free(tokens[i]);
+        }
+        free(tokens);
+    }
+}
+
 t_instruccion* parsear_instruccion(char* linea){
+    t_instruccion* parsear_instruccion(char* linea);
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
     char* ins;
     char* a1;
@@ -109,6 +116,8 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=6)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
+            free(tokens);
+            free(instruccion);
             return (t_instruccion* ) NULL;
             break;
         }
@@ -139,6 +148,8 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=4)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
+            free(tokens);
+            free(instruccion);
             return (t_instruccion* ) NULL;
             break;
         }
@@ -173,6 +184,8 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=3)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
+            free(tokens);
+            free(instruccion);
             return (t_instruccion* ) NULL;
             break;
         }
@@ -201,6 +214,8 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=2)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
+            free(tokens);
+            free(instruccion);
             return (t_instruccion* ) NULL;
             break;
         }    
@@ -222,6 +237,8 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=1)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
+            free(tokens);
+            free(instruccion);
             return (t_instruccion* ) NULL;
             break;
         }
@@ -244,9 +261,10 @@ t_instruccion* parsear_instruccion(char* linea){
         return (t_instruccion* ) NULL;
         break;
     }
-
+    free(tokens);
     return instruccion;
 }
+
 
 cod_ins hash_ins(char* ins){
     if (string_equals_ignore_case(ins, "SET")){return SET;}
@@ -281,8 +299,7 @@ char* path_completo(char* path_base, char* path_parcial)
 
 
 t_instruccion* get_ins(t_list* lista_instrucciones, uint32_t PC){
-    t_instruccion* instruccion = malloc(sizeof(t_instruccion));
-    instruccion = list_get(lista_instrucciones, PC);
+    t_instruccion* instruccion = list_get(lista_instrucciones, PC);
     return instruccion;
 }
 
