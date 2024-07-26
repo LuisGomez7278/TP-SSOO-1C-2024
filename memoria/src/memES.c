@@ -94,7 +94,7 @@ void read_es(int32_t socket_hilo, op_code motivo)
         agregar_a_paquete_string(paquete, strlen(str_leida)+1, str_leida);
         enviar_paquete(paquete, socket_hilo);
         eliminar_paquete(paquete);
-        log_debug(logger_debug, "Solicitud de lectura de E/S completada, string leida: %s", str_leida);
+        //(logger_debug, "Solicitud de lectura de E/S completada, string leida: %s", str_leida);
         free(str_leida);
         }
         else{
@@ -136,10 +136,10 @@ void write_es(int32_t socket_hilo){
         char* mensaje;
         if(escrito){
             mensaje = "El pedido de escritura a memoria fue exitoso";
-            log_debug(logger_debug, "El pedido de escritura desde E/S resulto perfecto");
+            //log_debug(logger_debug, "El pedido de escritura desde E/S resulto perfecto");
         }else{
             mensaje = "El pedido de escritura a memoria fallo";
-            log_debug(logger_debug, "El pedido de escritura desde E/S resulto fallido");
+            //log_debug(logger_debug, "El pedido de escritura desde E/S resulto fallido");
         }   
         agregar_a_paquete_string(paquete, strlen(mensaje)+1, mensaje);
         enviar_paquete(paquete, socket_hilo);

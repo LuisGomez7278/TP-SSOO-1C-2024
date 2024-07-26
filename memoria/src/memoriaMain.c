@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
 // INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
     inicializarEspacioMem();                                                           
-    
+    /*
 // INICIO SERVIDOR MEMORIA
     socket_escucha = iniciar_servidor(puerto_escucha, logger);
 
@@ -40,7 +40,10 @@ int main(int argc, char* argv[]) {
     pthread_t hilo_kernel_memoria;
     pthread_create(&hilo_kernel_memoria,NULL,(void*)conexion_con_kernel,NULL);
     pthread_join(hilo_kernel_memoria, NULL); 
-    
+*/
+
+crear_procesoM("/home/utnso/tp-2024-1c-Grupo-para-TP/pruebas/scripts_memoria/PLANI_1", 10);
+eliminar_procesoM(10);
 
 
     //--------------------------------------------
@@ -81,7 +84,7 @@ t_list* leer_pseudocodigo(char* path){
     }
 
     fclose(archivo);
-    log_debug(logger_debug, "Archivo pseudocodigo leido, cantidad lineas leidas: [%d]", list_size(lista_instrucciones));
+    //log_debug(logger_debug, "Archivo pseudocodigo leido, cantidad lineas leidas: [%d]", list_size(lista_instrucciones));
 
     return lista_instrucciones;
 }
@@ -289,7 +292,7 @@ void enviar_tam_pag(){
     agregar_a_paquete_uint32(paquete, tam_pag);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);            
-    log_debug(logger_debug, "Se envia el tamaño de pagina a CPU");
+    //log_debug(logger_debug, "Se envia el tamaño de pagina a CPU");
 }
 
 

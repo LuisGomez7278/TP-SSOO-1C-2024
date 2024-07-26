@@ -23,7 +23,7 @@ bool crear_procesoM(char* path_instrucciones, uint32_t PID){
     pthread_mutex_unlock(&mutex_procesos);
    
     
-    log_debug(logger_debug, "Proceso con PID %d creado", PID);
+    //log_debug(logger_debug, "Proceso con PID %d creado", PID);
     return true;
 } 
 
@@ -77,7 +77,7 @@ void eliminar_procesoM(uint32_t PID){
     //list_destroy(proceso->paginas); (ya esta liberada ya que es la misma lista que en su tabla)
     free(proceso);
 
-    log_debug(logger_debug, "Proceso con PID %d finalizado y eliminado", PID);
+    //log_debug(logger_debug, "Proceso con PID %d finalizado y eliminado", PID);
     }
 }
 
@@ -142,7 +142,7 @@ bool añadir_pagina_a_proceso(tabla_pag_proceso* tabla, uint32_t num_paginas, ui
             log_error(logger, "Out Of Memory");
             return false;
         } else {
-            log_info(logger_debug, "Página añadida y asignada al proceso %d. Total de páginas: %d", PID, list_size(tabla->paginas));
+            //log_info(logger_debug, "Página añadida y asignada al proceso %d. Total de páginas: %d", PID, list_size(tabla->paginas));
         }    
     }
     return true;
@@ -159,14 +159,14 @@ void eliminar_pagina_de_proceso(tabla_pag_proceso* tabla, int num_paginas) {
             // Liberar el marco correspondiente si es necesario
             if (pagina_a_eliminar->presencia) {
                 bitarray_clean_bit(bitmap, pagina_a_eliminar->marco);  // Libera el marco en el bitmap
-                log_debug(logger_debug, "Liberado el marco %d del proceso %d", pagina_a_eliminar->marco, tabla->pid);
+                //log_debug(logger_debug, "Liberado el marco %d del proceso %d", pagina_a_eliminar->marco, tabla->pid);
             }
             free(pagina_a_eliminar);
         }
 
         // Ahora eliminar la página de la lista
         list_remove(tabla->paginas, index);
-        log_info(logger_debug, "Página eliminada del proceso %d. Total de páginas: %d", tabla->pid, list_size(tabla->paginas));
+        //log_info(logger_debug, "Página eliminada del proceso %d. Total de páginas: %d", tabla->pid, list_size(tabla->paginas));
     }
 }
 
@@ -300,7 +300,7 @@ bool escribir_memoria(uint32_t direccion_fisica, uint32_t tamanio_acceso, void* 
     }
 
     if (direccion_fisica+tamanio_acceso > tam_memoria) {
-        log_info(logger_debug, "Out of Memory");
+        //log_info(logger_debug, "Out of Memory");
         return false;
     }
 
