@@ -68,7 +68,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
         log_error(logger_debug,"Error al recibir el buffer");
     }
     free(buffer);
-}
+}}
 
 
 void eliminar_proceso(){ // llega un pid
