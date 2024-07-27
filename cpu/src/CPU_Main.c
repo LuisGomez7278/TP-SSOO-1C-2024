@@ -1,9 +1,16 @@
 #include "../include/CPU_Main.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) 
+{
+    printf("Argumento : %s\n", argv[1]);   
+      
+    //VALIDO ARGUMENTOS
+    validar_argumento(argv[1]);
+    
+    char* parametros = argv[1];
 
 //INICIO DE CPU
-    iniciar_CPU();
+    iniciar_CPU(parametros);
 
 // INICIAR SERVIDOR
     socket_escucha_dispatch = iniciar_servidor(puerto_escucha_dispatch, logger_debug);
@@ -62,7 +69,11 @@ int main(int argc, char* argv[]) {
     if (socket_escucha_dispatch) {liberar_conexion(socket_escucha_dispatch);}
     if (socket_escucha_interrupt) {liberar_conexion(socket_escucha_interrupt);}
 
-    end_program(logger, config);
+    config_destroy(config_parametros);
+    config_destroy(config_conexiones);
+    log_destroy(logger);
+    log_destroy(logger_valores);
+    log_destroy(logger_debug);
 
     return 0;
 }
@@ -765,4 +776,12 @@ void destruir_instruccion(t_instruccion* instruccion)
     if (instruccion->arg4) {free(ins_actual->arg4);}
     if (instruccion->arg5) {free(ins_actual->arg5);}
     free(ins_actual);
+}
+
+void validar_argumento(char* parametros)
+{
+    if(parametros == NULL){
+        printf("Agregar argumento 'parametros'");
+        exit(EXIT_FAILURE);
+    }
 }

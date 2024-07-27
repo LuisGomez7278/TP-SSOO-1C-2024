@@ -12,6 +12,7 @@
 #include "CPU-kernel.h"
 #include "CPU_mmu.h"
 
+void validar_argumento(char* parametros);
 void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, t_instruccion* ins_actual);
 void* direccion_registro(t_contexto_ejecucion* contexto, char* registro);
 bool registro_chico(char* registro);
