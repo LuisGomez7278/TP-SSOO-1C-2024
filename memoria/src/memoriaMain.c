@@ -97,7 +97,7 @@ void free_tokens(char** tokens) {
 }
 
 t_instruccion* parsear_instruccion(char* linea){
-    t_instruccion* parsear_instruccion(char* linea);
+    
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
     char* ins;
     char* a1;
@@ -106,6 +106,7 @@ t_instruccion* parsear_instruccion(char* linea){
     char* a4;
     char* a5;
 
+    //string_trim(&linea);
     char** tokens = string_split(linea, " ");
 
     ins = tokens[0];
@@ -117,7 +118,7 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=6)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
-            free(tokens);
+            liberar_array_de_comando(tokens,string_array_size(tokens));
             free(instruccion);
             return (t_instruccion* ) NULL;
             break;
@@ -149,7 +150,7 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=4)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
-            free(tokens);
+            liberar_array_de_comando(tokens,string_array_size(tokens));
             free(instruccion);
             return (t_instruccion* ) NULL;
             break;
@@ -185,7 +186,7 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=3)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
-            free(tokens);
+            liberar_array_de_comando(tokens,string_array_size(tokens));
             free(instruccion);
             return (t_instruccion* ) NULL;
             break;
@@ -215,7 +216,7 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=2)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
-            free(tokens);
+            liberar_array_de_comando(tokens,string_array_size(tokens));
             free(instruccion);
             return (t_instruccion* ) NULL;
             break;
@@ -238,7 +239,7 @@ t_instruccion* parsear_instruccion(char* linea){
         if (string_array_size(tokens)!=1)
         {
             log_error(logger_debug,"Cantidad incorrecta de argumentos en instruccion");
-            free(tokens);
+            liberar_array_de_comando(tokens,string_array_size(tokens));
             free(instruccion);
             return (t_instruccion* ) NULL;
             break;
@@ -260,9 +261,11 @@ t_instruccion* parsear_instruccion(char* linea){
     default:
         log_error(logger_debug, "Instruccion no reconocida");
         return (t_instruccion* ) NULL;
+        liberar_array_de_comando(tokens,string_array_size(tokens));
         break;
     }
-    free(tokens);
+    
+    liberar_array_de_comando(tokens,string_array_size(tokens));
     return instruccion;
 }
 
@@ -316,4 +319,9 @@ void enviar_tam_pag(){
 
 
 
-	
+void liberar_array_de_comando(char** array_de_comando, int tamanio) {
+    for (int i = 0; i < tamanio; ++i) {
+        free(array_de_comando[i]);
+    } 
+    free(array_de_comando);
+}

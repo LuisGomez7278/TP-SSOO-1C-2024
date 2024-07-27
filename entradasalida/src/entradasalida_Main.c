@@ -390,7 +390,7 @@ char* leer_de_teclado(uint32_t tamanio_a_leer)
 
     //Primera lectura de teclado
     char* mensaje_mostrado = malloc(25);
-    sprintf(mensaje_mostrado, "Ingresar %d caracteres", tamanio_a_leer);
+    sprintf(mensaje_mostrado, "Ingresar %d caracteres\n", tamanio_a_leer);
     leido = readline(mensaje_mostrado);
     string_append(&string_a_memoria, leido);
     restante-=string_length(leido);

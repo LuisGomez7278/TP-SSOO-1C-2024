@@ -58,6 +58,7 @@ extern pthread_mutex_t mutex_tablaDePaginas;
 extern pthread_mutex_t mutex_procesos;
 extern pthread_mutex_t mutex_listaDeinstrucciones;
 extern pthread_mutex_t mutex_bitmap;
-
+//Memoria Main
+void liberar_array_de_comando(char** array_de_comando, int tamanio);
 
 #endif //TP_MEMORIA_EXT_H_

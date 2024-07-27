@@ -138,7 +138,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
 
         if(registro_chico(ins_actual->arg1))
         {
-            valorchico1 = suma;// Convertirlo a uint8 si hace falta
+            valorchico1 = resta;// Convertirlo a uint8 si hace falta
             log_debug(logger_valores, "Resultado resta: %u", valorchico1);
             memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
