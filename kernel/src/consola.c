@@ -57,7 +57,10 @@ bool validacion_de_ingreso_por_consola(char* leido){
 
 void liberar_array_de_comando(char** array_de_comando, int tamanio) {
     for (int i = 0; i < tamanio; ++i) {
-        free(array_de_comando[i]);
-    } 
+         if (array_de_comando[i] != NULL) {
+            free(array_de_comando[i]);
+            array_de_comando[i] = NULL;
+            }
+    }     
     free(array_de_comando);
 }

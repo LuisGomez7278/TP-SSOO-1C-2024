@@ -14,6 +14,7 @@ t_log* logger_valores;
 t_config* config_conexiones;
 t_config* config_parametros;
 
+
 char* ip_memoria;
 char* puerto_memoria;
 char* puerto_escucha_dispatch;

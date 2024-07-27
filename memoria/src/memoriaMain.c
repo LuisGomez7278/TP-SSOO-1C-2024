@@ -67,18 +67,25 @@ t_list* leer_pseudocodigo(char* path){
         return (t_list*) NULL;    
     }
 
-    char linea[50];
-    memset(linea, 0, 50);
-    while (fgets(linea, 50, archivo) != NULL)
-    {
-        instr = parsear_instruccion(linea);
-        if (!instr) 
-        {
-            log_error(logger_debug, "El archivo de pseudocodigo tiene errores/instrucciones invalidas");
-            return (t_list* ) NULL;
-            break;
+    char linea[60];
+    memset(linea, 0, 60);
+    while (fgets(linea, 60, archivo) != NULL)
+    {   
+        if(linea!=NULL){
+           
+            size_t len = strlen(linea);
+            if (len > 0 && linea[len - 1] == '\n') {
+            linea[len - 1] = '\0';
         }
-        list_add(lista_instrucciones, instr);
+            instr = parsear_instruccion(linea);
+            if (!instr) 
+            {
+                log_error(logger_debug, "El archivo de pseudocodigo tiene errores/instrucciones invalidas");
+                return (t_list* ) NULL;
+                break;
+            }
+            list_add(lista_instrucciones, instr);
+        }
     }
 
     fclose(archivo);
@@ -99,18 +106,18 @@ void free_tokens(char** tokens) {
 t_instruccion* parsear_instruccion(char* linea){
     
     t_instruccion* instruccion = malloc(sizeof(t_instruccion));
-    char* ins;
-    char* a1;
-    char* a2;
-    char* a3;
-    char* a4;
-    char* a5;
-
-    //string_trim(&linea);
+    //char* ins;
+    char* a1=NULL;
+    char* a2=NULL;
+    char* a3=NULL;
+    char* a4=NULL;
+    char* a5=NULL;
+    //printf("INSTRUCCION1:%s\n",linea);
+    
     char** tokens = string_split(linea, " ");
-
-    ins = tokens[0];
-    switch (hash_ins(ins))
+   
+    
+    switch (hash_ins(linea))
     {
     // 5 argumentos
     case IO_FS_WRITE:
@@ -123,19 +130,19 @@ t_instruccion* parsear_instruccion(char* linea){
             return (t_instruccion* ) NULL;
             break;
         }
-        a1 = tokens[1];
-        a2 = tokens[2];
-        a3 = tokens[3];
-        a4 = tokens[4];
-        a5 = tokens[5];
 
-        string_trim(&a1);
-        string_trim(&a2);
-        string_trim(&a3);
-        string_trim(&a4);
-        string_trim(&a5);
 
-        instruccion->ins = hash_ins(ins);
+
+
+        a1 =strdup(tokens[1]);
+        a2 =strdup(tokens[2]);
+        a3 =strdup(tokens[3]);
+        a4 =strdup(tokens[4]);
+        a5 =strdup(tokens[5]);
+
+
+
+        instruccion->ins = hash_ins(linea);
         instruccion->arg1 = a1;
         instruccion->arg2 = a2;
         instruccion->arg3 = a3;
@@ -155,17 +162,17 @@ t_instruccion* parsear_instruccion(char* linea){
             return (t_instruccion* ) NULL;
             break;
         }
-        a1 = tokens[1];
-        a2 = tokens[2];
-        a3 = tokens[3];
+        
+
+        a1 = strdup(tokens[1]);
+        a2 = strdup(tokens[2]);
+        a3 = strdup(tokens[3]);
         a4 = string_new();
         a5 = string_new();
 
-        string_trim(&a1);
-        string_trim(&a2);
-        string_trim(&a3);
 
-        instruccion->ins = hash_ins(ins);
+
+        instruccion->ins = hash_ins(linea);
         instruccion->arg1 = a1;
         instruccion->arg2 = a2;
         instruccion->arg3 = a3;
@@ -191,16 +198,17 @@ t_instruccion* parsear_instruccion(char* linea){
             return (t_instruccion* ) NULL;
             break;
         }
-        a1 = tokens[1];
-        a2 = tokens[2];
+
+
+        a1 = strdup(tokens[1]);
+        a2 = strdup(tokens[2]);
         a3 = string_new();
         a4 = string_new();
         a5 = string_new();
 
-        string_trim(&a1);
-        string_trim(&a2);
 
-        instruccion->ins = hash_ins(ins);
+
+        instruccion->ins = hash_ins(linea);
         instruccion->arg1 = a1;
         instruccion->arg2 = a2;
         instruccion->arg3 = a3;
@@ -221,14 +229,15 @@ t_instruccion* parsear_instruccion(char* linea){
             return (t_instruccion* ) NULL;
             break;
         }    
-        a1 = tokens[1];
+        //strcpy(a1,tokens[1]);
+        a1 = strdup(tokens[1]);
         a2 = string_new();
         a3 = string_new();
         a4 = string_new();
         a5 = string_new();
-        string_trim(&a1);
+        //string_trim(&a1);
         
-        instruccion->ins = hash_ins(ins);
+        instruccion->ins = hash_ins(linea);
         instruccion->arg1 = a1;
         instruccion->arg2 = a2;
         instruccion->arg3 = a3;
@@ -250,7 +259,7 @@ t_instruccion* parsear_instruccion(char* linea){
         a4 = string_new();
         a5 = string_new();
 
-        instruccion->ins = hash_ins(ins);
+        instruccion->ins = hash_ins(linea);
         instruccion->arg1 = a1;
         instruccion->arg2 = a2;
         instruccion->arg3 = a3;
@@ -270,6 +279,76 @@ t_instruccion* parsear_instruccion(char* linea){
 }
 
 
+
+
+cod_ins hash_ins(char* linea){
+    char** tokens = string_split(linea, " ");
+
+
+         if (strcmp(tokens[0], "SET")==0){
+            liberar_array_de_comando(tokens,string_array_size(tokens));
+            return SET;}
+    else if (strcmp(tokens[0], "SUM")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return SUM;}
+    else if (strcmp(tokens[0], "SUB")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return SUB;}
+    else if (strcmp(tokens[0], "MOV_IN")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return MOV_IN;}
+    else if (strcmp(tokens[0], "MOV_OUT")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return MOV_OUT;}
+    else if (strcmp(tokens[0], "RESIZE")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return RESIZE;}
+    else if (strcmp(tokens[0], "JNZ")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return JNZ;}
+    else if (strcmp(tokens[0], "COPY_STRING")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return COPY_STRING;}
+    else if (strcmp(tokens[0], "IO_GEN_SLEEP")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_GEN_SLEEP;}
+    else if (strcmp(tokens[0], "IO_STDIN_READ")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_STDIN_READ;}
+    else if (strcmp(tokens[0], "IO_STDOUT_WRITE")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_STDOUT_WRITE;}
+    else if (strcmp(tokens[0], "IO_FS_CREATE")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_FS_CREATE;}
+    else if (strcmp(tokens[0], "IO_FS_DELETE")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_FS_DELETE;}
+    else if (strcmp(tokens[0], "IO_FS_TRUNCATE")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_FS_TRUNCATE;}
+    else if (strcmp(tokens[0], "IO_FS_WRITE")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_FS_WRITE;}
+    else if (strcmp(tokens[0], "IO_FS_READ")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return IO_FS_READ;}
+    else if (strcmp(tokens[0], "WAIT")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return WAIT;}
+    else if (strcmp(tokens[0], "SIGNAL")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return SIGNAL;}
+    else if (strcmp(tokens[0], "EXIT")==0){
+        liberar_array_de_comando(tokens,string_array_size(tokens));
+        return EXIT;}
+    else return -1;
+}
+
+
+
+
+/*
 cod_ins hash_ins(char* ins){
     if (string_equals_ignore_case(ins, "SET")){return SET;}
     else if (string_equals_ignore_case(ins, "SUM")){return SUM;}
@@ -293,7 +372,7 @@ cod_ins hash_ins(char* ins){
     else return -1;
 }
 
-
+*/
 char* path_completo(char* path_base, char* path_parcial)
 {
     char* path = string_duplicate(path_base);
@@ -321,7 +400,10 @@ void enviar_tam_pag(){
 
 void liberar_array_de_comando(char** array_de_comando, int tamanio) {
     for (int i = 0; i < tamanio; ++i) {
-        free(array_de_comando[i]);
-    } 
+         if (array_de_comando[i] != NULL) {
+            free(array_de_comando[i]);
+            array_de_comando[i] = NULL;
+            }
+    }     
     free(array_de_comando);
 }

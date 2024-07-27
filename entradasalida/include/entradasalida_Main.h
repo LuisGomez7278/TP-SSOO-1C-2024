@@ -43,6 +43,7 @@ int32_t socket_kernel_entradasalida;
 
 
  t_config* config;
+ t_config* config_conexion;
 
  char* IP_KERNEL;
  char* PUERTO_KERNEL;

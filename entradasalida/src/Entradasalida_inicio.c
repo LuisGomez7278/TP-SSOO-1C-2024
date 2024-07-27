@@ -4,6 +4,12 @@ void iniciar_entradasalida(char* nombre_interfaz)
 {
     iniciar_logs(nombre_interfaz);
     iniciar_config(nombre_interfaz);
+    iniciar_config_conexion();
+
+    log_debug(logger_debug,"IP KERNEL: %s",IP_KERNEL);
+    log_debug(logger_debug,"PUERTO KERNEL: %s",PUERTO_KERNEL);
+    log_debug(logger_debug,"IP MEMORIA: %s",IP_MEMORIA);
+    log_debug(logger_debug,"PUERTO MEMORIA: %s",PUERTO_MEMORIA);
 
     sem_init(&respuesta_memoria, 0, 0);
 }
@@ -32,6 +38,28 @@ void iniciar_logs( char* nombre_interfaz) {
     free(nombre_log);
 }
 
+
+void iniciar_config_conexion(){
+    config_conexion = start_config("./configs/conection.config");
+    	if(config_conexion==NULL){
+    		perror("No se pudo crear la config");
+    		exit(EXIT_FAILURE);
+    }
+
+    IP_KERNEL = config_get_string_value(config_conexion, "IP_KERNEL");
+    PUERTO_KERNEL = config_get_string_value(config_conexion, "PUERTO_KERNEL");
+
+   // if (TIPO_INTERFAZ!=GENERICA)
+    //{
+        IP_MEMORIA = config_get_string_value(config_conexion, "IP_MEMORIA");
+        PUERTO_MEMORIA = config_get_string_value(config_conexion, "PUERTO_MEMORIA");
+    //}
+    
+
+
+}
+
+
 void iniciar_config(char* config_interfaz)
 {   
     char* path_config = string_duplicate("./configs/");
@@ -52,21 +80,21 @@ void iniciar_config(char* config_interfaz)
     {
     case GENERICA:
         TIEMPO_UNIDAD_TRABAJO = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");    
-        IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
-        PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
+        //IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
+        //PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
         break;
     case STDIN:
     case STDOUT:
-        IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
-        PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
-        IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
-        PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
+        //IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
+        //PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
+        //IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
+        //PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
         break;
     case DIALFS:
-        IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
-        PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
-        IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
-        PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
+        //IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
+        //PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
+        //IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
+        //PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
         TIEMPO_UNIDAD_TRABAJO = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
         PATH_BASE_DIALFS = config_get_string_value(config, "PATH_BASE_DIALFS");
         BLOCK_SIZE = config_get_int_value(config, "BLOCK_SIZE");

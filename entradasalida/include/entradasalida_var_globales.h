@@ -97,6 +97,7 @@ extern t_bitarray* bitmap_bloques;
 extern t_log* logger;
 extern t_log* logger_debug;
 extern t_config* config;
+extern t_config* config_conexion;
 
 extern char* IP_KERNEL;
 extern char* PUERTO_KERNEL;
@@ -116,6 +117,7 @@ extern sem_t respuesta_memoria;
 void iniciar_entradasalida(char* nombre_interfaz);
 void iniciar_logs(char* nombre_interfaz);
 void iniciar_config(char* config_interfaz);
+void iniciar_config_conexion();
 cod_interfaz get_tipo_interfaz(char* TIPO_INTERFAZ);
 
 

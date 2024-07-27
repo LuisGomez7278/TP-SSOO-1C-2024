@@ -491,15 +491,15 @@ void gestionar_solicitud_IO(t_pcb* pcb_dispatch, char* nombre_interfaz, op_code 
 
         agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
 
-        if(string_equals_ignore_case(algoritmo_planificacion, "VRR")) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
+        if(strcmp(algoritmo_planificacion,"VRR")==0 ) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
         {   
             if(pcb_dispatch->quantum_ejecutado<quantum){
                 ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
                 log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);
-            }else
-            {   pcb_dispatch->quantum_ejecutado=0;
-                ingresar_en_lista(pcb_dispatch, lista_bloqueado , &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);
+            }else{
                 log_warning(logger,"PID: %u bloqueado esperando uso interfaz: %s (ademas de solicitar interfaz se acabo su quantum).",pcb_dispatch->PID,nombre_interfaz);
+               pcb_dispatch->quantum_ejecutado=0;
+                ingresar_en_lista(pcb_dispatch, lista_bloqueado , &semaforo_bloqueado, &cantidad_procesos_bloqueados , BLOCKED);
             }
               
         }else
