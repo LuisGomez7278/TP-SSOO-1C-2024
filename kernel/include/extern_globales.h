@@ -46,7 +46,9 @@ extern int32_t socket_escucha;
 
 extern t_log* logger;
 extern t_log* logger_debug;
-extern t_config* config;
+
+extern t_config* config_conexiones;
+extern t_config* config_parametros;
 
 
 extern t_list *lista_new;
@@ -115,9 +117,9 @@ void signal_handler(int signum);
     void atender_conexion_CPU_DISPATCH_KERNEL ();
 
 //inicio kernel
-    void iniciar_Kernel(void);
+    void iniciar_Kernel(char* parametros);
     void iniciar_logs(void);
-    void iniciar_configs(void);
+    void iniciar_configs(char* parametros);
     void iniciar_estructuras_planificacion();
 
 //consola.h

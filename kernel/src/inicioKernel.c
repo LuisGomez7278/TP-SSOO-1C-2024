@@ -1,14 +1,12 @@
 #include "../include/inicioKernel.h"
 
 
-void iniciar_Kernel(){
+void iniciar_Kernel(char* parametros){
 
     iniciar_logs();
-	iniciar_configs();
+	iniciar_configs(parametros);
 	//imprimir_configs();
 	iniciar_estructuras_planificacion();
-
-
 }
 
 
@@ -30,26 +28,38 @@ void iniciar_logs()
 	
 }
 
-void iniciar_configs(){
-	config = start_config("./kernel.config");
-	if(config==NULL){
-		perror("No se pudo crear la config");
+void iniciar_configs(char* parametros){
+    config_conexiones = start_config("./kernel.config");
+
+    if(config_conexiones==NULL){
+        perror("Fallo al crear el archivo config conexiones");
+        exit(EXIT_FAILURE);
+    }
+    char* path_parametros = string_duplicate("./configs/");
+    string_append(&path_parametros, parametros);
+    string_append(&path_parametros, ".cfg");
+
+    config_parametros = start_config(path_parametros);
+	if(config_parametros==NULL){
+		perror("No se pudo crear la config parametros");
 		exit(EXIT_FAILURE);
 	}
+    free(path_parametros);
 
 
-    ip_cpu 							 = config_get_string_value(config, "IP_CPU");
-    puerto_cpu_dispatch				 = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
-    puerto_cpu_interrupt 			 = config_get_string_value(config, "PUERTO_CPU_INTERRUPT");
-    ip_memoria 						 = config_get_string_value(config, "IP_MEMORIA");
-    puerto_memoria 					 = config_get_string_value(config, "PUERTO_MEMORIA");
-    puerto_escucha 					 = config_get_string_value(config, "PUERTO_ESCUCHA");
-	algoritmo_planificacion			 = config_get_string_value(config,"ALGORITMO_PLANIFICACION");
-	quantum							 = config_get_int_value(config,"QUANTUM");
-	recursos						 = config_get_array_value(config,"RECURSOS");
-	instancias_recursos				 = config_get_array_value(config,"INSTANCIAS_RECURSOS");
-	grado_multiprogramacion			 = config_get_int_value(config,"GRADO_MULTIPROGRAMACION");
-	path_de_comandos_base			 = config_get_string_value(config,"PATH_COMANDOS");
+
+    ip_cpu 							 = config_get_string_value(config_conexiones, "IP_CPU");
+    puerto_cpu_dispatch				 = config_get_string_value(config_conexiones, "PUERTO_CPU_DISPATCH");
+    puerto_cpu_interrupt 			 = config_get_string_value(config_conexiones, "PUERTO_CPU_INTERRUPT");
+    ip_memoria 						 = config_get_string_value(config_conexiones, "IP_MEMORIA");
+    puerto_memoria 					 = config_get_string_value(config_conexiones, "PUERTO_MEMORIA");
+    puerto_escucha 					 = config_get_string_value(config_conexiones, "PUERTO_ESCUCHA");
+	algoritmo_planificacion			 = config_get_string_value(config_parametros,"ALGORITMO_PLANIFICACION");
+	quantum							 = config_get_int_value(config_parametros,"QUANTUM");
+	recursos						 = config_get_array_value(config_parametros,"RECURSOS");
+	instancias_recursos				 = config_get_array_value(config_parametros,"INSTANCIAS_RECURSOS");
+	grado_multiprogramacion			 = config_get_int_value(config_parametros,"GRADO_MULTIPROGRAMACION");
+	path_de_comandos_base			 = config_get_string_value(config_parametros,"PATH_COMANDOS");
 	instancias_recursos_int			 = convertir_a_enteros_la_lista_de_instancias(instancias_recursos);
 	
 

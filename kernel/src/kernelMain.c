@@ -2,8 +2,17 @@
 
 int32_t main(int32_t argc, char* argv[]) {
 
+    printf("Argumento : %s\n", argv[1]);   
+    char* parametros = argv[1];
+      
+    //VALIDO ARGUMENTOS
+    if(parametros == NULL){
+        printf("Agregar argumento 'parametros'");
+        exit(EXIT_FAILURE);
+    }
+    
 //INICIALIZO LOS LOGS Y CONGIFURACIONES Y COLAS DE ESTADO
-    iniciar_Kernel();
+    iniciar_Kernel(parametros);
 
 
 // INICIALIZO SERVIDOR KERNEL
@@ -59,8 +68,10 @@ int32_t main(int32_t argc, char* argv[]) {
     if (socket_memoria_kernel) {liberar_conexion(socket_memoria_kernel);}
     if (socket_entradasalida_kernel) {liberar_conexion(socket_entradasalida_kernel);}
 
+    log_destroy(logger);
     log_destroy(logger_debug);
-    end_program(logger, config);
+    config_destroy(config_conexiones);
+    config_destroy(config_parametros);
 
 
     sem_destroy (&control_multiprogramacion);
@@ -97,8 +108,10 @@ void signal_handler(int signum) {
     if (socket_kernel_cpu_interrupt) {liberar_conexion(socket_kernel_cpu_interrupt);}
     if (socket_memoria_kernel) {liberar_conexion(socket_memoria_kernel);}
     if (socket_entradasalida_kernel) {liberar_conexion(socket_entradasalida_kernel);}
+    log_destroy(logger);
     log_destroy(logger_debug);
-    end_program(logger, config);
+    config_destroy(config_conexiones);
+    config_destroy(config_parametros);
     
     sem_destroy (&control_multiprogramacion);
     sem_destroy (&cantidad_procesos_new);
