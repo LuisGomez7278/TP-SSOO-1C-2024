@@ -15,7 +15,6 @@ void cargarConfig(char* parametros){
 
     //INICIALIZO config
     config_conexiones = start_config("./memoria.config");
-    config_parametros = start_config("./memoria.config");
 
     if(config_conexiones==NULL){
         perror("Fallo al crear el archivo config conexiones");
