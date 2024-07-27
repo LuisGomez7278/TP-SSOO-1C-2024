@@ -295,6 +295,7 @@ int32_t main(int32_t argc, char* argv[]) {
             metadata = config_create(path_archivo_metadata);
             tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
             bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+            free(path_archivo_metadata);
 
             log_info(logger, "PID: %u - Escribir Archivo: %s - Tamaño a Escribir: %u - Puntero Archivo: %u", PID, nombre_archivo, tamanio_total, puntero);
             void* datos_leidos = NULL;
@@ -359,6 +360,10 @@ int32_t main(int32_t argc, char* argv[]) {
         
         }
     }
+
+    config_destroy(config);
+    log_destroy(logger);
+    log_destroy(logger_debug);
 
     if (bloques) {munmap(bloques, BLOCK_SIZE*BLOCK_COUNT);}
     if (array_bitmap) {munmap(array_bitmap, BLOCK_COUNT/8);}
