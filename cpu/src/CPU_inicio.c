@@ -50,17 +50,16 @@ void iniciar_logs(void){
 void iniciar_config(char* parametros){
     config_conexiones = start_config("./cpu.config");
 	if(config_conexiones==NULL){
-		perror("No se pudo crear la config");
+		perror("No se pudo crear la config conexiones");
 		exit(EXIT_FAILURE);
 	}
     char* path_parametros = string_duplicate("./configs/");
     string_append(&path_parametros, parametros);
     string_append(&path_parametros, ".cfg");
 
-    printf("%s", path_parametros);
     config_parametros = start_config(path_parametros);
 	if(config_parametros==NULL){
-		perror("No se pudo crear la config");
+		perror("No se pudo crear la config parametros");
 		exit(EXIT_FAILURE);
 	}
     free(path_parametros);

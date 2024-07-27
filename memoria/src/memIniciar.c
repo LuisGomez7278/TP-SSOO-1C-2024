@@ -11,30 +11,41 @@ void inciarlogsYsemaforos(){
      pthread_mutex_init(& mutex_bitmap,NULL);
 }
 
-void cargarConfig(){
+void cargarConfig(char* parametros){
 
     //INICIALIZO config
-    config = start_config("./memoria.config");
+    config_conexiones = start_config("./memoria.config");
+    config_parametros = start_config("./memoria.config");
 
-    if(config==NULL){
-        perror("Fallo al crear el archivo config");
+    if(config_conexiones==NULL){
+        perror("Fallo al crear el archivo config conexiones");
         exit(EXIT_FAILURE);
     }
+    char* path_parametros = string_duplicate("./configs/");
+    string_append(&path_parametros, parametros);
+    string_append(&path_parametros, ".cfg");
+
+    config_parametros = start_config(path_parametros);
+	if(config_parametros==NULL){
+		perror("No se pudo crear la config parametros");
+		exit(EXIT_FAILURE);
+	}
+    free(path_parametros);
 
     //OBTENER VALORES CONFIG
-    puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");
+    puerto_escucha = config_get_string_value(config_conexiones, "PUERTO_ESCUCHA");
     log_info(logger, "PUERTO leido: %s", puerto_escucha);
 
-    path_base = config_get_string_value(config, "PATH_INSTRUCCIONES");
+    path_base = config_get_string_value(config_conexiones, "PATH_INSTRUCCIONES");
     log_info(logger, "PATH: %s", path_base);
 
-    tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
+    tam_memoria = config_get_int_value(config_parametros, "TAM_MEMORIA");
     log_info(logger, "TAMANIO MEMORIA: %d", tam_memoria);
 
-    tam_pagina = config_get_int_value(config, "TAM_PAGINA");
+    tam_pagina = config_get_int_value(config_parametros, "TAM_PAGINA");
     log_info(logger, "TAMANIO PAGINA: %d", tam_pagina);
 
-    retardo = config_get_int_value(config, "RETARDO_RESPUESTA");
+    retardo = config_get_int_value(config_parametros, "RETARDO_RESPUESTA");
     log_info(logger, "RETARDO RESPUESTA: %d", retardo);
 
     cant_frames = tam_memoria/tam_pagina;

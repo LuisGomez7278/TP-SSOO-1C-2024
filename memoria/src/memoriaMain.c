@@ -2,11 +2,20 @@
 
 int main(int argc, char* argv[]) {
     
+    printf("Argumento : %s\n", argv[1]);   
+    char* parametros = argv[1];
+      
+    //VALIDO ARGUMENTOS
+    if(parametros == NULL){
+        printf("Agregar argumento 'parametros'");
+        exit(EXIT_FAILURE);
+    }    
+
 // INICIALIZO LOGs Y SEMAFOROS
     inciarlogsYsemaforos();
 
 // OBTENGO LOS VALORES DEL CONFIG
-    cargarConfig();
+    cargarConfig(parametros);
 
 // INICIALIZO EL ESPACIO DE USUARIO DE MEMORIA (PAGINACION)
     inicializarEspacioMem();                                                           

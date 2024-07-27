@@ -28,6 +28,7 @@ extern t_list* procesos;
 
 //LOGGER
 extern t_log* logger;
+extern t_log* logger_debug;
 
 //CONFIG
 extern char* puerto_escucha;
@@ -36,9 +37,9 @@ extern int32_t tam_pagina;
 extern int32_t tam_memoria;
 extern int32_t retardo;
 extern int32_t cant_frames;
-extern t_log* logger_debug;
 
-extern t_config* config;
+extern t_config* config_conexiones;
+extern t_config* config_parametros;
 
 extern int32_t socket_cpu_memoria;
 extern int32_t socket_kernel_memoria;

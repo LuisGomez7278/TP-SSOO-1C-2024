@@ -60,7 +60,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
             //log_debug(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
             enviar_instruccion_con_PID_por_socket(ERROR_AL_CARGAR_EL_PROCESO, PID, socket_kernel_memoria);
         }
-        free(path);
+        if(path) {free(path);}
         free(path_parcial);
 
     } else {

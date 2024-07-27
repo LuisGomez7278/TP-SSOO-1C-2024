@@ -17,7 +17,7 @@
 #include "extGlobales.h"
 
 void inciarlogsYsemaforos();
-void cargarConfig();
+void cargarConfig(char* parametros);
 void inicializarEspacioMem();
 
 #endif //TP_MEMORIA_INICIAR_H_
