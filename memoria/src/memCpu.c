@@ -52,7 +52,7 @@ void fetch(int socket_cpu_memoria){
     uint32_t PID; 
     uint32_t PC;
     recibir_fetch(socket_cpu_memoria, &PID, &PC);
-    log_trace(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
+    //log_trace(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     
     pthread_mutex_unlock(&mutex_listaDeinstrucciones);
     
