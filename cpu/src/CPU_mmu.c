@@ -256,6 +256,7 @@ void escribir_en_memoria_string(char* string_leida, uint32_t direccion_logica_WR
     }
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
+    free(bytes_str);
 }
 
 
