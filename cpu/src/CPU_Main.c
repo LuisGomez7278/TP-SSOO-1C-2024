@@ -1,12 +1,12 @@
 #include "../include/CPU_Main.h"
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
-    printf("Argumento : %s\n", argv[1]);   
-      
+    printf("Argumento : %s\n", argv[1]);
+
     //VALIDO ARGUMENTOS
     validar_argumento(argv[1]);
-    
+
     char* parametros = argv[1];
 
 //INICIO DE CPU
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
     pthread_create(&hilo_conexion_memoria, NULL, (void*) gestionar_conexion_memoria, NULL);
     pthread_detach(hilo_conexion_memoria);
-        
+
     while(true){
         if (detener_ejecucion)
         {   
@@ -46,13 +46,13 @@ int main(int argc, char* argv[])
             sem_post(&espera_iterador);
             sem_wait(&hay_proceso_ejecutando);
         }
-        
+
         fetch(PID, contexto_interno.PC);
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
-        
+
         // loggear_valores();
-        
+
         if (interrupcion != INT_NO && !instruccion_de_IO_o_exit(ins_actual->ins)) {
             log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
             if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
@@ -204,7 +204,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             log_info(logger, "PID: %u - Acción: LEER - Dirección Física: %u - Valor: %u", PID, dir_fisica_read, valorgrande1);
         }
 
-        contexto_interno->PC++;        
+        contexto_interno->PC++;
         break;
 
     case MOV_OUT:
@@ -251,7 +251,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             motivo_desalojo = OUT_OF_MEMORY;
             desalojar_proceso(motivo_desalojo);
             log_warning(logger, "PID: %u, es desaojado por OUT_OF_MEMORY", PID);
-        }        
+        }
         break;
 
     case COPY_STRING:
@@ -541,6 +541,7 @@ bool registro_chico(char* registro)
 
 void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
 {
+    detener_ejecucion=true;
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDIN);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -591,11 +592,12 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
     
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    detener_ejecucion=true;
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
 }
 
 void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
 {
+    detener_ejecucion=true;
     uint32_t bytes_restantes = tamanio_a_leer;
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_STDOUT);
     agregar_a_paquete_uint32(paquete, PID);
@@ -645,7 +647,7 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    detener_ejecucion=true;
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
 }
 
 void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint32_t tamanio)
@@ -658,6 +660,7 @@ void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint3
     string nombre_archivo
     uint32 nuevo_tam
     */
+    detener_ejecucion=true;
     t_paquete* paquete = crear_paquete(DESALOJO_POR_IO_FS_TRUNCATE);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -666,7 +669,7 @@ void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint3
     agregar_a_paquete_uint32(paquete, tamanio);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    detener_ejecucion=true;
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
 };
 
 void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, char* nombre_archivo, uint32_t direccion_logica, uint32_t tamanio_a_leer, uint32_t puntero)
@@ -684,6 +687,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
     uint32 tam_acceso (se repiten)
     */
 
+    detener_ejecucion=true;
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -734,7 +738,7 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    detener_ejecucion=true;
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
 }
 
 void loggear_valores()
@@ -759,7 +763,7 @@ bool instruccion_de_IO_o_exit(cod_ins instruccion){
     case IO_FS_WRITE:
     case IO_FS_READ:
     case EXIT:
-        return	true;
+        return true;
         break;
     
     default:
