@@ -1,9 +1,18 @@
-SET AX 2
-SET BX 3
-SUM AX BX
-SUB BX AX
-SET EAX 2
-SET EBX 4
-SUM EAX AX
-SUB EBX AX
+SET AX 10
+SET BX 80
+IO_FS_CREATE FS salida.txt
+IO_FS_CREATE FS cronologico.txt
+IO_FS_TRUNCATE FS salida.txt BX
+IO_FS_TRUNCATE FS cronologico.txt BX
+IO_FS_CREATE FS archivo1.txt
+IO_FS_CREATE FS archivo2.txt
+IO_FS_TRUNCATE FS archivo1.txt AX
+IO_FS_TRUNCATE FS archivo2.txt AX
+SET AX 0
+SET BX 250
+SET CX 70
+IO_FS_CREATE FS pesado.txt
+IO_FS_TRUNCATE FS pesado.txt BX
+IO_FS_DELETE FS archivo1.txt
+IO_FS_TRUNCATE FS archivo2.txt CX
 EXIT
