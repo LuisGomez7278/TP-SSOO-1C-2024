@@ -33,6 +33,7 @@ extern sem_t prox_instruccion;
 extern sem_t respuesta_resize;
 extern sem_t respuesta_MOV_IN;
 extern sem_t respuesta_copy_string;
+extern pthread_mutex_t mutex_detenerEjecucion;
 
 void iniciar_CPU();
 void iniciar_logs();

@@ -39,13 +39,23 @@ int main(int argc, char* argv[])
     pthread_create(&hilo_conexion_memoria, NULL, (void*) gestionar_conexion_memoria, NULL);
     pthread_detach(hilo_conexion_memoria);
         
+          
+            
+    
     while(true){
+        pthread_mutex_lock(&mutex_detenerEjecucion);
+
         if (detener_ejecucion)
         {   
+            pthread_mutex_unlock(&mutex_detenerEjecucion);
             log_trace(logger,"Esperando un proceso");
             sem_post(&espera_iterador);
             sem_wait(&hay_proceso_ejecutando);
+        }else
+        {
+            pthread_mutex_unlock(&mutex_detenerEjecucion);
         }
+        
         
         fetch(PID, contexto_interno.PC);
         sem_wait(&prox_instruccion);
@@ -590,7 +600,10 @@ void ejecutar_IO_STD_IN(char* nombre_interfaz, uint32_t direccion_logica, uint32
     
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
 }
 
 void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint32_t tamanio_a_leer)
@@ -644,7 +657,10 @@ void ejecutar_IO_STD_OUT(char* nombre_interfaz, uint32_t direccion_logica, uint3
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
 }
 
 void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint32_t tamanio)
@@ -665,7 +681,9 @@ void solicitar_IO_FS_TRUNCATE(char* nombre_interfaz, char* nombre_archivo, uint3
     agregar_a_paquete_uint32(paquete, tamanio);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
 };
 
 void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, char* nombre_archivo, uint32_t direccion_logica, uint32_t tamanio_a_leer, uint32_t puntero)
@@ -733,7 +751,10 @@ void solicitar_IO_FS_MEMORIA(op_code motivo_desalojo, char* nombre_interfaz, cha
     }
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
 }
 
 void loggear_valores()

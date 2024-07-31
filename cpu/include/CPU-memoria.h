@@ -21,6 +21,7 @@ extern uint32_t PID;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
 extern sem_t espera_iterador;
+extern pthread_mutex_t mutex_detenerEjecucion;
 
 extern t_instruccion* ins_actual;
 extern sem_t prox_instruccion;

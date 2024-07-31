@@ -36,6 +36,7 @@ uint32_t PID;
 t_contexto_ejecucion contexto_interno;
 sem_t hay_proceso_ejecutando;
 sem_t espera_iterador;
+pthread_mutex_t mutex_detenerEjecucion;
 
 t_instruccion* ins_actual;
 sem_t prox_instruccion;

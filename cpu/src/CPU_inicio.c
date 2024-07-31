@@ -26,7 +26,8 @@ void iniciar_CPU(){
     sem_init(&respuesta_resize, 0, 0);
     sem_init(&respuesta_copy_string, 0, 0);
     sem_init(&respuesta_MOV_IN, 0, 0);
-    
+    pthread_mutex_init(&mutex_detenerEjecucion, NULL);
+
 }
 
 void iniciar_logs(){

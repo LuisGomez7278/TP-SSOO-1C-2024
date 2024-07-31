@@ -25,7 +25,9 @@ void gestionar_conexion_dispatch()
             log_info(logger, "Llega un proceso de PID: %u, esperando CPU", PID);
             
             interrupcion = INT_NO;
+            pthread_mutex_lock(&mutex_detenerEjecucion);
             detener_ejecucion=false;
+            pthread_mutex_unlock(&mutex_detenerEjecucion);
             contexto_interno.PC = contexto_espera.PC;
             contexto_interno.AX = contexto_espera.AX;
             contexto_interno.BX = contexto_espera.BX;
@@ -55,7 +57,9 @@ void gestionar_conexion_dispatch()
 }
 
 void desalojar_proceso(op_code motivo_desalojo){
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -67,7 +71,9 @@ void desalojar_proceso(op_code motivo_desalojo){
 
 void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
 {
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -80,7 +86,9 @@ void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
 
 void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
 {
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -92,7 +100,9 @@ void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
 
 void solicitar_IO_GEN_SLEEP(op_code motivo_desalojo, char* nombre_interfaz, uint32_t unidades_trabajo)
 {
+    pthread_mutex_lock(&mutex_detenerEjecucion);
     detener_ejecucion=true;
+    pthread_mutex_unlock(&mutex_detenerEjecucion);
     t_paquete* paquete = crear_paquete(motivo_desalojo);
     agregar_a_paquete_uint32(paquete, PID);
     serializar_CE(paquete, contexto_interno);
@@ -115,7 +125,10 @@ void gestionar_conexion_interrupt()
     while (continuar_iterando)
     {
         desplazamiento=0;
+        
         operacion = recibir_operacion(socket_cpu_kernel_interrupt);
+              
+        
         switch (operacion)
         {
         case MENSAJE:
@@ -125,25 +138,33 @@ void gestionar_conexion_interrupt()
         case DESALOJO_POR_CONSOLA:
             buffer = recibir_buffer(&size, socket_cpu_kernel_interrupt);
             PID_recibido = leer_de_buffer_uint32(buffer, &desplazamiento);
+
+             pthread_mutex_lock(&mutex_detenerEjecucion); 
             if (!detener_ejecucion)
             {
                 log_info(logger, "El usuario finaliza el proceso PID: %u por consola, proceso en ejecucion: %u", PID_recibido, PID);
-                interrupcion = INT_CONSOLA;                
+                interrupcion = INT_CONSOLA;
+                pthread_mutex_unlock(&mutex_detenerEjecucion);                
             }else{
                 log_warning(logger_debug,"Llego una interrupcion por consola mientras no se estaba ejecutando");
+                pthread_mutex_unlock(&mutex_detenerEjecucion);
             }
             free(buffer);
+
             break;
 
         case DESALOJO_POR_QUANTUM:
             buffer = recibir_buffer(&size, socket_cpu_kernel_interrupt);
             PID_recibido = leer_de_buffer_uint32(buffer, &desplazamiento);
+            pthread_mutex_lock(&mutex_detenerEjecucion);
             if (!detener_ejecucion )
             {
                 log_debug(logger, "El proceso PID: %u termino su quantum sera desalojado, proceso en ejecucion: %u", PID_recibido, PID);
                 interrupcion = INT_QUANTUM;
+                pthread_mutex_unlock(&mutex_detenerEjecucion);
             }else{
                 log_warning(logger_debug,"Llego una interrupcion de quantum mientras no se estaba ejecutando");
+                pthread_mutex_unlock(&mutex_detenerEjecucion);
             }
             free(buffer);
             break;
