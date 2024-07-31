@@ -29,13 +29,9 @@ void gestionar_conexion_memoria()
             break;
 
         case PROCESO_NO_CARGADO:
-            if ( interrupcion !=INT_CONSOLA){
-                log_warning(logger, "CPU pidio una instruccion de un proceso que no esta cargado en memoria, PID: %u", PID);
-            }else{
-                ins_actual = malloc(sizeof(t_instruccion));
-                ins_actual->ins = VOLVER;
-                log_debug(logger_debug,"Gestionando desalojo por consola del proceso");
-            }
+            ins_actual = malloc(sizeof(t_instruccion));
+            ins_actual->ins = EXIT;
+            log_warning(logger, "CPU pidio una instruccion de un proceso que no esta cargado en memoria, PID: %u", PID);
             
             sem_post(&prox_instruccion);
             break;

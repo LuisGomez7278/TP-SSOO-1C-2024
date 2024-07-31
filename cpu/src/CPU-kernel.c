@@ -24,7 +24,8 @@ void gestionar_conexion_dispatch()
             recibir_CE(socket_cpu_kernel_dispatch, &PID, &contexto_espera);
             log_info(logger, "Llega un proceso de PID: %u, esperando CPU", PID);
             
-            interrupcion = INT_NO;
+            int_consola = false;
+            int_quantum = false;
             pthread_mutex_lock(&mutex_detenerEjecucion);
             detener_ejecucion=false;
             pthread_mutex_unlock(&mutex_detenerEjecucion);
@@ -66,7 +67,6 @@ void desalojar_proceso(op_code motivo_desalojo){
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
-        
 }
 
 void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
@@ -80,8 +80,6 @@ void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
     agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    
-    
 };
 
 void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
@@ -95,7 +93,7 @@ void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
     agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
     agregar_a_paquete_string(paquete, strlen(arg2) + 1, arg2);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
-    eliminar_paquete(paquete);    
+    eliminar_paquete(paquete);
 };
 
 void solicitar_IO_GEN_SLEEP(op_code motivo_desalojo, char* nombre_interfaz, uint32_t unidades_trabajo)
@@ -109,7 +107,7 @@ void solicitar_IO_GEN_SLEEP(op_code motivo_desalojo, char* nombre_interfaz, uint
     agregar_a_paquete_string(paquete, strlen(nombre_interfaz) + 1, nombre_interfaz);
     agregar_a_paquete_uint32(paquete, unidades_trabajo);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
-    eliminar_paquete(paquete);    
+    eliminar_paquete(paquete);
 }
 
 
@@ -139,12 +137,12 @@ void gestionar_conexion_interrupt()
             buffer = recibir_buffer(&size, socket_cpu_kernel_interrupt);
             PID_recibido = leer_de_buffer_uint32(buffer, &desplazamiento);
 
-             pthread_mutex_lock(&mutex_detenerEjecucion); 
+             pthread_mutex_lock(&mutex_detenerEjecucion);
             if (!detener_ejecucion)
             {
                 log_info(logger, "El usuario finaliza el proceso PID: %u por consola, proceso en ejecucion: %u", PID_recibido, PID);
-                interrupcion = INT_CONSOLA;
-                pthread_mutex_unlock(&mutex_detenerEjecucion);                
+                int_consola = true;
+                pthread_mutex_unlock(&mutex_detenerEjecucion);
             }else{
                 log_warning(logger_debug,"Llego una interrupcion por consola mientras no se estaba ejecutando");
                 pthread_mutex_unlock(&mutex_detenerEjecucion);
@@ -160,7 +158,7 @@ void gestionar_conexion_interrupt()
             if (!detener_ejecucion )
             {
                 log_debug(logger, "El proceso PID: %u termino su quantum sera desalojado, proceso en ejecucion: %u", PID_recibido, PID);
-                interrupcion = INT_QUANTUM;
+                int_quantum = true;
                 pthread_mutex_unlock(&mutex_detenerEjecucion);
             }else{
                 log_warning(logger_debug,"Llego una interrupcion de quantum mientras no se estaba ejecutando");

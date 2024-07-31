@@ -51,7 +51,8 @@ int main(int argc, char* argv[])
             log_trace(logger,"Esperando un proceso");
             sem_post(&espera_iterador);
             sem_wait(&hay_proceso_ejecutando);
-        }else
+        }
+        else
         {
             pthread_mutex_unlock(&mutex_detenerEjecucion);
         }
@@ -63,10 +64,18 @@ int main(int argc, char* argv[])
         
         // loggear_valores();
         
-        if (interrupcion != INT_NO && !instruccion_de_IO_o_exit(ins_actual->ins)) {
-            log_info(logger, "Llego una interrupcion a CPU: %d", interrupcion);
-            if (interrupcion == INT_CONSOLA){motivo_desalojo = DESALOJO_POR_CONSOLA;}
-            else /*interrupcion==INT_QUANTUM*/ {motivo_desalojo = DESALOJO_POR_QUANTUM;}
+        if ((int_consola || int_quantum) && !instruccion_de_IO_o_exit(ins_actual->ins)) 
+        {
+            if (int_consola) 
+            {
+                log_info(logger, "Gestionando desalojo por consola");
+                motivo_desalojo = DESALOJO_POR_CONSOLA;
+            }
+            else if (int_quantum) 
+            {
+                log_info(logger, "Gestionando desalojo por quantum");
+                motivo_desalojo = DESALOJO_POR_QUANTUM;
+            }
             desalojar_proceso(motivo_desalojo);
         };
         destruir_instruccion(ins_actual);

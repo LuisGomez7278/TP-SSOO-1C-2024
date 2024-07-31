@@ -25,7 +25,8 @@ extern uint32_t cant_entradas_TLB;
 extern char* algoritmo_TLB;
 
 extern uint32_t PID;
-extern op_code interrupcion;
+extern bool int_consola;
+extern bool int_quantum;
 extern t_contexto_ejecucion contexto_interno;
 extern sem_t hay_proceso_ejecutando;
 extern sem_t espera_iterador;

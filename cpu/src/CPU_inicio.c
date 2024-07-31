@@ -5,7 +5,8 @@ void iniciar_CPU(){
     iniciar_config();
 
     PID = 0;
-    interrupcion = INT_NO;
+    int_consola = false;
+    int_quantum = false;
     
     contexto_interno.PC = 0;
     contexto_interno.AX = 0;

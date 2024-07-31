@@ -17,8 +17,8 @@ extern sem_t hay_proceso_ejecutando;
 extern sem_t espera_iterador;
 extern pthread_mutex_t mutex_detenerEjecucion;
 
-extern op_code interrupcion;
-extern op_code tipo_interrupcion;
+extern bool int_consola;
+extern bool int_quantum;
 extern bool detener_ejecucion;
 
 void gestionar_conexion_dispatch(void);

@@ -17,7 +17,6 @@ extern char* algoritmo_TLB;
 extern uint32_t tamanio_de_pagina;
 extern bool usa_TLB;
 extern t_list* tabla_TLB;
-extern pthread_mutex_t mutex_detenerEjecucion;
 extern sem_t respuesta_marco;
 extern uint32_t marco_pedido;
 typedef struct

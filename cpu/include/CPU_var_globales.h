@@ -51,7 +51,8 @@ char* string_leida_de_memoria;
 sem_t respuesta_marco;
 uint32_t marco_pedido;
 
-op_code interrupcion;
+bool int_consola;
+bool int_quantum;
 op_code motivo_desalojo;
 
 pthread_t hilo_conexion_dispatch;
