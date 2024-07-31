@@ -280,7 +280,6 @@ int32_t main(int32_t argc, char* argv[]) {
             free(buffer);
             free(nombre_archivo);
             free(string_leida_memoria);
-            free(path_archivo_metadata);
             break;
 
         case DESALOJO_POR_IO_FS_READ:

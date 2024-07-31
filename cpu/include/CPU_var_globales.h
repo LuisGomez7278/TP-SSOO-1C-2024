@@ -12,8 +12,6 @@ t_log* logger;
 t_log* logger_debug;
 t_log* logger_valores;
 t_config* config;
-// t_config* config_parametros;
-// t_config* config_parametros;
 
 
 char* ip_memoria;

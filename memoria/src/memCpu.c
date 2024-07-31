@@ -6,11 +6,13 @@ void conexion_con_cpu(){
     
     bool continuarIterando = true;
     while(continuarIterando){
-
         pthread_mutex_unlock(&accediendo_a_memoria);
         op_code codigo = recibir_operacion(socket_cpu_memoria);
         pthread_mutex_lock(&accediendo_a_memoria);
-        
+
+
+
+
         switch (codigo){
         case MENSAJE:
             recibir_mensaje(socket_cpu_memoria,logger_debug);
@@ -57,6 +59,7 @@ void fetch(int socket_cpu_memoria){
     recibir_fetch(socket_cpu_memoria, &PID, &PC);
     //log_trace(logger_debug, "CPU solicita instruccion, PID: %d, PC: %d", PID, PC);
     
+   
     
     pthread_mutex_lock(&mutex_listaDeinstrucciones);
     

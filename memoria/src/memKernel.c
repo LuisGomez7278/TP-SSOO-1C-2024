@@ -11,10 +11,11 @@ void conexion_con_kernel(){
 
     bool continuarIterando = true;
     while (continuarIterando) {
-
+        
         pthread_mutex_unlock(&accediendo_a_memoria);
         codigo = recibir_operacion(socket_kernel_memoria);   
         pthread_mutex_lock(&accediendo_a_memoria);
+        
         
         switch (codigo){
         case MENSAJE:
@@ -44,7 +45,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
     if (buffer != NULL) {
         uint32_t PID = leer_de_buffer_uint32(buffer, &desplazamiento);
         char* path_parcial = leer_de_buffer_string(buffer, &desplazamiento);
-        char* path = NULL;
+        char* path;
 
         if (path_base!=NULL && path_parcial!= NULL)
             {path = path_completo(path_base, path_parcial);}
@@ -64,8 +65,7 @@ void crear_proceso(){ // llega el pid y el path de instrucciones
             //log_debug(logger_debug, "Falla al cargar un proceso, PID: %u", PID);
             enviar_instruccion_con_PID_por_socket(ERROR_AL_CARGAR_EL_PROCESO, PID, socket_kernel_memoria);
         }
-        if (path!=NULL)
-            {free(path);}
+        free(path);
         free(path_parcial);
 
     } else {

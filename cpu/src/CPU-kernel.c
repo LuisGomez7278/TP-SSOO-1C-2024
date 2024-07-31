@@ -62,6 +62,7 @@ void desalojar_proceso(op_code motivo_desalojo){
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+        
 }
 
 void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
@@ -73,7 +74,8 @@ void enviar_CE_con_1_arg(op_code motivo_desalojo, char* arg1)
     agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
-    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+    
+    
 };
 
 void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
@@ -85,8 +87,7 @@ void enviar_CE_con_2_arg(op_code motivo_desalojo, char* arg1, char* arg2)
     agregar_a_paquete_string(paquete, strlen(arg1) + 1, arg1);
     agregar_a_paquete_string(paquete, strlen(arg2) + 1, arg2);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
-    eliminar_paquete(paquete);
-    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+    eliminar_paquete(paquete);    
 };
 
 void solicitar_IO_GEN_SLEEP(op_code motivo_desalojo, char* nombre_interfaz, uint32_t unidades_trabajo)
@@ -98,8 +99,7 @@ void solicitar_IO_GEN_SLEEP(op_code motivo_desalojo, char* nombre_interfaz, uint
     agregar_a_paquete_string(paquete, strlen(nombre_interfaz) + 1, nombre_interfaz);
     agregar_a_paquete_uint32(paquete, unidades_trabajo);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
-    eliminar_paquete(paquete);
-    log_info(logger, "El proceso PID: %u es desalojado, motivo: %s", PID, codigo_operacion_string(motivo_desalojo));
+    eliminar_paquete(paquete);    
 }
 
 
