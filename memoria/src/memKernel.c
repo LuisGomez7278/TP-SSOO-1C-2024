@@ -11,7 +11,11 @@ void conexion_con_kernel(){
 
     bool continuarIterando = true;
     while (continuarIterando) {
+
+        pthread_mutex_unlock(&accediendo_a_memoria);
         codigo = recibir_operacion(socket_kernel_memoria);   
+        pthread_mutex_lock(&accediendo_a_memoria);
+        
         switch (codigo){
         case MENSAJE:
             recibir_mensaje(socket_kernel_memoria,logger_debug);
