@@ -10,8 +10,7 @@
 extern t_log* logger;
 extern t_log* logger_debug;
 extern t_log* logger_valores;
-extern t_config* config_conexiones;
-extern t_config* config_parametros;
+extern t_config* config;
 
 extern char* ip_memoria;
 extern char* puerto_memoria;
@@ -35,8 +34,8 @@ extern sem_t respuesta_resize;
 extern sem_t respuesta_MOV_IN;
 extern sem_t respuesta_copy_string;
 
-void iniciar_CPU(char* parametros);
-void iniciar_logs(void);
-void iniciar_config(char* parametros);
+void iniciar_CPU();
+void iniciar_logs();
+void iniciar_config();
 
 #endif /*  CPU_INICIO_H_ */

@@ -1,8 +1,8 @@
 #include "../include/CPU_inicio.h"
 
-void iniciar_CPU(char* parametros){
+void iniciar_CPU(){
     iniciar_logs();
-    iniciar_config(parametros);
+    iniciar_config();
 
     PID = 0;
     interrupcion = INT_NO;
@@ -29,7 +29,7 @@ void iniciar_CPU(char* parametros){
     
 }
 
-void iniciar_logs(void){
+void iniciar_logs(){
     logger = start_logger("log_cpu.log", "LOG CPU", LOG_LEVEL_TRACE);
 	if(logger==NULL){
 		perror("No se pudo crear el logger");
@@ -47,39 +47,29 @@ void iniciar_logs(void){
 	}
 }
 
-void iniciar_config(char* parametros){
-    config_conexiones = start_config("./cpu.config");
-	if(config_conexiones==NULL){
+void iniciar_config(){
+    config = start_config("./cpu.config");
+	if(config==NULL){
 		perror("No se pudo crear la config");
 		exit(EXIT_FAILURE);
 	}
-    char* path_parametros = string_duplicate("./configs/");
-    string_append(&path_parametros, parametros);
-    string_append(&path_parametros, ".cfg");
 
-    printf("%s", path_parametros);
-    config_parametros = start_config(path_parametros);
-	if(config_parametros==NULL){
-		perror("No se pudo crear la config");
-		exit(EXIT_FAILURE);
-	}
-    free(path_parametros);
 
-    ip_memoria = config_get_string_value(config_conexiones, "IP_MEMORIA");
+    ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     log_info(logger, "IP leido: %s", ip_memoria);
 
-    puerto_memoria = config_get_string_value(config_conexiones, "PUERTO_MEMORIA");
+    puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     log_info(logger, "PUERTO MEMORIA leido: %s", puerto_memoria);
 
-    puerto_escucha_dispatch = config_get_string_value(config_conexiones, "PUERTO_ESCUCHA_DISPATCH");
+    puerto_escucha_dispatch = config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH");
     log_info(logger, "PUERTO DISPATCH leido: %s", puerto_escucha_dispatch);
 
-    puerto_escucha_interrupt = config_get_string_value(config_conexiones, "PUERTO_ESCUCHA_INTERRUPT");
+    puerto_escucha_interrupt = config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT");
     log_info(logger, "PUERTO INTERRUPT leido: %s", puerto_escucha_interrupt);
     
-    cant_entradas_TLB = config_get_int_value(config_parametros, "CANTIDAD_ENTRADAS_TLB");
+    cant_entradas_TLB = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
     log_info(logger, "CANTIDAD ENTRADAS TLB leido: %u", cant_entradas_TLB);
 
-    algoritmo_TLB = config_get_string_value(config_parametros, "ALGORITMO_TLB");
+    algoritmo_TLB = config_get_string_value(config, "ALGORITMO_TLB");
     log_info(logger, "ALGORITMO TLB leido: %s", algoritmo_TLB);
 }

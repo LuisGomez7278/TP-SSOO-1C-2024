@@ -2,15 +2,15 @@
 
 int main(int argc, char* argv[]) 
 {
-    printf("Argumento : %s\n", argv[1]);   
+    //printf("Argumento : %s\n", argv[1]);   
       
     //VALIDO ARGUMENTOS
-    validar_argumento(argv[1]);
+    //validar_argumento(argv[1]);
     
-    char* parametros = argv[1];
+    //char* parametros = argv[1];
 
 //INICIO DE CPU
-    iniciar_CPU(parametros);
+    iniciar_CPU();
 
 // INICIAR SERVIDOR
     socket_escucha_dispatch = iniciar_servidor(puerto_escucha_dispatch, logger_debug);
@@ -69,8 +69,7 @@ int main(int argc, char* argv[])
     if (socket_escucha_dispatch) {liberar_conexion(socket_escucha_dispatch);}
     if (socket_escucha_interrupt) {liberar_conexion(socket_escucha_interrupt);}
 
-    config_destroy(config_parametros);
-    config_destroy(config_conexiones);
+    config_destroy(config);
     log_destroy(logger);
     log_destroy(logger_valores);
     log_destroy(logger_debug);
