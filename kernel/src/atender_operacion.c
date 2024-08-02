@@ -149,6 +149,7 @@ void iniciar_proceso(char*leido){
     new_pcb->CE.DI=0;
 
     ingresar_en_lista(new_pcb, lista_new, &semaforo_new, &cantidad_procesos_new , NEW); //loggeo el cambio de estado, loggeo el proceso si es cola ready/prioritario 
+    log_info(logger, "Se crea el proceso con PID: %u en NEW",new_pcb->PID);
     solicitud_de_creacion_proceso_a_memoria(new_pcb->PID,leido);                // ENVIO A CARGAR EL PROGRAMA A EJECUTAR, YA QUE SUPUESTAMENTE ARRANCA CON UNA PAGINA VACIA
                                                                              // EL SEMAFORO DE CONTROL DE MULTIPROGRAMACION LO COLOCO ANTES DEL PASO A LISTA READY 
 }

@@ -559,13 +559,16 @@ void enviar_siguiente_proceso_a_ejecucion ()
         if(pcb_a_ejecutar->quantum_ejecutado<quantum)
         {
             *pcb_interrupt = *pcb_a_ejecutar;
-                           
+
+            log_info(logger,"El proceso con PID:%u cambio su estado de READY -> EJECUCION",pcb_a_ejecutar->PID);
+            log_debug(logger, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s'\n ", pcb_a_ejecutar->PID,algoritmo_planificacion);
+ 
+
             pthread_create(&hilo_de_desalojo_por_quantum, NULL,(void*) interruptor_de_QUANTUM, pcb_interrupt); 
             pthread_detach(hilo_de_desalojo_por_quantum);
             
-            enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);  
-            log_info(logger, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' ", pcb_a_ejecutar->PID,algoritmo_planificacion);
-            log_info(logger,"El proceso con PID:%u cambio su estado de READY -> EJECUCION\n",pcb_a_ejecutar->PID);
+            enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);            
+ 
         }else
         {
             log_warning(logger_debug,"El calculo de quantum del proceso PID: %u dio un numero negativo: %ld. Agregado a lista READY",pcb_a_ejecutar->PID, quantum - pcb_a_ejecutar->quantum_ejecutado);
@@ -577,9 +580,9 @@ void enviar_siguiente_proceso_a_ejecucion ()
     else
     {
         pcb_actual_en_cpu = pcb_a_ejecutar->PID;
+        log_info(logger,"El proceso con PID:%u cambio su estado de READY -> EJECUCION",pcb_a_ejecutar->PID);
+        log_debug(logger, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s'\n ", pcb_a_ejecutar->PID,algoritmo_planificacion);
         enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID, pcb_a_ejecutar->CE);  
-        log_info(logger, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' ", pcb_a_ejecutar->PID,algoritmo_planificacion);
-         log_info(logger,"El proceso con PID:%u cambio su estado de READY -> EJECUCION\n",pcb_a_ejecutar->PID);
     }
         
     free(pcb_a_ejecutar);

@@ -319,10 +319,10 @@ IO_type* buscar_interfaz_con_nombre(char*nombre_a_buscar){
             pthread_mutex_lock(&semaforo_lista_interfaces);
     		for(int32_t i=0; i<list_size(lista_de_interfaces); i++){
 			int_punt_auxiliar = (IO_type*)list_get(lista_de_interfaces, i);
-			log_trace(logger_debug,"Buscando en lista interfaz con nombre: %s",nombre_a_buscar );
-			log_debug(logger_debug,"Leyendo en lista interfaz con nombre: %s",int_punt_auxiliar->nombre_interfaz );
+			//log_trace(logger_debug,"Buscando en lista interfaz con nombre: %s",nombre_a_buscar );
+			//log_debug(logger_debug,"Leyendo en lista interfaz con nombre: %s",int_punt_auxiliar->nombre_interfaz );
             if (strcmp(int_punt_auxiliar->nombre_interfaz,nombre_a_buscar)  == 0){
-                log_info(logger_debug,"Interfaz encontrada: %s",int_punt_auxiliar->nombre_interfaz);
+                //log_info(logger_debug,"Interfaz encontrada: %s",int_punt_auxiliar->nombre_interfaz);
                 pthread_mutex_unlock(&semaforo_lista_interfaces);
                 return int_punt_auxiliar;
             }

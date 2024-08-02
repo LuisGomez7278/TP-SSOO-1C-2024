@@ -86,7 +86,7 @@ void carga_exitosa_en_memoria(void* buffer){
  
         
         //log_info(logger_debug,"CARGA EXITOSA DEL PROCESO: PID= %u ",PID);
-        //log_info(logger_debug, "Se crea el proceso con PID: %u en NEW",PID);
+        
 
 
         free(buffer);
