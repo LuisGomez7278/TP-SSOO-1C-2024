@@ -34,13 +34,11 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
         case NUEVA_IO:
         IO_type* interfaz_para_hilo= crear_nodo_interfaz(nueva_interfaz);
         
-        pthread_t hilo_escucha_ENTRADASALIDA_KERNEL;
+        pthread_create(&hilo_gestion_Cola_interfaz,NULL,(void*)gestionar_envio_cola_nueva_interfaz,interfaz_para_hilo);       //Hilo que envia instrucciones a medida que se desocupa la interfaz
+
         pthread_create(&hilo_escucha_ENTRADASALIDA_KERNEL,NULL,(void*)escuchar_a_Nueva_Interfaz,interfaz_para_hilo);    //Hilo donde escucho los mensajes que envia la interfaz recien creada
         pthread_detach(hilo_escucha_ENTRADASALIDA_KERNEL);
 
-        pthread_t hilo_gestion_Cola_interfaz;
-        pthread_create(&hilo_gestion_Cola_interfaz,NULL,(void*)gestionar_envio_cola_nueva_interfaz,interfaz_para_hilo);       //Hilo que envia instrucciones a medida que se desocupa la interfaz
-        pthread_detach(hilo_gestion_Cola_interfaz);
         break;
 
         default:
@@ -74,7 +72,9 @@ void atender_conexion_ENTRADASALIDA_KERNEL(){
         }else{             
             log_info(logger_debug,"Se conecto nuevamente la interfaz: %s",nueva_interfaz->nombre_interfaz);                                                                                 //si ya existe una interfaz con ese nombre solo actualizo el socket
             vieja_interfaz->socket_interfaz= nueva_interfaz->socket_interfaz;
-            sem_init(&vieja_interfaz->utilizacion_interfaz,0,0);
+            //sem_init(&vieja_interfaz->utilizacion_interfaz,0,0);
+            //free(nueva_interfaz->nombre_interfaz);
+            free(nueva_interfaz->nombre_interfaz);
             free(nueva_interfaz);
             return vieja_interfaz;
         }
@@ -89,7 +89,7 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
     bool continuarIterando=true;
     op_code operacion;
     t_pid_paq* elemento_lista_espera;
-    log_trace(logger, "Se crea un hilo de escucha para la interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);
+    log_trace(logger, "Se crea un hilo de escucha para la interfaz: %s, socket: %d", interfaz_puntero_hilo->nombre_interfaz,interfaz_puntero_hilo->socket_interfaz);
     
     while(continuarIterando){        
         operacion = recibir_operacion(interfaz_puntero_hilo->socket_interfaz);
@@ -121,8 +121,21 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
             free(elemento_lista_espera);
             break;
         case FALLO:
+                
+                int error;
+                error = pthread_cancel(hilo_gestion_Cola_interfaz);
+                if (error != 0) {
+                    fprintf(stderr, "Error cancelando el hilo gestion cola interfaz: %s\n", strerror(error));
+                }
+    
+                error = pthread_join(hilo_gestion_Cola_interfaz, NULL);
+                if (error != 0) {
+                    fprintf(stderr, "Error haciendo join al hilo gestion cola interfaz: %s\n", strerror(error));
+                }
+                continuarIterando=false;
+            
             log_error(logger_debug,"La interfaz %s se deconecto, cerrando socket",interfaz_puntero_hilo->nombre_interfaz);      //si falla el recv cierro el hilo
-            continuarIterando=false;
+                //if (interfaz_puntero_hilo->socket_interfaz) {liberar_conexion(socket_escucha);}
             break;
         default:
             log_error(logger_debug,"Llegó una operacion desconocida de IO");
@@ -137,7 +150,7 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
 
 void gestionar_envio_cola_nueva_interfaz(void* interfaz){
     IO_type* interfaz_puntero_hilo= (IO_type*) interfaz;
-    log_info(logger_debug,"Gestionando interfaz: %s", interfaz_puntero_hilo->nombre_interfaz);     
+    log_info(logger_debug,"Gestionando interfaz: %s, socket %d", interfaz_puntero_hilo->nombre_interfaz,interfaz_puntero_hilo->socket_interfaz);     
 
     while (interfaz_puntero_hilo->socket_interfaz>0)                            //sigo iterando hasta que se cierre el socket de esa interfaz
     {   

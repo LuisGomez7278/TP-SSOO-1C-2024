@@ -15,6 +15,10 @@ int32_t main(int32_t argc, char* argv[]) {
     
     nombre_interfaz = argv[1];
     
+    size_t len = strlen(nombre_interfaz);
+    if (len > 0 && nombre_interfaz[len - 1] == '\n') {
+            nombre_interfaz[len - 1] = '\0';
+        }
 
     iniciar_entradasalida(nombre_interfaz);
 

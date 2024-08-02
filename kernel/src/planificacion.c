@@ -17,7 +17,7 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 
     sem_post(semaforo_contador);
 
-	log_info(logger, "Proceso PID:%u ingreso en %s", pcb->PID,estado_nuevo_string);
+	//log_info(logger, "Proceso PID:%u ingreso en %s", pcb->PID,estado_nuevo_string);
 
 ////////////////////////    LOGGEO OBLIGATORIO DE READY Y READY PRIORITARIO /////////////
 
@@ -35,7 +35,7 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 			}
 		}
 		string_append(&log_cola_ready, "]");
-		log_info(logger,"Lista de PID de procesos en estado READY (%s) : %s.",algoritmo_planificacion, log_cola_ready);
+		log_info(logger,"Lista de PID de procesos en estado READY (%s) : %s.\n",algoritmo_planificacion, log_cola_ready);
 		free(log_cola_ready);
 	}
  
@@ -54,7 +54,7 @@ void ingresar_en_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* semaforo_mute
 			}
 		}
 		string_append(&log_cola_ready_prioritario, "]");
-		log_info(logger,"Lista de PID de procesos en estado READY Prioritario %s : %s",algoritmo_planificacion, log_cola_ready_prioritario);
+		log_info(logger,"Lista de PID de procesos en estado READY Prioritario %s : %s\n",algoritmo_planificacion, log_cola_ready_prioritario);
 		free(log_cola_ready_prioritario);
 	}
     pthread_mutex_unlock(semaforo_mutex);
@@ -259,14 +259,14 @@ void gestionar_dispatch (){
 
                     break;
                 case 2: 
-                    log_info(logger, "PID: %u hace WAIT de recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
+                    //log_info(logger_debug, "PID: %u hace WAIT de recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
                     //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
                         pthread_mutex_lock(&semaforo_ready_prioridad);
                         list_add_in_index(lista_ready_prioridad, 0, pcb_dispatch);
                         pthread_mutex_unlock(&semaforo_ready_prioridad);
 
                         sem_post(&cantidad_procesos_en_algun_ready);
-                        log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u", pcb_dispatch->PID);
+                        //log_info(logger_debug, "Se gestiono el recurso, y se envio nuevamente a CPU a ejecutar el proceso PID:  %u", pcb_dispatch->PID);
                         //vengode_gestionarDispatch=true;
                         enviar_siguiente_proceso_a_ejecucion(pcb_dispatch);
 
@@ -295,7 +295,7 @@ void gestionar_dispatch (){
             
             switch(signal_recursos (recurso_solicitado,pcb_dispatch->PID)){
                 case 1:
-                    log_info(logger, "PID: %u hace SIGNAL a un recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
+                    //log_info(logger, "PID: %u hace SIGNAL a un recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
                     //SIGNAL EXITOSO, DEVUELVO EL PROCESO A EJECUCION
                     pthread_mutex_lock(&semaforo_ready_prioridad);
                     list_add_in_index(lista_ready_prioridad, 0, pcb_dispatch);
@@ -487,15 +487,15 @@ void gestionar_dispatch (){
 void gestionar_solicitud_IO(t_pcb* pcb_dispatch, char* nombre_interfaz, op_code cod_op_dispatch, t_paquete* paquete)
 {
     if(validar_conexion_interfaz_y_operacion (nombre_interfaz, cod_op_dispatch)){
-        log_info(logger, "PID: %u envia peticion a interfaz %s", pcb_dispatch->PID, nombre_interfaz);
+        log_info(logger_debug, "PID: %u envia peticion a interfaz %s", pcb_dispatch->PID, nombre_interfaz);
 
         agregar_a_cola_interfaz(nombre_interfaz,pcb_dispatch->PID,paquete);   /// lo agrego a la cola y voy enviando a medida que tengo disponible la interfaz
 
         if(strcmp(algoritmo_planificacion,"VRR")==0 ) /// -------------------BLOQUEO EL PROCESO SEGUN PLANIFICADOR
         {   
             if(pcb_dispatch->quantum_ejecutado<quantum){
-                ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
                 log_info(logger,"PID: %u bloqueado en prioridad esperando uso interfaz: %s",pcb_dispatch->PID,nombre_interfaz);
+                ingresar_en_lista(pcb_dispatch, lista_bloqueado_prioritario , &semaforo_bloqueado_prioridad, &cantidad_procesos_bloqueados , BLOCKED_PRIORITARIO);
             }else{
                 log_warning(logger,"PID: %u bloqueado esperando uso interfaz: %s (ademas de solicitar interfaz se acabo su quantum).",pcb_dispatch->PID,nombre_interfaz);
                pcb_dispatch->quantum_ejecutado=0;
@@ -564,7 +564,7 @@ void enviar_siguiente_proceso_a_ejecucion ()
             pthread_detach(hilo_de_desalojo_por_quantum);
             
             enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID,pcb_a_ejecutar->CE);  
-            log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' ", pcb_a_ejecutar->PID,algoritmo_planificacion);
+            log_info(logger, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' ", pcb_a_ejecutar->PID,algoritmo_planificacion);
             log_info(logger,"El proceso con PID:%u cambio su estado de READY -> EJECUCION\n",pcb_a_ejecutar->PID);
         }else
         {
@@ -578,7 +578,7 @@ void enviar_siguiente_proceso_a_ejecucion ()
     {
         pcb_actual_en_cpu = pcb_a_ejecutar->PID;
         enviar_CE(socket_kernel_cpu_dispatch, pcb_a_ejecutar->PID, pcb_a_ejecutar->CE);  
-        log_info(logger_debug, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' \n", pcb_a_ejecutar->PID,algoritmo_planificacion);
+        log_info(logger, "Se mando a CPU para ejecutar el proceso PID:  %u, planificado por '%s' ", pcb_a_ejecutar->PID,algoritmo_planificacion);
          log_info(logger,"El proceso con PID:%u cambio su estado de READY -> EJECUCION\n",pcb_a_ejecutar->PID);
     }
         

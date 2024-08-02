@@ -164,8 +164,8 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                 cod_op_dispatch=RETORNAR;
                 pcb_actual_en_cpu=0;
                 encontrado=true;
-                log_info(logger,"Proceso con PID:%u Estado Anterior: EJECUCION || Estado Actual: EXIT",pid_a_finalizar);
-                
+                log_info(logger, "Finaliza el proceso PID: %u Motivo: INTERRUPTED_BY_USER", pid_a_finalizar);
+                log_info(logger, "PID: %u - Cambio de estado EJECUCION -> EXIT", pid_a_finalizar);               
 
                 if (list_size(lista_new)==0 && !ocupacion_cpu )       //aca tengo que controlar que no haya un hilo o enviando procesos o gestionando dispatch;
                 {   
@@ -192,7 +192,8 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                     pthread_mutex_lock(&semaforo_ready);
                     encontrado=true;
                     if(list_remove_element(lista_ready,pcb_a_eliminar)){
-                        log_info(logger,"Proceso con PID:%u Estado Anterior: READY || Estado Actual: EXIT",pid_a_finalizar);
+                        log_info(logger, "Finaliza el proceso PID: %u Motivo: INTERRUPTED_BY_USER", pid_a_finalizar);
+                        log_info(logger, "PID: %u - Cambio de estado READY -> EXIT", pid_a_finalizar); 
                     }else{
                         log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista READY pero no se pudo eliminar.",pid_a_finalizar);
                     }
@@ -205,7 +206,8 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                     pthread_mutex_lock(&semaforo_ready_prioridad);
                     encontrado=true;
                     if(list_remove_element(lista_ready_prioridad,pcb_a_eliminar)){
-                        log_info(logger,"Proceso con PID:%u Estado Anterior: READY PRIORIDAD || Estado Actual: EXIT",pid_a_finalizar);
+                        log_info(logger, "Finaliza el proceso PID: %u Motivo: INTERRUPTED_BY_USER", pid_a_finalizar);
+                        log_info(logger, "PID: %u - Cambio de estado READY_PRIORIDAD -> EXIT", pid_a_finalizar);                         
                     }else{
                         log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista READY PRIORITARIO pero no se pudo eliminar.",pid_a_finalizar);
                     }
@@ -219,7 +221,9 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                     pthread_mutex_lock(&semaforo_bloqueado);
                     encontrado=true;
                     if(list_remove_element(lista_bloqueado,pcb_a_eliminar)){
-                        log_info(logger,"Proceso con PID:%u Estado Anterior: READY BLOCKED || Estado Actual: EXIT",pid_a_finalizar);
+                        log_info(logger, "Finaliza el proceso PID: %u Motivo: INTERRUPTED_BY_USER", pid_a_finalizar);
+                        log_info(logger, "PID: %u - Cambio de estado BLOQUEADO -> EXIT", pid_a_finalizar);                         
+                        
                     }else{
                         log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista BLOCKED pero no se pudo eliminar.",pid_a_finalizar);
                     }
@@ -231,7 +235,8 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                     pthread_mutex_lock(&semaforo_bloqueado_prioridad);    
                     encontrado=true;
                     if(list_remove_element(lista_bloqueado_prioritario,pcb_a_eliminar)){
-                        log_info(logger,"Proceso con PID:%u Estado Anterior: READY BLOCKED PRIORITARIO || Estado Actual: EXIT",pid_a_finalizar);
+                        log_info(logger, "Finaliza el proceso PID: %u Motivo: INTERRUPTED_BY_USER", pid_a_finalizar);
+                        log_info(logger, "PID: %u - Cambio de estado BLOQUEADO_PRIORITARIO -> EXIT", pid_a_finalizar); 
                     }else{
                         log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista BLOCKED PRIORITARIO pero no se pudo eliminar.",pid_a_finalizar);
                     }
@@ -249,7 +254,8 @@ void finalizar_proceso_con_pid(uint32_t pid_a_finalizar){
                     pthread_mutex_lock(&semaforo_new);
                     encontrado=true;
                     if(list_remove_element(lista_new,pcb_a_eliminar)){
-                        log_info(logger,"Proceso con PID:%u Estado Anterior: NEW || Estado Actual: EXIT",pid_a_finalizar);
+                        log_info(logger, "Finaliza el proceso PID: %u Motivo: INTERRUPTED_BY_USER", pid_a_finalizar);
+                        log_info(logger, "PID: %u - Cambio de estado NEW-> EXIT", pid_a_finalizar); 
                     }else{
                         log_error(logger_debug,"Se encontro el proceso con PID: %u en la lista NEW pero no se pudo eliminar.",pid_a_finalizar);
                     }

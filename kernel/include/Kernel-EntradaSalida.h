@@ -25,7 +25,8 @@
 void escuchar_a_Nueva_Interfaz(void* interfaz);
 void gestionar_envio_cola_nueva_interfaz(void* interfaz);
 void cambiar_proceso_de_block_a_ready(uint32_t PID);
-
+pthread_t hilo_gestion_Cola_interfaz;
+pthread_t hilo_escucha_ENTRADASALIDA_KERNEL;
 
 
 
