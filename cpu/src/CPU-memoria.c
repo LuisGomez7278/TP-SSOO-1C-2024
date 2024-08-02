@@ -65,8 +65,8 @@ void gestionar_conexion_memoria()
                 {log_info(logger_debug, "COPY_STRING exitoso");}
             else            
                 {log_info(logger_debug, "COPY_STRING fallido");}
-
-            break;;
+            free(buffer);
+            break;
 
         case SOLICITUD_MOV_IN:
             desplazamiento = 0;

@@ -285,6 +285,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         sem_wait(&respuesta_copy_string);
         char* str_leida = string_leida_de_memoria;
         escribir_en_memoria_string(str_leida, direccion_logica_WRITE, bytes_a_copiar);
+        free(string_leida_de_memoria);
         contexto_interno->PC++;
         break;
         
