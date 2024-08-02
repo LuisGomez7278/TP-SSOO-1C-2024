@@ -72,8 +72,9 @@ void gestionar_conexion_memoria()
             desplazamiento = 0;
             buffer = recibir_buffer(&size, socket_cpu_memoria);
 
-            uint32_t tamanio = leer_de_buffer_uint32(&buffer, &desplazamiento);
-            uint32_t respuesta = leer_de_buffer_uint32(&buffer, &desplazamiento);
+            uint32_t tamanio = leer_de_buffer_uint32(buffer, &desplazamiento);
+            uint32_t respuesta = leer_de_buffer_uint32(buffer, &desplazamiento);
+            // log_debug(logger_debug, "valor respuesta MOV_IN: %u", respuesta);
 
             if (tamanio == sizeof(uint8_t))
                 {respuesta_mov_in_8 = respuesta;}

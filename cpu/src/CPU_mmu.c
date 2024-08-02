@@ -51,13 +51,13 @@ entrada_TLB* buscar_en_tlb(uint32_t PID_pedida, uint32_t nro_pag)
         entrada = list_get(tabla_TLB, i);
         if (entrada->PID == PID_pedida && entrada->nro_pag == nro_pag)
         {
-            log_info(logger, "ID: %u - TLB HIT - Pagina: %u", PID_pedida, nro_pag);
+            log_trace(logger, "ID: %u - TLB HIT - Pagina: %u", PID_pedida, nro_pag);
             temporal_destroy(entrada->t_ultimo_uso);
             entrada->t_ultimo_uso = temporal_create();
             return entrada;
         }
     }
-    log_info(logger, "ID: %u - TLB MISS - Pagina: %u", PID_pedida, nro_pag);
+    log_trace(logger, "ID: %u - TLB MISS - Pagina: %u", PID_pedida, nro_pag);
     entrada = TLB_miss(PID_pedida, nro_pag);
     return entrada;
 }

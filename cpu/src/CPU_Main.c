@@ -147,12 +147,12 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         if(registro_chico(ins_actual->arg1))
         {
             valorchico1 = suma;// Convertirlo a uint8 si hace falta
-            log_debug(logger_valores, "Resultado suma: %u", valorchico1);
+            // log_debug(logger_valores, "Resultado suma: %u", valorchico1);
             memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
         else
         {
-            log_debug(logger_valores, "Resultado suma: %u", suma);
+            // log_debug(logger_valores, "Resultado suma: %u", suma);
             memcpy(registro_1, &suma, sizeof(uint32_t));
         }
         break;
@@ -168,12 +168,12 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
         if(registro_chico(ins_actual->arg1))
         {
             valorchico1 = resta;// Convertirlo a uint8 si hace falta
-            log_debug(logger_valores, "Resultado resta: %u", valorchico1);
+            // log_debug(logger_valores, "Resultado resta: %u", valorchico1);
             memcpy(registro_1, &valorchico1, sizeof(uint8_t));
         }
         else
         {
-            log_debug(logger_valores, "Resultado resta: %u", resta);
+            // log_debug(logger_valores, "Resultado resta: %u", resta);
             memcpy(registro_1, &resta, sizeof(uint32_t));
         }
         break;
@@ -210,7 +210,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             dir_fisica_read = solicitar_MOV_IN(direccion_logica, sizeof(uint8_t));
             sem_wait(&respuesta_MOV_IN);
             valorchico1 = respuesta_mov_in_8;
-            memcpy(registro_2, &valorchico1, sizeof(uint8_t));
+            memcpy(registro_1, &valorchico1, sizeof(uint8_t));
             log_info(logger, "PID: %u - Acción: LEER - Dirección Física: %u - Valor: %u", PID, dir_fisica_read, valorchico1);
         }
         else
@@ -218,7 +218,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             dir_fisica_read = solicitar_MOV_IN(direccion_logica, sizeof(uint32_t));
             sem_wait(&respuesta_MOV_IN);
             valorgrande1 = respuesta_mov_in_32;
-            memcpy(registro_2, &valorgrande1, sizeof(uint32_t));
+            memcpy(registro_1, &valorgrande1, sizeof(uint32_t));
             log_info(logger, "PID: %u - Acción: LEER - Dirección Física: %u - Valor: %u", PID, dir_fisica_read, valorgrande1);
         }
 

@@ -147,8 +147,7 @@ void movIn(){
         {
             memcpy(&num, bytes_del_nro, sizeof(uint32_t));
         }
-        //log_debug(logger_debug, "MOV_IN nro leido: %u", num);
-        free(bytes_del_nro);
+        log_debug(logger_debug, "MOV_IN nro leido: %u", num);
         
         t_paquete* paquete = crear_paquete(SOLICITUD_MOV_IN);
         agregar_a_paquete_uint32(paquete, tamanio_total);
@@ -157,6 +156,7 @@ void movIn(){
 
         enviar_paquete(paquete, socket_cpu_memoria);
         eliminar_paquete(paquete);
+        free(bytes_del_nro);
         //log_info(logger_debug, "Mov_In completado");
     }
     else
