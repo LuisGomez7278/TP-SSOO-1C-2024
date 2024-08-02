@@ -289,9 +289,9 @@ bool intentar_asignar_bloques(uint32_t PID, char* nombre_archivo, t_config* meta
             int32_t nuevo_inicio = compactacion(PID, nombre_archivo, nueva_cant_bloques);//Si no puede, hace compactacion y lo intenta de nuevo
             int32_t n = contar_bloques_libres();
             log_debug(logger_debug, "Archivo: %s, necesita: %d bloques a partir del bloque %d y hay: %d disponibles", 
-                                        nombre_archivo, diferencia_cant_bloques, bloque_inicial+1, n);
+                                        nombre_archivo, diferencia_cant_bloques, nuevo_inicio+1, n);
 
-            bool asignacion3 = asignar_n_bloques(nuevo_inicio+cant_bloques, diferencia_cant_bloques);
+            bool asignacion3 = asignar_n_bloques(nuevo_inicio+cant_bloques-1, diferencia_cant_bloques);
             if (asignacion3)
             {
                 log_trace(logger_debug, "Exito en el tercer intento de asignacion");
@@ -497,10 +497,10 @@ int32_t compactar_archivo(char* nombre_archivo, void* nuevos_bloques)
     log_trace(logger_debug, "Proximo archivo a ser compactado: %s", nombre_archivo);
     char* path_archivo_metadata = string_duplicate(path_metadata);
     string_append(&path_archivo_metadata, nombre_archivo);
-    t_config* metadata = config_create(path_archivo_metadata);
+    t_config* metadata_c = config_create(path_archivo_metadata);
     
-    int32_t tamanio_archivo = config_get_int_value(metadata, "TAMANIO_ARCHIVO");
-    int32_t bloque_inicial = config_get_int_value(metadata, "BLOQUE_INICIAL");
+    int32_t tamanio_archivo = config_get_int_value(metadata_c, "TAMANIO_ARCHIVO");
+    int32_t bloque_inicial = config_get_int_value(metadata_c, "BLOQUE_INICIAL");
     int32_t cant_bloques = cantidad_de_bloques(tamanio_archivo);
     int32_t nuevo_inicio = buscar_bloque_libre();
 
@@ -514,9 +514,9 @@ int32_t compactar_archivo(char* nombre_archivo, void* nuevos_bloques)
     
     char* itoa = string_itoa(nuevo_inicio);
 
-    config_set_value(metadata, "BLOQUE_INICIAL", itoa);
-    config_save_in_file(metadata, path_archivo_metadata);
-    config_destroy(metadata);
+    config_set_value(metadata_c, "BLOQUE_INICIAL", itoa);
+    config_save_in_file(metadata_c, path_archivo_metadata);
+    config_destroy(metadata_c);
     free(itoa);
     free(path_archivo_metadata);
     free(contenido);
@@ -529,6 +529,6 @@ void asignar_bloques_compactacion(int32_t nuevo_inicio, int32_t cant_bloques)
     for (int32_t i = 1; i < cant_bloques; i++)
     {
         bitarray_set_bit(bitmap_bloques, nuevo_inicio+i);
-        msync(bitmap_bloques->bitarray, BLOCK_COUNT/8, MS_SYNC);
     }
+    msync(bitmap_bloques->bitarray, BLOCK_COUNT/8, MS_SYNC);
 }
