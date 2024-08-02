@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
         sem_wait(&prox_instruccion);
         ejecutar_instruccion(PID, &contexto_interno, ins_actual);
         
-        loggear_valores();
+        // loggear_valores();
         
         if ((int_consola || int_quantum) && !instruccion_de_IO_o_exit(ins_actual->ins)) 
         {
@@ -158,7 +158,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             {valorgrande2=*registro_2;}
 
         uint32_t suma = valorgrande1 + valorgrande2;
-        log_debug(logger_debug, "a= %u, b= %u, suma: %u", valorgrande1, valorgrande2, suma);
+        // log_debug(logger_debug, "a= %u, b= %u, suma: %u", valorgrande1, valorgrande2, suma);
 
         if(registro_chico(ins_actual->arg1))
         {
@@ -195,7 +195,7 @@ void ejecutar_instruccion(uint32_t PID, t_contexto_ejecucion* contexto_interno, 
             {valorgrande2=*registro_2;}
 
         uint32_t resta = valorgrande1 + valorgrande2;
-        log_debug(logger_debug, "a= %u, b= %u, resta: %u", valorgrande1, valorgrande2, resta);
+        // log_debug(logger_debug, "a= %u, b= %u, resta: %u", valorgrande1, valorgrande2, resta);
 
         if(registro_chico(ins_actual->arg1))
         {
