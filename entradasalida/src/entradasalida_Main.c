@@ -14,11 +14,11 @@ int32_t main(int32_t argc, char* argv[]) {
     validar_argumentos(argv[1]);
     
     nombre_interfaz = argv[1];
-    
+
     size_t len = strlen(nombre_interfaz);
     if (len > 0 && nombre_interfaz[len - 1] == '\n') {
             nombre_interfaz[len - 1] = '\0';
-        }
+    }
 
     iniciar_entradasalida(nombre_interfaz);
 
@@ -284,6 +284,7 @@ int32_t main(int32_t argc, char* argv[]) {
             free(buffer);
             free(nombre_archivo);
             free(string_leida_memoria);
+            free(path_archivo_metadata);
             break;
 
         case DESALOJO_POR_IO_FS_READ:
