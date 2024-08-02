@@ -107,16 +107,19 @@ void escuchar_a_Nueva_Interfaz(void* interfaz){
         switch (operacion) 
         {
         case SOLICITUD_EXITOSA_IO:
+            pthread_mutex_lock(&semaforo_lista_interfaces); 
             elemento_lista_espera= (t_pid_paq*) list_remove(interfaz_puntero_hilo->cola_de_espera,0);
+            pthread_mutex_unlock(&semaforo_lista_interfaces);
             log_info(logger, "La interfaz: %s, realizo una operacion con exito para el proceso PID: %u.", interfaz_puntero_hilo->nombre_interfaz, elemento_lista_espera->PID_cola);
             uint32_t PiD= elemento_lista_espera->PID_cola;
             cambiar_proceso_de_block_a_ready(PiD);
             free(elemento_lista_espera);
             sem_post(&interfaz_puntero_hilo->utilizacion_interfaz);             //se desocupo la interfaz
             break;
-        case ERROR_SOLICITUD_IO:                                            //Como no solicita esta funcionalidad sigo enviando procesos y el que arrojo error queda bloqueado forever
+        case ERROR_SOLICITUD_IO:
+            pthread_mutex_lock(&semaforo_lista_interfaces);                                       //Como no solicita esta funcionalidad sigo enviando procesos y el que arrojo error queda bloqueado forever
             elemento_lista_espera= (t_pid_paq*)list_remove(interfaz_puntero_hilo->cola_de_espera,0);
-            //sem_wait(&interfaz_puntero_hilo->control_envio_interfaz);
+            pthread_mutex_unlock(&semaforo_lista_interfaces);
             log_error(logger_debug,"La interfaz: %s, no pudo realizar la operacion para el proceso PID: %u. Enviando proximo proceso.",interfaz_puntero_hilo->nombre_interfaz,elemento_lista_espera->PID_cola);
             free(elemento_lista_espera);
             break;
@@ -272,19 +275,24 @@ void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paq
 
 void cambiar_proceso_de_block_a_ready(uint32_t PID){
      t_pcb* pcb=NULL;
+     pthread_mutex_lock(&semaforo_bloqueado_prioridad);
 
 if (list_size(lista_bloqueado_prioritario)>0)
 {   //printf("Primer if camb proc de blok a R\n");
     pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado_prioritario ,PID,&semaforo_bloqueado_prioridad);
-    pthread_mutex_lock(&semaforo_bloqueado_prioridad);
+    
     list_remove_element(lista_bloqueado_prioritario,pcb);
-    pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
+    
 }
+    pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
+
+    pthread_mutex_lock(&semaforo_bloqueado);
+    
 if (pcb==NULL && list_size(lista_bloqueado)>0)
 {
     //printf("Segundo if camb proc de blok a R\n");
     pcb=buscar_pcb_por_PID_en_lista(lista_bloqueado,PID,&semaforo_bloqueado);
-    pthread_mutex_lock(&semaforo_bloqueado);
+    
     if(list_remove_element(lista_bloqueado,pcb)){
         log_info(logger_debug,"Eliminado de la lista de bloqueados");
     };
