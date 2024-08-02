@@ -12,17 +12,17 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include <dirent.h>
-
-
 #include <commons/bitarray.h>
 #include <commons/memory.h>
+
+#include "../../utils/include/utils.h"
+#include "../../utils/include/conexiones.h"
+
+#include <dirent.h>
 #include <math.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 
-#include "../../utils/include/utils.h"
-#include "../../utils/include/conexiones.h"
 #include "entradasalida_var_globales.h"
 
 

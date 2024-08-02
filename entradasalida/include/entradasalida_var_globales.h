@@ -21,13 +21,10 @@
 
  // Entrada salida memoria ---------------------------------------------------
 
-
  extern sem_t respuesta_memoria;
  extern char* string_leida_memoria;
 
 //Entrada salida file system ---------------------------------------------------
-
-
 
 extern char* PATH_BASE_DIALFS;
 extern uint32_t BLOCK_SIZE;
@@ -65,19 +62,18 @@ bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar);
 bool reasignar_bloques(t_config* metadata, int32_t cant_bloques, int32_t nueva_cant_bloques);
 
 int32_t contar_bloques_libres();
-void compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloques);
+int32_t compactacion(uint32_t PID, char* nombre_archivo, uint32_t nueva_cant_bloques);
 void limpiar_bitmap();
-void compactar_archivo(char* nombre_archivo, void* nuevos_bloques);
+int32_t compactar_archivo(char* nombre_archivo, void* nuevos_bloques);
+void asignar_bloques_compactacion(int32_t nuevo_inicio, int32_t cant_bloques);
 
 void FS_WRITE(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, char* datos_a_escribir);
 void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t tamanio_total, void* datos_leidos);
 
 //entrada salida inicio ---------------------------------------------------
 
-
 extern int32_t socket_memoria_entradasalida;
- 
- 
+  
 extern char* PATH_BASE_DIALFS;
 extern uint32_t BLOCK_SIZE;
 extern uint32_t BLOCK_COUNT;
@@ -89,10 +85,6 @@ extern char* bloques;
 extern char* path_bitmap;
 extern void* array_bitmap;
 extern t_bitarray* bitmap_bloques;
-
-
-
-
 
 extern t_log* logger;
 extern t_log* logger_debug;
@@ -133,28 +125,17 @@ char* leer_de_teclado(uint32_t tamanio_a_leer);
 
 //entrada salida kernel ---------------------------------------------------
 
-
-
-
-
 extern int32_t socket_kernel_entradasalida;
 
 void atender_conexion_entradasalida_KERNEL();
 
-
 //entrada salida memoria ---------------------------------------------------
-
 
 extern t_log* logger;
 extern t_log* logger_debug;
 extern sem_t respuesta_memoria;
 extern char* string_leida_memoria;
 
-
 void gestionar_conexion_memoria();
-
-
-
-
 
 #endif /*  ENTRADASALIDA_INICIO_H_ */

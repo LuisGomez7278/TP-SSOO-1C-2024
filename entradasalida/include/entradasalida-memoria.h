@@ -20,10 +20,4 @@
 
 #include "entradasalida_var_globales.h"
 
-
-
-
-
-
-
 #endif //ENTRADASALIDA_MEMORIA_H_

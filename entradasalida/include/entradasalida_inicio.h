@@ -16,13 +16,7 @@
 #include <commons/config.h>
 #include "../../utils/include/conexiones.h"
 #include "../../utils/include/utils.h"
+
 #include "entradasalida_var_globales.h"
-
-
-
-
-
-
-
 
 #endif /*  ENTRADASALIDA_INICIO_H_ */

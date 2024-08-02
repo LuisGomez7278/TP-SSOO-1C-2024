@@ -341,7 +341,7 @@ bool asignar_n_bloques(int32_t bloque_inicial, int32_t bloques_a_asignar)
     {
         if (bitarray_test_bit(bitmap_bloques, bloque_inicial+i))
             {
-                log_warning(logger_debug, "El bit: %d esta ocupado", bloque_inicial+i);
+                // log_warning(logger_debug, "El bit: %d esta ocupado", bloque_inicial+i);
                 break;
             }
         else 
@@ -427,7 +427,7 @@ void FS_READ(void* bloques, uint32_t bloque_inicial, uint32_t puntero, uint32_t 
 {
     uint32_t inicio_lectura = (bloque_inicial*BLOCK_SIZE) + puntero;
     memcpy(datos_leidos, bloques+inicio_lectura, tamanio_total);
-    msync(bloques, BLOCK_SIZE*BLOCK_COUNT, MS_SYNC);
+    // msync(bloques, BLOCK_SIZE*BLOCK_COUNT, MS_SYNC);
     log_info(logger, "Lectura exitosa");
 }
 
@@ -529,5 +529,6 @@ void asignar_bloques_compactacion(int32_t nuevo_inicio, int32_t cant_bloques)
     for (int32_t i = 1; i < cant_bloques; i++)
     {
         bitarray_set_bit(bitmap_bloques, nuevo_inicio+i);
-    }    
+        msync(bitmap_bloques->bitarray, BLOCK_COUNT/8, MS_SYNC);
+    }
 }
