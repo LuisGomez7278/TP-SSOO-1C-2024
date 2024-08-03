@@ -259,7 +259,7 @@ void gestionar_dispatch (){
 
                     break;
                 case 2: 
-                    //log_info(logger_debug, "PID: %u hace WAIT de recurso: %s exitosamente", pcb_dispatch->PID, recurso_solicitado);
+                    log_info(logger, "PID: %u hace WAIT de recurso: %s. Enviando de nuevo a CPU", pcb_dispatch->PID, recurso_solicitado);
                     //WAIT REALIZADO, DEVOLVER EL PROCESO A EJECUCION
                         pthread_mutex_lock(&semaforo_ready_prioridad);
                         list_add_in_index(lista_ready_prioridad, 0, pcb_dispatch);

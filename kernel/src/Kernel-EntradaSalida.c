@@ -275,7 +275,7 @@ void agregar_a_cola_interfaz(char* nombre_interfaz, uint32_t PID, t_paquete* paq
 
 void cambiar_proceso_de_block_a_ready(uint32_t PID){
      t_pcb* pcb=NULL;
-     pthread_mutex_lock(&semaforo_bloqueado_prioridad);
+     //pthread_mutex_lock(&semaforo_bloqueado_prioridad);
 
 if (list_size(lista_bloqueado_prioritario)>0)
 {   //printf("Primer if camb proc de blok a R\n");
@@ -284,9 +284,9 @@ if (list_size(lista_bloqueado_prioritario)>0)
     list_remove_element(lista_bloqueado_prioritario,pcb);
     
 }
-    pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
+    //pthread_mutex_unlock(&semaforo_bloqueado_prioridad);
 
-    pthread_mutex_lock(&semaforo_bloqueado);
+    //pthread_mutex_lock(&semaforo_bloqueado);
     
 if (pcb==NULL && list_size(lista_bloqueado)>0)
 {
@@ -296,9 +296,8 @@ if (pcb==NULL && list_size(lista_bloqueado)>0)
     if(list_remove_element(lista_bloqueado,pcb)){
         log_info(logger_debug,"Eliminado de la lista de bloqueados");
     };
-    pthread_mutex_unlock(&semaforo_bloqueado);
-
 }
+    //pthread_mutex_unlock(&semaforo_bloqueado);
 
 if (pcb==NULL)
 {

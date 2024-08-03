@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
         
         // loggear_valores();
         
-        if ((int_consola || int_quantum) && !instruccion_de_IO_o_exit(ins_actual->ins)) 
+        if ((int_consola || int_quantum) && !instruccion_de_IO_o_exit(ins_actual->ins) && motivo_desalojo!= OUT_OF_MEMORY) 
         {
             if (int_consola) 
             {
@@ -77,6 +77,8 @@ int main(int argc, char* argv[])
                 motivo_desalojo = DESALOJO_POR_QUANTUM;
             }
             desalojar_proceso(motivo_desalojo);
+        }else{
+            motivo_desalojo=DESALOJO_POR_QUANTUM;  //esto lo pongo para resetear el motivo desalojo
         };
         destruir_instruccion(ins_actual);
     }
